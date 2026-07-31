@@ -1,4 +1,4 @@
-﻿.env
+.env
 __pycache__/
 .venv/
 cache/
@@ -8,4 +8,4 @@ scratch/
 brain/
 *.zip
 *.docx
-.streamlit/
+
