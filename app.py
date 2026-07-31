@@ -564,7 +564,7 @@ tab0, tab1, tab2, tab3, tab4 = st.tabs([
     "🏙️  Tổng quan",
     "🗺️  Phân tích khu vực",
     "📐  Yếu tố quyết định giá",
-    "📅  Biến động theo thời gian",
+    "📅  Xu hướng & Khuyến nghị Đầu tư",
     "🤖  Dự báo & Mô hình ML",
 ])
 
@@ -1074,7 +1074,7 @@ with tab2:
 
 
 # ════════════════════════════════════════════════════════════
-# TAB 3 — BIẾN ĐỘNG THEO THỜI GIAN
+# TAB 3 — XU HƯỚNG & KHUYẾN NGHỊ ĐẦU TƯ
 # ════════════════════════════════════════════════════════════
 with tab3:
     st.markdown("""
