@@ -1210,7 +1210,7 @@ with tab3:
         divider()
 
         # HÀM VẼ BIỂU ĐỒ 1 KHU VỰC VS QUẬN
-        def plot_single_neighborhood(boro_name, neigh_name, title, color_neigh):
+        def plot_single_neighborhood(boro_name, neigh_name, title, color_neigh, height=320):
             fig = go.Figure()
 
             df_neigh = df_t3[(df_t3["borough_name"] == boro_name) & (df_t3["neighborhood"] == neigh_name)]
@@ -1237,7 +1237,7 @@ with tab3:
                         line=dict(color=color_neigh, width=1.5, dash='dash'), hoverinfo='skip'))
 
             
-            clayout(fig, h=320, t=50, b=20)
+            clayout(fig, h=height, t=40, b=10)
             fig.update_layout(
                 title=dict(text=title, font=dict(size=14, color='#374151')),
                 hovermode='x unified',
@@ -1351,11 +1351,10 @@ with tab3:
             selected_idx = selected_rows[0]
             selected_n = df_leaderboard.iloc[selected_idx]['Khu Vực']
             
-            st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(f"""
-            <div id='target-explorer' style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
-                <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 8px;'>🔎 Hồ sơ Phân tích: {selected_n}</h4>
-                <p style='color:#94A3B8; font-size:14px; margin-bottom: 0px;'>Chi tiết lịch sử giá và chỉ số rủi ro của khu vực bạn vừa chọn trên bảng xếp hạng.</p>
+            <div id='target-explorer' style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:10px 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:5px; margin-bottom: 5px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
+                <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 4px; font-size: 18px;'>🔎 Hồ sơ Phân tích: {selected_n}</h4>
+                <p style='color:#94A3B8; font-size:13px; margin-bottom: 0px;'>Chi tiết lịch sử giá và chỉ số rủi ro của khu vực bạn vừa chọn trên bảng xếp hạng.</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -1382,21 +1381,21 @@ with tab3:
                 rating = "🟠 Độ tin cậy trung bình"
                 stars = "🌟🌟🌟"
                 
-            fig_explore, pct_explore = plot_single_neighborhood(boro_of_n, selected_n, f"Lịch sử giá chi tiết: {selected_n}", C_BLUE)
+            fig_explore, pct_explore = plot_single_neighborhood(boro_of_n, selected_n, f"Lịch sử giá chi tiết: {selected_n}", C_BLUE, height=220)
             st.plotly_chart(fig_explore, width='stretch')
             
             # Show Reliability Card
             st.markdown(f"""
-            <div style='background-color:rgba(15, 23, 42, 0.04); border-left:4px solid #3B82F6; padding:15px; border-radius:8px; margin-bottom: 15px;'>
+            <div style='background-color:rgba(15, 23, 42, 0.04); border-left:4px solid #3B82F6; padding:10px 15px; border-radius:8px; margin-bottom: 8px; margin-top: -15px;'>
                 <div style='display:flex; justify-content:space-between; align-items:center;'>
                     <div>
-                        <span style='font-size:13px; color:#64748b; font-weight:bold; text-transform:uppercase;'>📊 Chỉ số Tin cậy Dữ liệu (Confidence Score)</span><br>
-                        <span style='font-size:24px; font-weight:800; color:#0f172a;'>{total_score:.0f}/100</span>
-                        <span style='font-size:15px; margin-left:10px; font-weight:600;'>{rating}</span>
+                        <span style='font-size:12px; color:#64748b; font-weight:bold; text-transform:uppercase;'>📊 Chỉ số Tin cậy Dữ liệu</span>
+                        <span style='font-size:20px; font-weight:800; color:#0f172a; margin-left:8px;'>{total_score:.0f}/100</span>
+                        <span style='font-size:13px; margin-left:6px; font-weight:600;'>{rating}</span>
                     </div>
-                    <div style='font-size:20px;'>{stars}</div>
+                    <div style='font-size:16px;'>{stars}</div>
                 </div>
-                <div style='margin-top:8px; font-size:14px; color:#475569;'>
+                <div style='margin-top:4px; font-size:13px; color:#475569;'>
                     Dựa trên <b>{n_gd} giao dịch</b> rải đều trong <b>{n_thang} tháng</b> với mức độ ổn định xu hướng đạt <b>{n_r2*100:.0f}%</b>.
                 </div>
             </div>
