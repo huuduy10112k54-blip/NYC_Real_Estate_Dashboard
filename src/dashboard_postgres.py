@@ -1292,11 +1292,50 @@ with tab3:
             neigh_list = valid_neighs['Khu Vực'].tolist()
             selected_n = st.selectbox("📌 Chọn Khu vực bạn muốn phân tích:", options=neigh_list)
             
-            boro_of_n = valid_neighs[valid_neighs['Khu Vực'] == selected_n]['Quận'].iloc[0]
+            # Fetch stats
+            n_stats = valid_neighs[valid_neighs['Khu Vực'] == selected_n].iloc[0]
+            boro_of_n = n_stats['Quận']
+            n_gd = n_stats['Số GD']
+            n_thang = n_stats['Số tháng']
+            n_r2 = n_stats['R2']
+            
+            # Calculate Reliability Score
+            vol_score = min((n_gd / 100) * 40, 40)
+            time_score = min((n_thang / 12) * 30, 30)
+            trend_score = min(n_r2 * 30, 30)
+            total_score = vol_score + time_score + trend_score
+            
+            if total_score >= 80:
+                rating = "🟢 Cực kỳ đáng tin"
+                stars = "🌟🌟🌟🌟🌟"
+            elif total_score >= 60:
+                rating = "🟡 Khá đáng tin"
+                stars = "🌟🌟🌟🌟"
+            else:
+                rating = "🟠 Độ tin cậy trung bình"
+                stars = "🌟🌟🌟"
+                
             fig_explore, pct_explore = plot_single_neighborhood(boro_of_n, selected_n, f"Lịch sử giá chi tiết: {selected_n}", C_BLUE)
             st.plotly_chart(fig_explore, width='stretch')
             
-            st.info(f"Khu vực **{selected_n}** (thuộc {boro_of_n}) có tỷ suất sinh lời lũy kế là **{pct_explore:+.1f}%** dựa trên dữ liệu lịch sử.")
+            # Show Reliability Card
+            st.markdown(f"""
+            <div style='background-color:rgba(15, 23, 42, 0.04); border-left:4px solid #3B82F6; padding:15px; border-radius:8px; margin-bottom: 15px;'>
+                <div style='display:flex; justify-content:space-between; align-items:center;'>
+                    <div>
+                        <span style='font-size:13px; color:#64748b; font-weight:bold; text-transform:uppercase;'>📊 Chỉ số Tin cậy Dữ liệu (Confidence Score)</span><br>
+                        <span style='font-size:24px; font-weight:800; color:#0f172a;'>{total_score:.0f}/100</span>
+                        <span style='font-size:15px; margin-left:10px; font-weight:600;'>{rating}</span>
+                    </div>
+                    <div style='font-size:20px;'>{stars}</div>
+                </div>
+                <div style='margin-top:8px; font-size:14px; color:#475569;'>
+                    Dựa trên <b>{n_gd} giao dịch</b> rải đều trong <b>{n_thang} tháng</b> với mức độ ổn định xu hướng đạt <b>{n_r2*100:.0f}%</b>.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.info(f"Dựa trên xu hướng lịch sử, khu vực **{selected_n}** (thuộc {boro_of_n}) có tỷ suất sinh lời lũy kế là **{pct_explore:+.1f}%**.")
         else:
             st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản (>= 30 giao dịch) trong bộ lọc hiện tại.")
 
