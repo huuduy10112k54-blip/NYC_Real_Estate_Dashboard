@@ -1204,16 +1204,7 @@ with tab3:
         # HÀM VẼ BIỂU ĐỒ 1 KHU VỰC VS QUẬN
         def plot_single_neighborhood(boro_name, neigh_name, title, color_neigh):
             fig = go.Figure()
-            sub_b = df_boro[df_boro["borough_name"] == boro_name].copy()
-            if len(sub_b) > 0:
-                base_b = sub_b["sale_price"].iloc[0]
-                sub_b['growth_pct'] = (sub_b['sale_price'] - base_b) / base_b * 100
-                fig.add_trace(go.Scatter(
-                    x=sub_b['ym_dt'], y=sub_b['growth_pct'],
-                    mode='lines', name=f"Trung bình {boro_name}",
-                    customdata=sub_b['sale_price'],
-                    hovertemplate=f'<b>TB {boro_name}</b><br>%{{x|%m/%Y}}<br>Lợi suất: %{{y:+.1f}}%<extra></extra>'))
-                
+
             df_neigh = df_t3[(df_t3["borough_name"] == boro_name) & (df_t3["neighborhood"] == neigh_name)]
             sub_n = df_neigh.groupby("ym_dt")["sale_price"].median().reset_index().sort_values("ym_dt")
             final_pct = 0
