@@ -1419,6 +1419,9 @@ with tab3:
                             if (window.parent.document.activeElement) {
                                 window.parent.document.activeElement.blur();
                             }
+                            // Giả lập click chuột ra ngoài (vào body) để ép Streamlit đóng dropdown
+                            window.parent.document.body.click();
+                            
                             target.scrollIntoView({behavior: 'smooth', block: 'start'});
                         } else {
                             setTimeout(function() { tryScroll(attempts - 1); }, 200);
