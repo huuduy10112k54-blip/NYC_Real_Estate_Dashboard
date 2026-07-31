@@ -1406,10 +1406,16 @@ with tab3:
             components.html(
                 """
                 <script>
-                    var target = window.parent.document.getElementById('target-explorer');
-                    if (target) {
-                        target.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    function tryScroll(attempts) {
+                        if (attempts <= 0) return;
+                        var target = window.parent.document.getElementById('target-explorer');
+                        if (target) {
+                            target.scrollIntoView({behavior: 'smooth', block: 'start'});
+                        } else {
+                            setTimeout(function() { tryScroll(attempts - 1); }, 200);
+                        }
                     }
+                    tryScroll(5);
                 </script>
                 """,
                 height=0, width=0
