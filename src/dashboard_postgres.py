@@ -1350,6 +1350,9 @@ with tab3:
         # --- NỘI SOI KHU VỰC ĐỘNG ---
         selected_rows = event.selection.rows if 'event' in locals() and event.selection else []
         
+        if len(selected_rows) == 0 and search_query and len(search_query) == 1:
+            selected_rows = [0]
+            
         if len(selected_rows) > 0:
             selected_idx = selected_rows[0]
             selected_n = df_leaderboard.iloc[selected_idx]['Khu Vực']
