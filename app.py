@@ -1281,9 +1281,9 @@ with tab3:
         # --- NỘI SOI KHU VỰC ĐỘNG ---
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("""
-        <div style='background:rgba(255,255,255,0.02); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:20px; margin-bottom: 20px;'>
-            <h4 style='margin-top:0px; color:#F8FAFC;'>🔎 Công cụ Nội soi Khu vực (On-Demand Explorer)</h4>
-            <p style='color:#94A3B8; font-size:14px;'>Tra cứu chuyên sâu lịch sử giá của bất kỳ khu vực nào. Chỉ hiển thị các khu vực có thanh khoản an toàn (Tối thiểu 30 giao dịch & dữ liệu liên tục >= 5 tháng).</p>
+        <div style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
+            <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 8px;'>🔎 Công cụ Nội soi Khu vực (On-Demand Explorer)</h4>
+            <p style='color:#94A3B8; font-size:14px; margin-bottom: 0px;'>Tra cứu chuyên sâu lịch sử giá của bất kỳ khu vực nào. Chỉ hiển thị các khu vực có thanh khoản an toàn (Tối thiểu 30 giao dịch & dữ liệu liên tục >= 5 tháng).</p>
         </div>
         """, unsafe_allow_html=True)
         
