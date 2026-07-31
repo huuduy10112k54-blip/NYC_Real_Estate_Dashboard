@@ -1278,6 +1278,27 @@ with tab3:
                 fig_down, pct_down = plot_single_neighborhood(down_boro, down_neigh, f"📉 {down_neigh} (Trượt dốc từ từ)", "#8B5CF6")
                 st.plotly_chart(fig_down, width='stretch')
 
+        # --- NỘI SOI KHU VỰC ĐỘNG ---
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style='background:rgba(255,255,255,0.02); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:20px; margin-bottom: 20px;'>
+            <h4 style='margin-top:0px; color:#F8FAFC;'>🔎 Công cụ Nội soi Khu vực (On-Demand Explorer)</h4>
+            <p style='color:#94A3B8; font-size:14px;'>Tra cứu chuyên sâu lịch sử giá của bất kỳ khu vực nào. Chỉ hiển thị các khu vực có thanh khoản an toàn (Tối thiểu 30 giao dịch).</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        valid_neighs = df_neigh_all[df_neigh_all['Số GD'] >= 30].sort_values("Khu Vực")
+        if len(valid_neighs) > 0:
+            neigh_list = valid_neighs['Khu Vực'].tolist()
+            selected_n = st.selectbox("📌 Chọn Khu vực bạn muốn phân tích:", options=neigh_list)
+            
+            boro_of_n = valid_neighs[valid_neighs['Khu Vực'] == selected_n]['Quận'].iloc[0]
+            fig_explore, pct_explore = plot_single_neighborhood(boro_of_n, selected_n, f"Lịch sử giá chi tiết: {selected_n}", C_BLUE)
+            st.plotly_chart(fig_explore, width='stretch')
+            
+            st.info(f"Khu vực **{selected_n}** (thuộc {boro_of_n}) có tỷ suất sinh lời lũy kế là **{pct_explore:+.1f}%** dựa trên dữ liệu lịch sử.")
+        else:
+            st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản (>= 30 giao dịch) trong bộ lọc hiện tại.")
 
 
 # ════════════════════════════════════════════════════════════
