@@ -1160,7 +1160,7 @@ with tab3:
                 "Giá Hiện Tại": "${:,.0f}",
                 "Lợi Suất (%)": "{:+.1f}%"
             }).map(get_text_color, subset=["Lợi Suất (%)"])
-        st.dataframe(format_table(df_table), width='stretch', hide_index=True)
+        st.dataframe(format_table(df_table), use_container_width=True, hide_index=True)
 
     divider()
 
@@ -1196,16 +1196,16 @@ with tab3:
     
     if neigh_stats:
         df_neigh_all = pd.DataFrame(neigh_stats)
-        top_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=False).head(3)[["Quận", "Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]].reset_index(drop=True)
-        bot_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=True).head(3)[["Quận", "Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]].reset_index(drop=True)
+        top_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=False).head(3)[["Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]].reset_index(drop=True)
+        bot_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=True).head(3)[["Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]].reset_index(drop=True)
 
         c1, c2 = st.columns(2)
         with c1:
             st.markdown("##### 🔥 TOP 3 TĂNG MẠNH NHẤT")
-            st.dataframe(format_table(top_3), width='stretch', hide_index=True)
+            st.dataframe(format_table(top_3), use_container_width=True, hide_index=True)
         with c2:
             st.markdown("##### ⚠️ TOP 3 SỤT GIẢM NHIỀU NHẤT")
-            st.dataframe(format_table(bot_3), width='stretch', hide_index=True)
+            st.dataframe(format_table(bot_3), use_container_width=True, hide_index=True)
 
         divider()
 
