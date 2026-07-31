@@ -1318,11 +1318,13 @@ with tab3:
             
             df_leaderboard = valid_neighs[["Quận", "Khu Vực", "Giá Hiện Tại", "Lợi Suất (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
             
-            st.dataframe(
+            event = st.dataframe(
                 df_leaderboard,
                 use_container_width=True,
                 height=300,
                 hide_index=True,
+                on_select="rerun",
+                selection_mode="single-row",
                 column_config={
                     "Giá Hiện Tại": st.column_config.NumberColumn("Giá Hiện Tại", format="$%d"),
                     "Lợi Suất (%)": st.column_config.NumberColumn("Lợi Suất (%)", format="%.1f%%"),
@@ -1333,18 +1335,19 @@ with tab3:
         divider()
 
         # --- NỘI SOI KHU VỰC ĐỘNG ---
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("""
-        <div style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
-            <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 8px;'>🔎 Công cụ Nội soi Khu vực (On-Demand Explorer)</h4>
-            <p style='color:#94A3B8; font-size:14px; margin-bottom: 0px;'>Tra cứu chuyên sâu lịch sử giá của bất kỳ khu vực nào. Chỉ hiển thị các khu vực có thanh khoản an toàn (Tối thiểu 30 giao dịch & dữ liệu liên tục >= 5 tháng).</p>
-        </div>
-        """, unsafe_allow_html=True)
+        selected_rows = event.selection.rows if 'event' in locals() and event.selection else []
         
-        valid_neighs = df_neigh_all[(df_neigh_all['Số GD'] >= 30) & (df_neigh_all['Số tháng'] >= 5)].sort_values("Khu Vực")
-        if len(valid_neighs) > 0:
-            neigh_list = valid_neighs['Khu Vực'].tolist()
-            selected_n = st.selectbox("📌 Chọn Khu vực bạn muốn phân tích:", options=neigh_list)
+        if len(selected_rows) > 0:
+            selected_idx = selected_rows[0]
+            selected_n = df_leaderboard.iloc[selected_idx]['Khu Vực']
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
+                <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 8px;'>🔎 Hồ sơ Phân tích: {selected_n}</h4>
+                <p style='color:#94A3B8; font-size:14px; margin-bottom: 0px;'>Chi tiết lịch sử giá và chỉ số rủi ro của khu vực bạn vừa chọn trên bảng xếp hạng.</p>
+            </div>
+            """, unsafe_allow_html=True)
             
             # Fetch stats
             n_stats = valid_neighs[valid_neighs['Khu Vực'] == selected_n].iloc[0]
@@ -1388,8 +1391,14 @@ with tab3:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            
             st.info(f"Dựa trên xu hướng lịch sử, khu vực **{selected_n}** (thuộc {boro_of_n}) có tỷ suất sinh lời lũy kế là **{pct_explore:+.1f}%**.")
+        elif len(valid_neighs) > 0:
+            st.markdown("""
+            <div style='text-align:center; padding: 40px 20px; border: 2px dashed #cbd5e1; border-radius: 12px; margin-top: 20px;'>
+                <h4 style='color:#64748b; margin-bottom:10px;'>👆 Hãy click vào một khu vực trên Bảng xếp hạng</h4>
+                <p style='color:#94a3b8; font-size:15px;'>Hệ thống sẽ tự động hiển thị biểu đồ lịch sử giá và phân tích rủi ro cho khu vực bạn chọn.</p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
             st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản (>= 30 giao dịch) trong bộ lọc hiện tại.")
 
