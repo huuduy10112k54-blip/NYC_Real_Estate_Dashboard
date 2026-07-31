@@ -1237,6 +1237,19 @@ with tab3:
                 legend=dict(orientation='h', y=1.1, x=0))
             return fig, final_pct
 
+        def render_mini_confidence(neigh_name):
+            try:
+                n_stats = df_neigh_all[df_neigh_all['Khu Vực'] == neigh_name].iloc[0]
+                n_gd = n_stats['Số GD']
+                n_thang = n_stats['Số tháng']
+                n_r2 = n_stats['R2']
+                total_score = min((n_gd/100)*40, 40) + min((n_thang/12)*30, 30) + min(n_r2*30, 30)
+                if total_score >= 80: rating = "Cực kỳ đáng tin"
+                elif total_score >= 60: rating = "Khá đáng tin"
+                else: rating = "Tin cậy TB"
+                st.markdown(f"<div style='text-align: center; font-size: 13px; color: #64748b; margin-top: -15px;'>Độ tin cậy: <b>{total_score:.0f}/100</b> ({rating}) - Dựa trên {n_gd} GD / {n_thang} tháng</div>", unsafe_allow_html=True)
+            except: pass
+
         # 4. NGHỊCH LÝ
         col_a, col_b = st.columns(2)
         if len(top_3) > 0:
@@ -1246,6 +1259,7 @@ with tab3:
                 section_q("4️⃣ Đỉnh cao sinh lời", "")
                 fig_top, pct_top = plot_single_neighborhood(top_boro, top_neigh, f"🚀 {top_neigh} (Tăng mạnh nhất)", C_RED)
                 st.plotly_chart(fig_top, width='stretch')
+                render_mini_confidence(top_neigh)
 
         if len(bot_3) > 0:
             bot_boro = bot_3.iloc[0]["Quận"]
@@ -1254,6 +1268,7 @@ with tab3:
                 section_q("5️⃣ Hố đen tử thần", "")
                 fig_bot, pct_bot = plot_single_neighborhood(bot_boro, bot_neigh, f"⚠️ {bot_neigh} (Giảm mạnh nhất)", C_GREEN)
                 st.plotly_chart(fig_bot, width='stretch')
+                render_mini_confidence(bot_neigh)
 
         divider()
 
@@ -1269,6 +1284,7 @@ with tab3:
                 section_q("6️⃣ Tăng trưởng Ổn định nhất", "")
                 fig_up, pct_up = plot_single_neighborhood(up_boro, up_neigh, f"📈 {up_neigh} (Ít rủi ro biến động)", C_ORANGE)
                 st.plotly_chart(fig_up, width='stretch')
+                render_mini_confidence(up_neigh)
 
         if len(stable_down) > 0:
             down_boro = stable_down.iloc[0]["Quận"]
@@ -1277,6 +1293,7 @@ with tab3:
                 section_q("7️⃣ Suy thoái Ổn định nhất", "")
                 fig_down, pct_down = plot_single_neighborhood(down_boro, down_neigh, f"📉 {down_neigh} (Trượt dốc từ từ)", "#8B5CF6")
                 st.plotly_chart(fig_down, width='stretch')
+                render_mini_confidence(down_neigh)
 
         # --- NỘI SOI KHU VỰC ĐỘNG ---
         st.markdown("<br>", unsafe_allow_html=True)
