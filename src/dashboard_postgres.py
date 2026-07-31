@@ -1295,6 +1295,35 @@ with tab3:
                 st.plotly_chart(fig_down, width='stretch')
                 render_mini_confidence(down_neigh)
 
+        # --- BẢNG XẾP HẠNG (LEADERBOARD) ---
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color:#1e293b; margin-bottom: 5px;'>🏆 Bảng Xếp Hạng & Sàng Lọc Khu Vực</h4>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748b; font-size:14px; margin-bottom: 15px;'>Bảng tổng hợp toàn bộ các khu vực an toàn. Bạn có thể <b>bấm vào tiêu đề cột</b> để sắp xếp (VD: Sắp xếp theo Lợi suất để tìm top sinh lời, hoặc Giá hiện tại để tìm giá rẻ).</p>", unsafe_allow_html=True)
+        
+        valid_neighs = df_neigh_all[(df_neigh_all['Số GD'] >= 30) & (df_neigh_all['Số tháng'] >= 5)].copy()
+        if len(valid_neighs) > 0:
+            valid_neighs['Điểm Tin Cậy'] = (
+                (valid_neighs['Số GD'] / 100 * 40).clip(upper=40) + 
+                (valid_neighs['Số tháng'] / 12 * 30).clip(upper=30) + 
+                (valid_neighs['R2'] * 30).clip(upper=30)
+            ).round(0)
+            
+            df_leaderboard = valid_neighs[["Quận", "Khu Vực", "Giá Hiện Tại", "Lợi Suất (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
+            
+            st.dataframe(
+                df_leaderboard,
+                use_container_width=True,
+                height=300,
+                hide_index=True,
+                column_config={
+                    "Giá Hiện Tại": st.column_config.NumberColumn("Giá Hiện Tại", format="$%d"),
+                    "Lợi Suất (%)": st.column_config.NumberColumn("Lợi Suất (%)", format="%.1f%%"),
+                    "Điểm Tin Cậy": st.column_config.ProgressColumn("Điểm Tin Cậy (/100)", format="%d", min_value=0, max_value=100)
+                }
+            )
+        
+        divider()
+
         # --- NỘI SOI KHU VỰC ĐỘNG ---
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("""
