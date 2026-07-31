@@ -1318,12 +1318,15 @@ with tab3:
             
             df_leaderboard = valid_neighs[["Quận", "Khu Vực", "Giá Hiện Tại", "Lợi Suất (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
             
-            search_query = st.text_input("🔍", placeholder="🔍 Nhập tên khu vực hoặc quận để tìm nhanh...", label_visibility="collapsed")
+            all_options = sorted(df_leaderboard['Khu Vực'].unique())
+            search_query = st.multiselect(
+                "🔍 Nhập hoặc chọn khu vực để lọc bảng:", 
+                options=all_options, 
+                placeholder="Ví dụ: Gõ 'Astoria' để xem gợi ý...",
+                label_visibility="collapsed"
+            )
             if search_query:
-                df_leaderboard = df_leaderboard[
-                    df_leaderboard['Khu Vực'].str.contains(search_query, case=False, na=False) |
-                    df_leaderboard['Quận'].str.contains(search_query, case=False, na=False)
-                ]
+                df_leaderboard = df_leaderboard[df_leaderboard['Khu Vực'].isin(search_query)]
             
             event = st.dataframe(
                 df_leaderboard,
