@@ -1196,16 +1196,19 @@ with tab3:
     
     if neigh_stats:
         df_neigh_all = pd.DataFrame(neigh_stats)
-        top_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=False).head(3)[["Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]].reset_index(drop=True)
-        bot_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=True).head(3)[["Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]].reset_index(drop=True)
+        top_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=False).head(3).reset_index(drop=True)
+        bot_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=True).head(3).reset_index(drop=True)
+        
+        top_3_disp = top_3[["Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]]
+        bot_3_disp = bot_3[["Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]]
 
         c1, c2 = st.columns(2)
         with c1:
             st.markdown("##### 🔥 TOP 3 TĂNG MẠNH NHẤT")
-            st.dataframe(format_table(top_3), use_container_width=True, hide_index=True)
+            st.dataframe(format_table(top_3_disp), use_container_width=True, hide_index=True)
         with c2:
             st.markdown("##### ⚠️ TOP 3 SỤT GIẢM NHIỀU NHẤT")
-            st.dataframe(format_table(bot_3), use_container_width=True, hide_index=True)
+            st.dataframe(format_table(bot_3_disp), use_container_width=True, hide_index=True)
 
         divider()
 
