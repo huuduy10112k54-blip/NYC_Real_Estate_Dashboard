@@ -1416,6 +1416,9 @@ with tab3:
                         if (attempts <= 0) return;
                         var target = window.parent.document.getElementById('target-explorer');
                         if (target) {
+                            if (window.parent.document.activeElement) {
+                                window.parent.document.activeElement.blur();
+                            }
                             target.scrollIntoView({behavior: 'smooth', block: 'start'});
                         } else {
                             setTimeout(function() { tryScroll(attempts - 1); }, 200);
