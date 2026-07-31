@@ -1283,11 +1283,11 @@ with tab3:
         st.markdown("""
         <div style='background:rgba(255,255,255,0.02); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:20px; margin-bottom: 20px;'>
             <h4 style='margin-top:0px; color:#F8FAFC;'>🔎 Công cụ Nội soi Khu vực (On-Demand Explorer)</h4>
-            <p style='color:#94A3B8; font-size:14px;'>Tra cứu chuyên sâu lịch sử giá của bất kỳ khu vực nào. Chỉ hiển thị các khu vực có thanh khoản an toàn (Tối thiểu 30 giao dịch).</p>
+            <p style='color:#94A3B8; font-size:14px;'>Tra cứu chuyên sâu lịch sử giá của bất kỳ khu vực nào. Chỉ hiển thị các khu vực có thanh khoản an toàn (Tối thiểu 30 giao dịch & dữ liệu liên tục >= 5 tháng).</p>
         </div>
         """, unsafe_allow_html=True)
         
-        valid_neighs = df_neigh_all[df_neigh_all['Số GD'] >= 30].sort_values("Khu Vực")
+        valid_neighs = df_neigh_all[(df_neigh_all['Số GD'] >= 30) & (df_neigh_all['Số tháng'] >= 5)].sort_values("Khu Vực")
         if len(valid_neighs) > 0:
             neigh_list = valid_neighs['Khu Vực'].tolist()
             selected_n = st.selectbox("📌 Chọn Khu vực bạn muốn phân tích:", options=neigh_list)
