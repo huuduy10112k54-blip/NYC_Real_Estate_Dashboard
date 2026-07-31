@@ -1147,11 +1147,13 @@ with tab3:
     if boro_stats:
         df_table = pd.DataFrame(boro_stats).sort_values("Lợi Suất (%)", ascending=False)
         def format_table(df_tbl):
+            vmax = df_tbl["Lợi Suất (%)"].abs().max()
+            if pd.isna(vmax) or vmax == 0: vmax = 1 # Fallback
             return df_tbl.style.format({
                 "Giá Bắt Đầu": "${:,.0f}",
                 "Giá Hiện Tại": "${:,.0f}",
                 "Lợi Suất (%)": "{:+.1f}%"
-            }).map(lambda x: f"color: {'#EF4444' if x > 0 else '#10B981' if x < 0 else 'black'}; font-weight: bold;" if isinstance(x, (int, float)) and x < 100 else "", subset=["Lợi Suất (%)"])
+            }).background_gradient(cmap='RdYlGn', subset=["Lợi Suất (%)"], vmin=-vmax, vmax=vmax)
         st.dataframe(format_table(df_table), width='stretch', hide_index=True)
 
     divider()
