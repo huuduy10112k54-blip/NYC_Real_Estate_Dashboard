@@ -1147,13 +1147,19 @@ with tab3:
     if boro_stats:
         df_table = pd.DataFrame(boro_stats).sort_values("Lợi Suất (%)", ascending=False)
         def format_table(df_tbl):
-            vmax = df_tbl["Lợi Suất (%)"].abs().max()
-            if pd.isna(vmax) or vmax == 0: vmax = 1 # Fallback
+            def get_text_color(val):
+                if not isinstance(val, (int, float)): return ""
+                if val >= 5: return "color: #047857; font-weight: bold;" # Dark Green
+                elif val > 0: return "color: #059669; font-weight: bold;" # Green
+                elif val <= -5: return "color: #B91C1C; font-weight: bold;" # Dark Red
+                elif val < 0: return "color: #DC2626; font-weight: bold;" # Red
+                return "color: #475569; font-weight: bold;" # Slate (0%)
+            
             return df_tbl.style.format({
                 "Giá Bắt Đầu": "${:,.0f}",
                 "Giá Hiện Tại": "${:,.0f}",
                 "Lợi Suất (%)": "{:+.1f}%"
-            }).background_gradient(cmap='RdYlGn', subset=["Lợi Suất (%)"], vmin=-vmax, vmax=vmax)
+            }).map(get_text_color, subset=["Lợi Suất (%)"])
         st.dataframe(format_table(df_table), width='stretch', hide_index=True)
 
     divider()
