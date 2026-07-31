@@ -1353,7 +1353,7 @@ with tab3:
             
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(f"""
-            <div style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
+            <div id='target-explorer' style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
                 <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 8px;'>🔎 Hồ sơ Phân tích: {selected_n}</h4>
                 <p style='color:#94A3B8; font-size:14px; margin-bottom: 0px;'>Chi tiết lịch sử giá và chỉ số rủi ro của khu vực bạn vừa chọn trên bảng xếp hạng.</p>
             </div>
@@ -1402,6 +1402,19 @@ with tab3:
             </div>
             """, unsafe_allow_html=True)
             st.info(f"Dựa trên xu hướng lịch sử, khu vực **{selected_n}** (thuộc {boro_of_n}) có tỷ suất sinh lời lũy kế là **{pct_explore:+.1f}%**.")
+            
+            import streamlit.components.v1 as components
+            components.html(
+                """
+                <script>
+                    var target = window.parent.document.getElementById('target-explorer');
+                    if (target) {
+                        target.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    }
+                </script>
+                """,
+                height=0, width=0
+            )
         elif len(valid_neighs) > 0:
             st.markdown("""
             <div style='text-align:center; padding: 40px 20px; border: 2px dashed #cbd5e1; border-radius: 12px; margin-top: 20px;'>
