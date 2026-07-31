@@ -676,16 +676,6 @@ with tab0:
     rat0   = top_b0['Giá trung vị'] / low_b0['Giá trung vị']
     top_bt0= df['building_type'].value_counts().index[0]
     pct_bt0= df['building_type'].value_counts().iloc[0] / len(df) * 100
-    insight_box(f"""
-    <b>📌 Những điều quan trọng nhất từ tổng quan:</b><br>
-    • <b>{top_b0['Borough']}</b> dẫn đầu về giá trung vị ({fmt_M(top_b0['Giá trung vị'])}),
-      cao hơn <b>{rat0:.1f}×</b> so với {low_b0['Borough']} ({fmt_M(low_b0['Giá trung vị'])}) —
-      phản ánh phân hóa mạnh giữa các quận.<br>
-    • <b>{pct_bt0:.0f}%</b> giao dịch thuộc loại hình <b>{top_bt0}</b> —
-      thị trường tập trung rõ vào phân khúc này.<br>
-    • Tổng giá trị thị trường: <b>${total_val/1e9:.2f} tỷ USD</b>.
-      Tỷ lệ giao dịch ≥$1M: <b>{pct_1m:.1f}%</b> — thị trường có xu hướng cao cấp.
-    """)
 
     # ── Phân khúc khách hàng ──────────────────────────────────
     divider()
@@ -865,12 +855,6 @@ with tab1:
     p_spots = ", ".join([f"<b>{r['neighborhood'].title()}</b> (${r['med_price']/1e6:.2f}M)" for _, r in top_p_geo.iterrows()])
     v_spots = ", ".join([f"<b>{r['neighborhood'].title()}</b> ({r['n_count']:,} GD)" for _, r in top_v_geo.iterrows()])
 
-    insight_box(f"""
-    <b>📍 Nhận diện Điểm nóng (Hotspots) trên Bản đồ:</b><br>
-    • 🔴 <b>Điểm nóng về Giá bán (Hotspots Giá cao):</b> Tập trung dày đặc tại khu vực lõi Manhattan: {p_spots}.<br>
-    • 🟢 <b>Điểm nóng về Thanh khoản (Hotspots Giao dịch nhộn nhịp):</b> Phân bố rộng ở Queens & Brooklyn: {v_spots}.<br>
-    • 💡 <i>Mẹo sử dụng bản đồ: Phóng to (Zoom) để quan sát từng góc phố, di chuột qua từng điểm màu nhiệt để xem chi tiết đơn giá $/sqft và tổng số giao dịch thực tế.</i>
-    """)
 
     divider()
     section_q("Giá bán phân bố như thế nào trong từng quận?",
@@ -1026,13 +1010,6 @@ with tab2:
                 trace.name = 'Đường xu hướng (OLS)'
         st.plotly_chart(fig_sq_chart, width='stretch')
 
-    insight_box(f"""
-    <b>💡 Ý nghĩa kinh tế của Biến số DIỆN TÍCH (gross_sqft):</b><br>
-    • Hệ số tương quan: <b>r = +{corr_sq:.2f}</b> (Tương quan thuận rất mạnh).<br>
-    • <b>Giải thích thực tế:</b> Diện tích sàn là yếu tố vật lý đóng vai trò quyết định số 1 tới giá bán. 
-      Căn hộ có diện tích lớn hơn cung cấp không gian sống rộng rãi hơn, nhiều phòng ngủ/phòng tắm hơn. 
-      Mỗi 500 sqft diện tích tăng thêm giúp giá trị tài sản tăng trung bình từ 40% - 60%.
-    """)
 
     divider()
 
@@ -1066,13 +1043,6 @@ with tab2:
     )
     st.plotly_chart(fig_inc, width='stretch')
 
-    insight_box(f"""
-    <b>💡 Ý nghĩa kinh tế của Biến số THU NHẬP KHU VỰC (avg_income):</b><br>
-    • Hệ số tương quan: <b>r = +{corr_inc:.2f}</b> (Tương quan thuận mạnh).<br>
-    • <b>Giải thích thực tế:</b> Thu nhập bình quân của dân cư khu vực phản ánh <i>sức mua (purchasing power)</i> 
-      và chất lượng môi trường sống. Khu vực có thu nhập cao (như Manhattan: ~$88K/năm) thường sở hữu hạ tầng cao cấp, 
-      an ninh tốt và trường học chất lượng, dẫn tới nhu cầu mua nhà cao hơn và sẵn sàng trả mức giá áp đảo so với các quận phụ cận.
-    """)
 
     divider()
 
@@ -1102,12 +1072,6 @@ with tab2:
     fig_age.update_layout(coloraxis_showscale=False, yaxis=dict(tickformat='$,.0f', automargin=True), title_font=dict(size=13, color='#374151'))
     st.plotly_chart(fig_age, width='stretch')
 
-    insight_box(f"""
-    <b>💡 Ý nghĩa kinh tế của Biến số TUỔI BẤT ĐỘNG SẢN (building_age):</b><br>
-    • Hệ số tương quan: <b>r = {corr_age:.2f}</b> (Tương quan âm nhẹ).<br>
-    • <b>Giải thích thực tế:</b> Bất động sản mới xây (<15 năm) sở hữu giá bán cao nhất do thiết kế hiện đại và không tốn chi phí sửa chữa. 
-      Công trình cũ có xu hướng giảm giá do <i>khấu hao tài sản (physical depreciation)</i>. Tuy nhiên tại NYC, mối tương quan này khá yếu vì nhiều tòa nhà cổ (>70 năm) tại Manhattan hay Brooklyn Heights nằm ở vị trí đất vàng đắt đỏ và có kiến trúc lịch sử được bảo tồn, bù đắp đáng kể sự suy giảm về tuổi đời.
-    """)
 
 # ════════════════════════════════════════════════════════════
 # TAB 3 — BIẾN ĐỘNG THEO THỜI GIAN
@@ -1247,7 +1211,6 @@ with tab3:
                 fig.add_trace(go.Scatter(
                     x=sub_b['ym_dt'], y=sub_b['growth_pct'],
                     mode='lines', name=f"Trung bình {boro_name}",
-                    line=dict(color='#9CA3AF', width=2, dash='dot'),
                     customdata=sub_b['sale_price'],
                     hovertemplate=f'<b>TB {boro_name}</b><br>%{{x|%m/%Y}}<br>Lợi suất: %{{y:+.1f}}%<extra></extra>'))
                 
@@ -1274,7 +1237,7 @@ with tab3:
                         x=sub_n['ym_dt'], y=trend, mode='lines', showlegend=False,
                         line=dict(color=color_neigh, width=1.5, dash='dash'), hoverinfo='skip'))
 
-            fig.add_hline(y=0, line_color="#9CA3AF", line_width=1.5, line_dash="dash")
+            
             clayout(fig, h=320, t=50, b=20)
             fig.update_layout(
                 title=dict(text=title, font=dict(size=14, color='#374151')),
@@ -1292,7 +1255,6 @@ with tab3:
                 section_q("4️⃣ Đỉnh cao sinh lời", "")
                 fig_top, pct_top = plot_single_neighborhood(top_boro, top_neigh, f"🚀 {top_neigh} (Tăng mạnh nhất)", C_RED)
                 st.plotly_chart(fig_top, width='stretch')
-                insight_box(f"Vượt xa đường trung bình của Quận <b>{top_boro}</b>, <b>{top_neigh}</b> là bến đỗ sinh lời bứt phá nhất với <b>+{pct_top:.1f}%</b> lợi suất.")
 
         if len(bot_3) > 0:
             bot_boro = bot_3.iloc[0]["Quận"]
@@ -1301,7 +1263,6 @@ with tab3:
                 section_q("5️⃣ Hố đen tử thần", "")
                 fig_bot, pct_bot = plot_single_neighborhood(bot_boro, bot_neigh, f"⚠️ {bot_neigh} (Giảm mạnh nhất)", C_GREEN)
                 st.plotly_chart(fig_bot, width='stretch')
-                insight_box(f"Ngược chiều hoàn toàn với xu hướng của Quận <b>{bot_boro}</b>, NĐT tại <b>{bot_neigh}</b> gánh chịu khoản lỗ khổng lồ lên tới <b>{pct_bot:.1f}%</b>.")
 
         divider()
 
@@ -1317,7 +1278,6 @@ with tab3:
                 section_q("6️⃣ Tăng trưởng Ổn định nhất", "")
                 fig_up, pct_up = plot_single_neighborhood(up_boro, up_neigh, f"📈 {up_neigh} (Ít rủi ro biến động)", C_ORANGE)
                 st.plotly_chart(fig_up, width='stretch')
-                insight_box(f"Bỏ qua các cú sốc giật cục, <b>{up_neigh}</b> là bến đỗ an toàn nhất. Lợi suất tăng bám sát đường xu hướng đạt <b>+{pct_up:.1f}%</b>.")
 
         if len(stable_down) > 0:
             down_boro = stable_down.iloc[0]["Quận"]
@@ -1326,7 +1286,6 @@ with tab3:
                 section_q("7️⃣ Suy thoái Ổn định nhất", "")
                 fig_down, pct_down = plot_single_neighborhood(down_boro, down_neigh, f"📉 {down_neigh} (Trượt dốc từ từ)", "#8B5CF6")
                 st.plotly_chart(fig_down, width='stretch')
-                insight_box(f"Khác với cú sập bất ngờ, <b>{down_neigh}</b> rỉ máu từ từ qua từng tháng. Giá trị đã bốc hơi <b>{pct_down:.1f}%</b> dọc theo đường xu hướng giảm.")
 
 
 
