@@ -1,0 +1,11 @@
+﻿.env
+__pycache__/
+.venv/
+cache/
+logs/
+temp/
+scratch/
+brain/
+*.zip
+*.docx
+.streamlit/

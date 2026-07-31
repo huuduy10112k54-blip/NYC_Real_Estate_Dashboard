@@ -1,0 +1,31 @@
+CHÀO BẠN, ĐÂY LÀ HƯỚNG DẪN DÀNH CHO NGƯỜI VIẾT PHẦN GIỚI THIỆU ĐỒ ÁN
+======================================================================
+
+Chào bạn, để viết phần Giới thiệu và Mở đầu cho Đồ án Tốt nghiệp được hay và bám sát thực tế, bạn chỉ cần nắm rõ TỔNG QUAN DỰ ÁN và tự tay MỞ ỨNG DỤNG (DASHBOARD) lên để trải nghiệm. Không cần quan tâm đến code phức tạp ở bên dưới.
+
+---
+
+A. TÓM TẮT ĐỂ BẠN VIẾT GIỚI THIỆU
+1. Tên dự án (Gợi ý): "Xây dựng hệ thống Data Warehouse và ứng dụng Machine Learning để phân tích, dự đoán giá Bất động sản tại New York".
+2. Vấn đề giải quyết: Thị trường BĐS New York quá rộng lớn và dữ liệu phân mảnh. Các dự án sinh viên bình thường chỉ chạy file Excel/CSV đơn giản. Dự án của nhóm mình đi theo hướng Doanh nghiệp (Enterprise) thực thụ.
+3. Điểm nhấn công nghệ của dự án (Key Highlights):
+   - Không dùng file dữ liệu (CSV) tĩnh lặt vặt. Hệ thống tự động CÀO (Crawl) dữ liệu từ API của Chính phủ Mỹ (US Census) và OpenStreetMap.
+   - Xây dựng Kho dữ liệu (Data Warehouse) chuẩn chỉnh bằng SQLite (Lược đồ hình sao - Star Schema).
+   - Có tích hợp Machine Learning (Học máy) để dự đoán giá.
+   - Giao diện Dashboard tương tác trực tiếp (Real-time).
+
+---
+
+B. HƯỚNG DẪN MỞ GIAO DIỆN LÊN ĐỂ TRẢI NGHIỆM (3 BƯỚC)
+Bạn hãy mở giao diện lên bấm thử để có cảm hứng viết giới thiệu nhé.
+
+Bước 1: Giải nén thư mục này ra máy của bạn.
+Bước 2: Mở phần mềm CMD (Command Prompt) trên máy bạn. Gõ lệnh di chuyển vào thư mục vừa giải nén (ví dụ nếu bạn giải nén ở ổ D, thư mục DATN_DP02_NYC):
+   cd /d D:\DATN_DP02_NYC
+
+Bước 3: Chạy dòng lệnh sau để khởi động ứng dụng:
+   python -m streamlit run src\dashboard_sqlite.py
+
+=> Đợi 3 giây, một trang web giao diện (Dashboard) sẽ tự động bật lên trên trình duyệt của bạn. Bạn có thể bấm chọn các Quận (Manhattan, Queens...), xem biểu đồ, và xem các chỉ số xã hội (Số công viên, điểm tiện ích...) để lấy ý tưởng viết lời mở đầu nhé!
+
+Chúc bạn viết tốt! Nếu cần hỏi thêm về luồng dữ liệu, cứ nhắn lại trong nhóm.
