@@ -402,7 +402,6 @@ def clayout(fig, h=340, t=20, b=20, l=10, r=10, leg=False):
                       plot_bgcolor='#fafafa',
                       paper_bgcolor='#ffffff',
                       showlegend=leg,
-                      title=None,
                       font=dict(family='Inter', size=13, color='#1e1b4b'),
                       title_font=dict(size=15, color='#1e1b4b', family='Inter'),
                       legend=dict(font=dict(size=12, color='#1e1b4b')))
@@ -1104,8 +1103,7 @@ with tab3:
 
         fig_all = go.Figure()
         fig_all.add_trace(go.Scatter(
-            x=mts_all['ym_dt'], y=mts_all['growth_pct'], 
-            mode='lines+text', text=mts_all['growth_pct'].apply(lambda x: f"{x:+.1f}%"), textposition='top center',
+            x=mts_all['ym_dt'], y=mts_all['growth_pct'], mode='lines',
             name='Thị trường chung', line=dict(color=C_BLUE, width=4),
             customdata=mts_all['sale_price'],
             hovertemplate='<b>Thị trường chung</b><br>%{x|%m/%Y}<br>Tăng trưởng: <b>%{y:+.1f}%</b><br>Giá: $%{customdata:,.0f}<extra></extra>'
@@ -1121,6 +1119,7 @@ with tab3:
         fig_all.add_hline(y=0, line_color="#9CA3AF", line_width=1.5, line_dash="dash")
         clayout(fig_all, h=300, t=20, b=20)
         fig_all.update_layout(
+            title_text="",
             hovermode='x unified',
             yaxis=dict(ticksuffix='%', title="Tỷ suất Sinh lời (%)", zeroline=False))
         st.plotly_chart(fig_all, width='stretch')
@@ -1228,8 +1227,7 @@ with tab3:
                 
                 fig.add_trace(go.Scatter(
                     x=sub_n['ym_dt'], y=sub_n['growth_pct'],
-                    mode='lines+text', text=sub_n['growth_pct'].apply(lambda x: f"{x:+.1f}%"), textposition='top center', 
-                    name=neigh_name,
+                    mode='lines', name=neigh_name,
                     line=dict(color=color_neigh, width=4),
                     customdata=sub_n['sale_price'],
                     hovertemplate=f'<b>{neigh_name}</b><br>%{{x|%m/%Y}}<br>Lợi suất: <b>%{{y:+.1f}}%</b><br>Giá: $%{{customdata:,.0f}}<extra></extra>'))
