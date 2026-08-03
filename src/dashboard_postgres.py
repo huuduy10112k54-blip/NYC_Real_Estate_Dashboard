@@ -845,6 +845,7 @@ with tab1:
     )
     clayout(fig_map, h=520, t=10, b=10, l=10, r=10)
     fig_map.update_layout(
+        title_text="",
         coloraxis_colorbar=dict(title=z_title, len=0.8)
     )
     st.plotly_chart(fig_map, width='stretch')
