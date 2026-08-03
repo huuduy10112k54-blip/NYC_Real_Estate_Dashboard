@@ -564,7 +564,7 @@ tab0, tab1, tab2, tab3, tab4 = st.tabs([
     "🏙️  Tổng quan",
     "🗺️  Phân tích khu vực",
     "📐  Yếu tố quyết định giá",
-    "📅  Xu hướng & Khuyến nghị Đầu tư",
+    "Xu hướng & Khuyến nghị đầu tư",
     "🤖  Dự báo & Mô hình ML",
 ])
 
@@ -1082,7 +1082,7 @@ with tab3:
     <div style='background:linear-gradient(135deg,#b45309,#d97706,#fbbf24);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(245,158,11,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>📅 Phân tích Lợi suất Đầu tư: Từ Vĩ mô đến Vi mô</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'>Phân tích Lợi suất Đầu tư: Từ Vĩ mô đến Vi mô</b><br>
     <span style='font-size:12px;opacity:0.9'>Theo dõi tỷ suất sinh lời theo thời gian thực để tìm ra khu vực bùng nổ, các hố đen rủi ro, và những bến đỗ an toàn nhất.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -1096,7 +1096,7 @@ with tab3:
         format="%Y-%m")
 
     # 1. TOÀN CẢNH
-    section_q("1️⃣ Toàn cảnh Thị trường", "Đường xu hướng (nét đứt) cho thấy quỹ đạo lợi suất của giá trung vị toàn khu vực đang chọn.")
+    section_q("1. Toàn cảnh Thị trường", "Đường xu hướng (nét đứt) cho thấy quỹ đạo lợi suất của giá trung vị toàn khu vực đang chọn.")
     mts_all = df_t3.groupby('ym_dt')['sale_price'].median().reset_index().sort_values('ym_dt')
     if len(mts_all) > 0:
         base_price_all = mts_all['sale_price'].iloc[0]
@@ -1130,7 +1130,7 @@ with tab3:
     divider()
 
     # 2. PHÂN HÓA QUẬN
-    section_q("2️⃣ Phân hóa Tỷ suất: Cấp độ Quận (Borough)", "Sự khác biệt về mức độ sinh lời giữa các quận trong cùng giai đoạn.")
+    section_q("2. Phân hóa Tỷ suất: Cấp độ Quận (Borough)", "Sự khác biệt về mức độ sinh lời giữa các quận trong cùng giai đoạn.")
     boro_stats = []
     df_boro = df_t3.groupby(["borough_name", "ym_dt"])["sale_price"].median().reset_index().sort_values("ym_dt")
     for boro in sorted(df_boro['borough_name'].unique()):
@@ -1167,7 +1167,7 @@ with tab3:
     divider()
 
     # 3. BẢNG PHONG THẦN
-    section_q("3️⃣ Bảng Phong Thần: Cấp độ Khu vực (Neighborhood)", "Soi rọi toàn bộ các khu vực để tìm ra các mỏ vàng và hố đen cảnh báo.")
+    section_q("3. Bảng Phong Thần: Cấp độ Khu vực (Neighborhood)", "Soi rọi toàn bộ các khu vực để tìm ra các mỏ vàng và hố đen cảnh báo.")
     neigh_stats = []
     for boro in df_t3["borough_name"].unique():
         b_df = df_t3[df_t3["borough_name"] == boro]
@@ -1206,10 +1206,10 @@ with tab3:
 
         c1, c2 = st.columns(2)
         with c1:
-            st.markdown("##### 🔥 TOP 3 TĂNG MẠNH NHẤT")
+            st.markdown("##### TOP 3 TĂNG MẠNH NHẤT")
             st.dataframe(format_table(top_3_disp), use_container_width=True, hide_index=True)
         with c2:
-            st.markdown("##### ⚠️ TOP 3 SỤT GIẢM NHIỀU NHẤT")
+            st.markdown("##### TOP 3 SỤT GIẢM NHIỀU NHẤT")
             st.dataframe(format_table(bot_3_disp), use_container_width=True, hide_index=True)
 
         divider()
@@ -1269,8 +1269,8 @@ with tab3:
             top_boro = top_3.iloc[0]["Quận"]
             top_neigh = top_3.iloc[0]["Khu Vực"]
             with col_a:
-                section_q("4️⃣ Đỉnh cao sinh lời", "")
-                fig_top, pct_top = plot_single_neighborhood(top_boro, top_neigh, f"🚀 {top_neigh} (Tăng mạnh nhất)", C_RED)
+                section_q("4. Đỉnh cao sinh lời", "")
+                fig_top, pct_top = plot_single_neighborhood(top_boro, top_neigh, f"{top_neigh} (Tăng mạnh nhất)", C_RED)
                 st.plotly_chart(fig_top, width='stretch')
                 render_mini_confidence(top_neigh)
 
@@ -1278,8 +1278,8 @@ with tab3:
             bot_boro = bot_3.iloc[0]["Quận"]
             bot_neigh = bot_3.iloc[0]["Khu Vực"]
             with col_b:
-                section_q("5️⃣ Hố đen tử thần", "")
-                fig_bot, pct_bot = plot_single_neighborhood(bot_boro, bot_neigh, f"⚠️ {bot_neigh} (Giảm mạnh nhất)", C_GREEN)
+                section_q("5. Hố đen tử thần", "")
+                fig_bot, pct_bot = plot_single_neighborhood(bot_boro, bot_neigh, f"{bot_neigh} (Giảm mạnh nhất)", C_GREEN)
                 st.plotly_chart(fig_bot, width='stretch')
                 render_mini_confidence(bot_neigh)
 
@@ -1293,14 +1293,14 @@ with tab3:
         if len(stable_up) > 0:
             up_boro = stable_up.iloc[0]["Quận"]
             up_neigh = stable_up.iloc[0]["Khu Vực"]
-            section_q("6️⃣ Tăng trưởng Ổn định nhất", "")
-            fig_up, pct_up = plot_single_neighborhood(up_boro, up_neigh, f"📈 {up_neigh} (Ít rủi ro biến động)", C_ORANGE)
+            section_q("6. Tăng trưởng Ổn định nhất", "")
+            fig_up, pct_up = plot_single_neighborhood(up_boro, up_neigh, f"{up_neigh} (Ít rủi ro biến động)", C_ORANGE)
             st.plotly_chart(fig_up, width='stretch')
             render_mini_confidence(up_neigh)
 
         # --- BẢNG XẾP HẠNG (LEADERBOARD) ---
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("<h4 style='color:#1e293b; margin-bottom: 5px;'>🏆 Bảng Xếp Hạng & Sàng Lọc Khu Vực</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color:#1e293b; margin-bottom: 5px;'>Bảng Xếp Hạng & Sàng Lọc Khu Vực</h4>", unsafe_allow_html=True)
         st.markdown("<p style='color:#64748b; font-size:14px; margin-bottom: 15px;'>Bảng tổng hợp toàn bộ các khu vực an toàn. Bạn có thể <b>bấm vào tiêu đề cột</b> để sắp xếp (VD: Sắp xếp theo Lợi suất để tìm top sinh lời, hoặc Giá hiện tại để tìm giá rẻ).</p>", unsafe_allow_html=True)
         
         valid_neighs = df_neigh_all[(df_neigh_all['Số GD'] >= 30) & (df_neigh_all['Số tháng'] >= 5)].copy()
@@ -1315,7 +1315,7 @@ with tab3:
             
             all_options = sorted(df_leaderboard['Khu Vực'].unique())
             search_query = st.multiselect(
-                "🔍 Nhập hoặc chọn khu vực để lọc bảng:", 
+                "Nhập hoặc chọn khu vực để lọc bảng:", 
                 options=all_options, 
                 placeholder="Ví dụ: Gõ 'Astoria' để xem gợi ý...",
                 label_visibility="collapsed"
