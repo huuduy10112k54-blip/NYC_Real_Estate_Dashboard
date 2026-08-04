@@ -1095,6 +1095,11 @@ with tab3:
         df_t3["sale_year"].astype(int).astype(str) + "-" + df_t3["sale_month"].astype(int).astype(str).str.zfill(2),
         format="%Y-%m")
 
+    start_dt_str = df_t3['ym_dt'].min().strftime('%m/%Y') if not df_t3.empty else "N/A"
+    end_dt_str = df_t3['ym_dt'].max().strftime('%m/%Y') if not df_t3.empty else "N/A"
+    col_start = f"Giá Bắt Đầu ({start_dt_str})"
+    col_end = f"Giá Hiện Tại ({end_dt_str})"
+
     def format_table(df_tbl):
         def get_text_color(val):
             if not isinstance(val, (int, float)): return ""
@@ -1104,11 +1109,12 @@ with tab3:
             elif val < 0: return "color: #DC2626; font-weight: bold;" # Red
             return "color: #475569; font-weight: bold;" # Slate (0%)
         
-        return df_tbl.style.format({
-            "Giá Bắt Đầu": "${:,.0f}",
-            "Giá Hiện Tại": "${:,.0f}",
-            "Lợi Suất (%)": "{:+.1f}%"
-        }).map(get_text_color, subset=["Lợi Suất (%)"])
+        format_dict = {"Lợi Suất (%)": "{:+.1f}%"}
+        for col in df_tbl.columns:
+            if "Giá" in col:
+                format_dict[col] = "${:,.0f}"
+                
+        return df_tbl.style.format(format_dict).map(get_text_color, subset=["Lợi Suất (%)"])
 
     with st.expander("🔍 Xem thêm: Dữ liệu Toàn cảnh & Phân hóa cấp Quận", expanded=False):
         st.markdown("<h4 style='color:#1e293b; margin-top:0px;'>Toàn cảnh thị trường</h4>", unsafe_allow_html=True)
@@ -1157,8 +1163,8 @@ with tab3:
             pct = (end_p - start_p) / start_p * 100
             boro_stats.append({
                 "Quận": boro,
-                "Giá Bắt Đầu": start_p,
-                "Giá Hiện Tại": end_p,
+                col_start: start_p,
+                col_end: end_p,
                 "Lợi Suất (%)": pct
             })
         
@@ -1193,8 +1199,8 @@ with tab3:
             r2 = 1 - (ss_res / ss_tot) if ss_tot != 0 else 0
 
             neigh_stats.append({
-                "Quận": boro, "Khu Vực": n, "Giá Bắt Đầu": start_p, 
-                "Giá Hiện Tại": end_p, "Lợi Suất (%)": pct, 
+                "Quận": boro, "Khu Vực": n, col_start: start_p, 
+                col_end: end_p, "Lợi Suất (%)": pct, 
                 "Slope": coef[0], "R2": r2, "Số tháng": len(sub), "Số GD": n_gd
             })
     
@@ -1203,8 +1209,8 @@ with tab3:
         top_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=False).head(3).reset_index(drop=True)
         bot_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=True).head(3).reset_index(drop=True)
         
-        top_3_disp = top_3[["Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]]
-        bot_3_disp = bot_3[["Khu Vực", "Giá Bắt Đầu", "Giá Hiện Tại", "Lợi Suất (%)"]]
+        top_3_disp = top_3[["Khu Vực", col_start, col_end, "Lợi Suất (%)"]]
+        bot_3_disp = bot_3[["Khu Vực", col_start, col_end, "Lợi Suất (%)"]]
 
         c1, c2 = st.columns(2)
         with c1:
@@ -1318,7 +1324,7 @@ with tab3:
                 (valid_neighs['R2'] * 30).clip(upper=30)
             ).round(0)
             
-            df_leaderboard = valid_neighs[["Quận", "Khu Vực", "Giá Hiện Tại", "Lợi Suất (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
+            df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "Lợi Suất (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
             
             all_options = sorted(df_leaderboard['Khu Vực'].unique())
             search_query = st.multiselect(
@@ -1338,7 +1344,7 @@ with tab3:
                 on_select="rerun",
                 selection_mode="single-row",
                 column_config={
-                    "Giá Hiện Tại": st.column_config.NumberColumn("Giá Hiện Tại", format="$%d"),
+                    col_end: st.column_config.NumberColumn(col_end, format="$%d"),
                     "Lợi Suất (%)": st.column_config.NumberColumn("Lợi Suất (%)", format="%.1f%%"),
                     "Điểm Tin Cậy": st.column_config.ProgressColumn("Điểm Tin Cậy (/100)", format="%d", min_value=0, max_value=100)
                 }
