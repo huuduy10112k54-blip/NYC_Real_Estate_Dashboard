@@ -1110,6 +1110,64 @@ with tab3:
             "Lợi Suất (%)": "{:+.1f}%"
         }).map(get_text_color, subset=["Lợi Suất (%)"])
 
+    with st.expander("🔍 Xem thêm: Dữ liệu Toàn cảnh & Phân hóa cấp Quận", expanded=False):
+        st.markdown("<h4 style='color:#1e293b; margin-top:0px;'>Toàn cảnh thị trường</h4>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748b; font-size:14px;'>Đường xu hướng (nét đứt) cho thấy quỹ đạo lợi suất của giá trung vị toàn khu vực đang chọn.</p>", unsafe_allow_html=True)
+        mts_all = df_t3.groupby('ym_dt')['sale_price'].median().reset_index().sort_values('ym_dt')
+        if len(mts_all) > 0:
+            base_price_all = mts_all['sale_price'].iloc[0]
+            mts_all['growth_pct'] = (mts_all['sale_price'] - base_price_all) / base_price_all * 100
+
+            fig_all = go.Figure()
+            fig_all.add_trace(go.Scatter(
+                x=mts_all['ym_dt'], y=mts_all['growth_pct'], mode='lines',
+                name='Thị trường chung', line=dict(color=C_BLUE, width=4),
+                customdata=mts_all['sale_price'],
+                hovertemplate='<b>Thị trường chung</b><br>%{x|%m/%Y}<br>Tăng trưởng: <b>%{y:+.1f}%</b><br>Giá: $%{customdata:,.0f}<extra></extra>'
+            ))
+            if len(mts_all) >= 3:
+                x_num = mdates.date2num(mts_all['ym_dt'])
+                coef = np.polyfit(x_num, mts_all['growth_pct'].ffill().bfill().values, 1)
+                trend = np.polyval(coef, x_num)
+                fig_all.add_trace(go.Scatter(
+                    x=mts_all['ym_dt'], y=trend, mode='lines', showlegend=False,
+                    line=dict(color=C_ORANGE, width=2.5, dash='dash'), hoverinfo='skip'))
+
+            fig_all.add_hline(y=0, line_color="#9CA3AF", line_width=1.5, line_dash="dash")
+            clayout(fig_all, h=300, t=20, b=20)
+            fig_all.update_layout(
+                title_text="",
+                hovermode='x unified',
+                yaxis=dict(ticksuffix='%', title="Tỷ suất Sinh lời (%)", zeroline=False))
+            st.plotly_chart(fig_all, width='stretch')
+        else:
+            st.warning("Không đủ dữ liệu thời gian.")
+
+        st.markdown("<hr style='margin: 20px 0; border-color: #e2e8f0;'>", unsafe_allow_html=True)
+
+        st.markdown("<h4 style='color:#1e293b; margin-top:0px;'>Phân hóa tỷ suất: Cấp độ quận</h4>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748b; font-size:14px;'>Sự khác biệt về mức độ sinh lời giữa các quận trong cùng giai đoạn.</p>", unsafe_allow_html=True)
+        boro_stats = []
+        df_boro = df_t3.groupby(["borough_name", "ym_dt"])["sale_price"].median().reset_index().sort_values("ym_dt")
+        for boro in sorted(df_boro['borough_name'].unique()):
+            sub = df_boro[df_boro['borough_name']==boro]
+            if len(sub) < 1: continue
+            start_p = sub['sale_price'].iloc[0]
+            end_p = sub['sale_price'].iloc[-1]
+            pct = (end_p - start_p) / start_p * 100
+            boro_stats.append({
+                "Quận": boro,
+                "Giá Bắt Đầu": start_p,
+                "Giá Hiện Tại": end_p,
+                "Lợi Suất (%)": pct
+            })
+        
+        if boro_stats:
+            df_table = pd.DataFrame(boro_stats).sort_values("Lợi Suất (%)", ascending=False)
+            st.dataframe(format_table(df_table), use_container_width=True, hide_index=True)
+            
+    divider()
+
     # 1. ĐÁNH GIÁ TỶ SUẤT KHU VỰC
     section_q("1. Đánh giá tỷ suất: Cấp độ khu vực", "Soi rọi toàn bộ các khu vực để phân tích chi tiết mức độ sinh lời và rủi ro.")
     neigh_stats = []
