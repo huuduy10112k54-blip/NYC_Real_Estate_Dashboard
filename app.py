@@ -1095,79 +1095,23 @@ with tab3:
         df_t3["sale_year"].astype(int).astype(str) + "-" + df_t3["sale_month"].astype(int).astype(str).str.zfill(2),
         format="%Y-%m")
 
-    # 1. TOÀN CẢNH
-    section_q("1. Toàn cảnh thị trường", "Đường xu hướng (nét đứt) cho thấy quỹ đạo lợi suất của giá trung vị toàn khu vực đang chọn.")
-    mts_all = df_t3.groupby('ym_dt')['sale_price'].median().reset_index().sort_values('ym_dt')
-    if len(mts_all) > 0:
-        base_price_all = mts_all['sale_price'].iloc[0]
-        mts_all['growth_pct'] = (mts_all['sale_price'] - base_price_all) / base_price_all * 100
+    def format_table(df_tbl):
+        def get_text_color(val):
+            if not isinstance(val, (int, float)): return ""
+            if val >= 5: return "color: #047857; font-weight: bold;" # Dark Green
+            elif val > 0: return "color: #059669; font-weight: bold;" # Green
+            elif val <= -5: return "color: #B91C1C; font-weight: bold;" # Dark Red
+            elif val < 0: return "color: #DC2626; font-weight: bold;" # Red
+            return "color: #475569; font-weight: bold;" # Slate (0%)
+        
+        return df_tbl.style.format({
+            "Giá Bắt Đầu": "${:,.0f}",
+            "Giá Hiện Tại": "${:,.0f}",
+            "Lợi Suất (%)": "{:+.1f}%"
+        }).map(get_text_color, subset=["Lợi Suất (%)"])
 
-        fig_all = go.Figure()
-        fig_all.add_trace(go.Scatter(
-            x=mts_all['ym_dt'], y=mts_all['growth_pct'], mode='lines',
-            name='Thị trường chung', line=dict(color=C_BLUE, width=4),
-            customdata=mts_all['sale_price'],
-            hovertemplate='<b>Thị trường chung</b><br>%{x|%m/%Y}<br>Tăng trưởng: <b>%{y:+.1f}%</b><br>Giá: $%{customdata:,.0f}<extra></extra>'
-        ))
-        if len(mts_all) >= 3:
-            x_num = mdates.date2num(mts_all['ym_dt'])
-            coef = np.polyfit(x_num, mts_all['growth_pct'].ffill().bfill().values, 1)
-            trend = np.polyval(coef, x_num)
-            fig_all.add_trace(go.Scatter(
-                x=mts_all['ym_dt'], y=trend, mode='lines', showlegend=False,
-                line=dict(color=C_ORANGE, width=2.5, dash='dash'), hoverinfo='skip'))
-
-        fig_all.add_hline(y=0, line_color="#9CA3AF", line_width=1.5, line_dash="dash")
-        clayout(fig_all, h=300, t=20, b=20)
-        fig_all.update_layout(
-            title_text="",
-            hovermode='x unified',
-            yaxis=dict(ticksuffix='%', title="Tỷ suất Sinh lời (%)", zeroline=False))
-        st.plotly_chart(fig_all, width='stretch')
-    else:
-        st.warning("Không đủ dữ liệu thời gian.")
-
-    divider()
-
-    # 2. PHÂN HÓA QUẬN
-    section_q("2. Phân hóa tỷ suất: Cấp độ quận", "Sự khác biệt về mức độ sinh lời giữa các quận trong cùng giai đoạn.")
-    boro_stats = []
-    df_boro = df_t3.groupby(["borough_name", "ym_dt"])["sale_price"].median().reset_index().sort_values("ym_dt")
-    for boro in sorted(df_boro['borough_name'].unique()):
-        sub = df_boro[df_boro['borough_name']==boro]
-        if len(sub) < 1: continue
-        start_p = sub['sale_price'].iloc[0]
-        end_p = sub['sale_price'].iloc[-1]
-        pct = (end_p - start_p) / start_p * 100
-        boro_stats.append({
-            "Quận": boro,
-            "Giá Bắt Đầu": start_p,
-            "Giá Hiện Tại": end_p,
-            "Lợi Suất (%)": pct
-        })
-    
-    if boro_stats:
-        df_table = pd.DataFrame(boro_stats).sort_values("Lợi Suất (%)", ascending=False)
-        def format_table(df_tbl):
-            def get_text_color(val):
-                if not isinstance(val, (int, float)): return ""
-                if val >= 5: return "color: #047857; font-weight: bold;" # Dark Green
-                elif val > 0: return "color: #059669; font-weight: bold;" # Green
-                elif val <= -5: return "color: #B91C1C; font-weight: bold;" # Dark Red
-                elif val < 0: return "color: #DC2626; font-weight: bold;" # Red
-                return "color: #475569; font-weight: bold;" # Slate (0%)
-            
-            return df_tbl.style.format({
-                "Giá Bắt Đầu": "${:,.0f}",
-                "Giá Hiện Tại": "${:,.0f}",
-                "Lợi Suất (%)": "{:+.1f}%"
-            }).map(get_text_color, subset=["Lợi Suất (%)"])
-        st.dataframe(format_table(df_table), use_container_width=True, hide_index=True)
-
-    divider()
-
-    # 3. BẢNG PHONG THẦN
-    section_q("3. Đánh giá tỷ suất: Cấp độ khu vực", "Soi rọi toàn bộ các khu vực để phân tích chi tiết mức độ sinh lời và rủi ro.")
+    # 1. ĐÁNH GIÁ TỶ SUẤT KHU VỰC
+    section_q("1. Đánh giá tỷ suất: Cấp độ khu vực", "Soi rọi toàn bộ các khu vực để phân tích chi tiết mức độ sinh lời và rủi ro.")
     neigh_stats = []
     for boro in df_t3["borough_name"].unique():
         b_df = df_t3[df_t3["borough_name"] == boro]
@@ -1269,8 +1213,8 @@ with tab3:
             top_boro = top_3.iloc[0]["Quận"]
             top_neigh = top_3.iloc[0]["Khu Vực"]
             with col_a:
-                section_q("4. Khu vực tăng trưởng cao nhất", "")
-                fig_top, pct_top = plot_single_neighborhood(top_boro, top_neigh, f"{top_neigh} (Tăng trưởng cao nhất)", C_RED)
+                section_q("2. Khu vực tăng trưởng cao nhất", "")
+                fig_top, pct_top = plot_single_neighborhood(top_boro, top_neigh, f"{top_neigh}", C_RED)
                 st.plotly_chart(fig_top, width='stretch')
                 render_mini_confidence(top_neigh)
 
@@ -1278,8 +1222,8 @@ with tab3:
             bot_boro = bot_3.iloc[0]["Quận"]
             bot_neigh = bot_3.iloc[0]["Khu Vực"]
             with col_b:
-                section_q("5. Khu vực sụt giảm mạnh nhất", "")
-                fig_bot, pct_bot = plot_single_neighborhood(bot_boro, bot_neigh, f"{bot_neigh} (Sụt giảm mạnh nhất)", C_GREEN)
+                section_q("3. Khu vực sụt giảm mạnh nhất", "")
+                fig_bot, pct_bot = plot_single_neighborhood(bot_boro, bot_neigh, f"{bot_neigh}", C_GREEN)
                 st.plotly_chart(fig_bot, width='stretch')
                 render_mini_confidence(bot_neigh)
 
@@ -1293,8 +1237,8 @@ with tab3:
         if len(stable_up) > 0:
             up_boro = stable_up.iloc[0]["Quận"]
             up_neigh = stable_up.iloc[0]["Khu Vực"]
-            section_q("6. Tăng trưởng ổn định nhất", "")
-            fig_up, pct_up = plot_single_neighborhood(up_boro, up_neigh, f"{up_neigh} (Biến động thấp)", C_ORANGE)
+            section_q("4. Tăng trưởng ổn định nhất", "")
+            fig_up, pct_up = plot_single_neighborhood(up_boro, up_neigh, f"{up_neigh}", C_ORANGE)
             st.plotly_chart(fig_up, width='stretch')
             render_mini_confidence(up_neigh)
 
