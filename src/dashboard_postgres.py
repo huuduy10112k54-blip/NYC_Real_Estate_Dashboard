@@ -1170,10 +1170,15 @@ with tab3:
                 sub_n['growth_pct'] = (sub_n['sale_price'] - base_n) / base_n * 100
                 final_pct = sub_n['growth_pct'].iloc[-1]
                 
+                text_labels = [f"{v:+.0f}%" for v in sub_n['growth_pct']]
                 fig.add_trace(go.Scatter(
                     x=sub_n['ym_dt'], y=sub_n['growth_pct'],
-                    mode='lines', name=neigh_name,
-                    line=dict(color=color_neigh, width=4),
+                    mode='lines+markers+text', name=neigh_name,
+                    text=text_labels,
+                    textposition="top center",
+                    textfont=dict(size=11, color=color_neigh),
+                    marker=dict(size=6),
+                    line=dict(color=color_neigh, width=3),
                     customdata=sub_n['sale_price'],
                     hovertemplate=f'<b>{neigh_name}</b><br>%{{x|%m/%Y}}<br>Lợi suất: <b>%{{y:+.1f}}%</b><br>Giá: $%{{customdata:,.0f}}<extra></extra>'))
 
@@ -1371,7 +1376,7 @@ with tab3:
         elif len(valid_neighs) > 0:
             st.markdown("""
             <div style='text-align:center; padding: 40px 20px; border: 2px dashed #cbd5e1; border-radius: 12px; margin-top: 20px;'>
-                <div style='color:#64748b; font-size:18px; font-weight:bold; margin-bottom:10px;'>Hãy click vào một khu vực trên Bảng xếp hạng</div>
+                <div style='color:#64748b; font-size:18px; font-weight:bold; margin-bottom:10px;'>Hãy click vào một khu vực trên bảng xếp hạng</div>
                 <p style='color:#94a3b8; font-size:15px;'>Hệ thống sẽ tự động hiển thị biểu đồ lịch sử giá và phân tích rủi ro cho khu vực bạn chọn.</p>
             </div>
             """, unsafe_allow_html=True)
