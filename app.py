@@ -1144,6 +1144,7 @@ with tab3:
             fig_all.update_layout(
                 title_text="",
                 hovermode='x unified',
+                xaxis=dict(tickformat="%m/%Y"),
                 yaxis=dict(ticksuffix='%', title="Tỷ suất Sinh lời (%)", zeroline=False))
             st.plotly_chart(fig_all, width='stretch')
         else:
@@ -1259,6 +1260,7 @@ with tab3:
             fig.update_layout(
                 title=dict(text=title, font=dict(size=14, color='#374151')),
                 hovermode='x unified',
+                xaxis=dict(tickformat="%m/%Y"),
                 yaxis=dict(ticksuffix='%', title="", zeroline=False),
                 legend=dict(orientation='h', y=1.1, x=0))
             return fig, final_pct
