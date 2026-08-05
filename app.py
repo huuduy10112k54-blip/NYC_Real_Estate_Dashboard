@@ -1731,7 +1731,8 @@ Nhiệm vụ của bạn:
                             st.markdown(response.text)
                             st.session_state.chat_history.append({"role": "assistant", "content": response.text})
                         except Exception as e:
-                            error_msg = f"Xin lỗi, AI gặp lỗi khi xử lý câu hỏi này. Chi tiết lỗi: {e}"
+                            available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+                            error_msg = f"Xin lỗi, AI gặp lỗi khi xử lý câu hỏi này. Chi tiết lỗi: {e}\n\nCác model khả dụng cho API Key của bạn: {', '.join(available_models)}"
                             st.error(error_msg)
                             st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
                             
