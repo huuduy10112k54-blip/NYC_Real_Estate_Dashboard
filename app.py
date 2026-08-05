@@ -1682,13 +1682,13 @@ with tab6:
             # Trích xuất toàn bộ dữ liệu thống kê khu vực để AI có thể trả lời chi tiết
             full_stats_str = ""
             if 'neigh_stats' in locals() and neigh_stats is not None and len(neigh_stats) > 0:
-                # Gộp thông tin lướt sóng (neigh_stats) và dài hạn (long_term) nếu có
+                # long_term đã chứa đầy đủ thông tin gộp của neigh_stats
                 try:
                     import pandas as pd
                     if 'long_term' in locals() and long_term is not None:
-                        combined = pd.merge(long_term, neigh_stats[['neighborhood', 'avg_roi', 'avg_profit']], on='neighborhood', how='left')
+                        combined = long_term.copy()
                     else:
-                        combined = neigh_stats
+                        combined = neigh_stats.copy()
                     
                     combined = combined.fillna(0).sort_values('total_sales', ascending=False)
                     # Tạo bảng Markdown cho tất cả các khu vực
