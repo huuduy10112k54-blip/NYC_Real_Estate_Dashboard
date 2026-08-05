@@ -1719,19 +1719,12 @@ BẢNG DỮ LIỆU CHI TIẾT TỪNG KHU VỰC:
 Nhiệm vụ của bạn:
 1. Dựa vào bảng dữ liệu trên để trả lời các câu hỏi về ROI, số giao dịch.
 2. NẾU người dùng hỏi một câu hỏi ĐẶC BIỆT yêu cầu truy vấn DỮ LIỆU THÔ (Ví dụ: "Căn nhà đắt nhất giá bao nhiêu?", "Có bao nhiêu nhà bán dưới 500 ngàn đô?"):
-   - Bạn có thể viết code Python pandas để truy vấn bản copy của dữ liệu (biến df_ai).
+   - Bạn CÓ THỂ viết code Python pandas để truy vấn bản copy của dữ liệu (biến df_ai).
    - HÃY ĐẶT ĐOẠN CODE ĐÓ VÀO GIỮA THẺ <python> và </python>.
    - Ví dụ: <python>df_ai['sale_price'].max()</python>
    - Chỉ được viết MỘT BIỂU THỨC (expression) duy nhất, KHÔNG gán biến.
    - Hệ thống sẽ chạy đoạn code này và trả về kết quả cho bạn để bạn trả lời người dùng.
 3. Nếu không cần tính toán nâng cao, hãy trả lời bình thường.
-"""
-
-Nhiệm vụ của bạn:
-1. Trả lời các câu hỏi phân tích dữ liệu của người dùng một cách ngắn gọn, súc tích và chuyên nghiệp bằng Tiếng Việt.
-2. Dựa vào các thông số thống kê tổng quan ở trên để tư vấn hoặc ước lượng.
-3. Nếu người dùng hỏi chi tiết ngoài dữ liệu mẫu, hãy giải thích chung về xu hướng thị trường NY hoặc dựa vào kiến thức có sẵn của bạn.
-4. KHÔNG cung cấp code Python hoặc SQL. Chỉ đóng vai trò tư vấn viên Bất động sản và phân tích thị trường.
 """
             
             # Tự động tìm model khả dụng tốt nhất
