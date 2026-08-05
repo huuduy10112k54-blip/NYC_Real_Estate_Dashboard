@@ -1604,51 +1604,51 @@ with tab5:
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(99,102,241,0.35)'>
         <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'>?? L�?t s�ng & �?u c� (House Flipping)</h2>
-        <p style='margin:8px 0 0;font-size:15px;opacity:0.9;'>Ph�n t�ch h�nh vi mua �i b�n l?i (gi? d�?i 3 n�m) �? t?m ra c�c �i?m n�ng �?u c� v� khu v?c an c� l? t�?ng.</p>
-    </div>
+            <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'>🌊 Lướt sóng & Đầu cơ (House Flipping)</h2>
+            <p style='margin:8px 0 0;font-size:15px;opacity:0.9;'>Phân tích hành vi mua đi bán lại (giữ dưới 3 năm) để tìm ra các điểm nóng đầu cơ và khu vực an cư lý tưởng.</p>
     """, unsafe_allow_html=True)
     
     with st.spinner("�ang ph�n t�ch l?ch s? giao d?ch BBL..."):
-        df_flip, neigh_stats, long_term = get_flipping_stats(df)
+    with st.spinner('Đang phân tích lịch sử giao dịch BBL...'):
         
     if neigh_stats is None or len(neigh_stats) == 0:
         st.warning("Kh�ng t?m th?y �? d? li?u giao d?ch l�?t s�ng trong b? l?c hi?n t?i.")
-    else:
+        st.warning('Không tìm thấy đủ dữ liệu giao dịch lướt sóng trong bộ lọc hiện tại.')
         st.markdown("### ?? Top Khu v?c L�?t s�ng Kh?c li?t nh?t")
-        st.markdown("Nh� �?u t� giao d?ch mua �i b�n l?i li�n t?c, thanh kho?n c?c cao nh�ng r?i ro '�u �?nh' l?n.")
-        
+        st.markdown('### 📈 Top Khu vực Lướt sóng Khốc liệt nhất')
+        st.markdown('Nhà đầu tư giao dịch mua đi bán lại liên tục, thanh khoản cực cao nhưng rủi ro đu đỉnh lớn.')
         top_active = long_term.sort_values('flip_rate', ascending=False).head(5)
         fig_act = px.bar(top_active, x='flip_rate', y='neighborhood', orientation='h',
                          color='avg_profit', color_continuous_scale='RdYlGn',
                          labels={'num_flips': 'S? l�?t l�?t s�ng', 'neighborhood': 'Khu vực', 'avg_profit': 'Lợi nhuận TB ($)'},
-                         title="Top 5 Khu v?c nhi?u giao d?ch l�?t s�ng nh?t")
-        fig_act.update_layout(yaxis={'categoryorder':'total ascending'})
+                         labels={'num_flips': 'Số lượt lướt sóng', 'neighborhood': 'Khu vực', 'avg_profit': 'Lợi nhuận TB ($)'},
+                         title='Top 5 Khu vực nhiều giao dịch lướt sóng nhất')
         clayout(fig_act, h=350)
         st.plotly_chart(fig_act, width='stretch')
         
         divider()
         st.markdown("### ?? Top Khu v?c L�?t s�ng Si�u l?i nhu?n")
-        st.markdown("T? su?t l?i nhu?n (ROI) kh?ng l?, ph� h?p cho d�n �?u c� '��nh nhanh r�t g?n'.")
-        
+        st.markdown('### 💰 Top Khu vực có ROI Lướt sóng cao nhất')
+        st.markdown("Tỷ suất lợi nhuận (ROI) khổng lồ, phù hợp cho dân đầu cơ 'đánh nhanh rút gọn'.")
         top_roi = neigh_stats.sort_values('avg_roi', ascending=False).head(5)
         top_roi['roi_pct'] = top_roi['avg_roi'] * 100
         fig_roi = px.bar(top_roi, x='roi_pct', y='neighborhood', orientation='h',
                          color='roi_pct', color_continuous_scale='Sunsetdark',
                          labels={'roi_pct': 'ROI TB (%)', 'neighborhood': 'Khu vực'},
                          title="Top 5 Khu v?c c� T? su?t sinh l?i (ROI) l�?t s�ng cao nh?t")
-        fig_roi.update_layout(yaxis={'categoryorder':'total ascending'})
+                         title='Top 5 Khu vực có Tỷ suất sinh lời (ROI) lướt sóng cao nhất')
         clayout(fig_roi, h=350)
         st.plotly_chart(fig_roi, width='stretch')
         
         divider()
         st.markdown("### ?? Top Khu v?c �?nh c� L�u d�i (An c� l?c nghi?p)")
-        st.markdown("N�i c� h�ng tr�m giao d?ch nh�ng t? l? l�?t s�ng r?t th?p. Th? tr�?ng ?n �?nh, ch?ng l?m ph�t t?t, l? t�?ng �? mua ?.")
-        
+        st.markdown('### 🛡️ Top Khu vực Ổn định (An Cư)')
+        st.markdown('Nơi có hàng trăm giao dịch nhưng tỷ lệ lướt sóng rất thấp. Thị trường ổn định, chống lạm phát tốt, lý tưởng để mua ở.')
         top_safe = long_term.sort_values('flip_rate', ascending=True).head(5)
         fig_safe = px.scatter(top_safe, x='total_sales', y='flip_rate', size='total_sales', color='neighborhood',
                               labels={'total_sales': 'Tổng số giao dịch', 'flip_rate': 'T? l? l�?t s�ng (%)', 'neighborhood': 'Khu vực'},
-                              title="Top 5 Khu v?c ?n �?nh nh?t (T? l? l�?t s�ng th?p)")
-        clayout(fig_safe, h=350)
+                              labels={'total_sales': 'Tổng số giao dịch', 'flip_rate': 'Tỷ lệ lướt sóng (%)', 'neighborhood': 'Khu vực'},
+                              title='Top 5 Khu vực Ổn định nhất (Tỷ lệ lướt sóng thấp)')
         st.plotly_chart(fig_safe, width='stretch')
 
 
@@ -1658,7 +1658,7 @@ with tab5:
 # ============================================================
 with tab6:
     st.header("💬 Trợ lý AI Phân tích Dữ liệu")
-    st.markdown("---")
+    st.header('💬 Trợ lý AI Phân tích Dữ liệu')
     
     import os
     from dotenv import load_dotenv
