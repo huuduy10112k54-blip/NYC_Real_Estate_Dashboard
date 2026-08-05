@@ -385,7 +385,7 @@ def get_flipping_stats(df_in):
         group = group.sort_values('sale_date')
         prices = group['sale_price'].tolist()
         dates = group['sale_date'].tolist()
-        neigh = group['neighborhood_name'].iloc[0]
+        neigh = group['neighborhood'].iloc[0]
         boro = group['borough_name'].iloc[0]
         
         for i in range(1, len(prices)):
@@ -400,7 +400,7 @@ def get_flipping_stats(df_in):
                 profit = sell_price - buy_price
                 roi = profit / buy_price if buy_price > 0 else 0
                 results.append({
-                    'neighborhood_name': neigh,
+                    'neighborhood': neigh,
                     'borough_name': boro,
                     'days_held': days_held,
                     'profit': profit,
@@ -412,8 +412,8 @@ def get_flipping_stats(df_in):
     if len(df_res) == 0:
         return None, None, None
 
-    neigh_stats = df_res.groupby(['borough_name', 'neighborhood_name']).agg(
-        num_flips=('neighborhood_name', 'count'),
+    neigh_stats = df_res.groupby(['borough_name', 'neighborhood']).agg(
+        num_flips=('neighborhood', 'count'),
         avg_profit=('profit', 'mean'),
         avg_roi=('roi', 'mean'),
         avg_days=('days_held', 'mean')
@@ -422,8 +422,8 @@ def get_flipping_stats(df_in):
     neigh_stats = neigh_stats[neigh_stats['num_flips'] >= 5]
     
     # Khu vực định cư (Ít lướt sóng)
-    all_sales = df_f.groupby('neighborhood_name')['property_id'].count().reset_index(name='total_sales')
-    long_term = pd.merge(all_sales, neigh_stats, on='neighborhood_name', how='left')
+    all_sales = df_f.groupby('neighborhood')['property_id'].count().reset_index(name='total_sales')
+    long_term = pd.merge(all_sales, neigh_stats, on='neighborhood', how='left')
     long_term['num_flips'] = long_term['num_flips'].fillna(0)
     long_term['flip_rate'] = (long_term['num_flips'] / long_term['total_sales']) * 100
     long_term = long_term[long_term['total_sales'] > 150]
@@ -1618,9 +1618,9 @@ with tab5:
         st.markdown("Nh� �?u t� giao d?ch mua �i b�n l?i li�n t?c, thanh kho?n c?c cao nh�ng r?i ro '�u �?nh' l?n.")
         
         top_active = long_term.sort_values('flip_rate', ascending=False).head(5)
-        fig_act = px.bar(top_active, x='flip_rate', y='neighborhood_name', orientation='h',
+        fig_act = px.bar(top_active, x='flip_rate', y='neighborhood', orientation='h',
                          color='avg_profit', color_continuous_scale='RdYlGn',
-                         labels={'num_flips': 'S? l�?t l�?t s�ng', 'neighborhood_name': 'Khu v?c', 'avg_profit': 'L?i nhu?n TB ($)'},
+                         labels={'num_flips': 'S? l�?t l�?t s�ng', 'neighborhood': 'Khu v?c', 'avg_profit': 'L?i nhu?n TB ($)'},
                          title="Top 5 Khu v?c nhi?u giao d?ch l�?t s�ng nh?t")
         fig_act.update_layout(yaxis={'categoryorder':'total ascending'})
         clayout(fig_act, h=350)
@@ -1632,9 +1632,9 @@ with tab5:
         
         top_roi = neigh_stats.sort_values('avg_roi', ascending=False).head(5)
         top_roi['roi_pct'] = top_roi['avg_roi'] * 100
-        fig_roi = px.bar(top_roi, x='roi_pct', y='neighborhood_name', orientation='h',
+        fig_roi = px.bar(top_roi, x='roi_pct', y='neighborhood', orientation='h',
                          color='roi_pct', color_continuous_scale='Sunsetdark',
-                         labels={'roi_pct': 'ROI TB (%)', 'neighborhood_name': 'Khu v?c'},
+                         labels={'roi_pct': 'ROI TB (%)', 'neighborhood': 'Khu v?c'},
                          title="Top 5 Khu v?c c� T? su?t sinh l?i (ROI) l�?t s�ng cao nh?t")
         fig_roi.update_layout(yaxis={'categoryorder':'total ascending'})
         clayout(fig_roi, h=350)
@@ -1645,8 +1645,8 @@ with tab5:
         st.markdown("N�i c� h�ng tr�m giao d?ch nh�ng t? l? l�?t s�ng r?t th?p. Th? tr�?ng ?n �?nh, ch?ng l?m ph�t t?t, l? t�?ng �? mua ?.")
         
         top_safe = long_term.sort_values('flip_rate', ascending=True).head(5)
-        fig_safe = px.scatter(top_safe, x='total_sales', y='flip_rate', size='total_sales', color='neighborhood_name',
-                              labels={'total_sales': 'T?ng s? giao d?ch', 'flip_rate': 'T? l? l�?t s�ng (%)', 'neighborhood_name': 'Khu v?c'},
+        fig_safe = px.scatter(top_safe, x='total_sales', y='flip_rate', size='total_sales', color='neighborhood',
+                              labels={'total_sales': 'T?ng s? giao d?ch', 'flip_rate': 'T? l? l�?t s�ng (%)', 'neighborhood': 'Khu v?c'},
                               title="Top 5 Khu v?c ?n �?nh nh?t (T? l? l�?t s�ng th?p)")
         clayout(fig_safe, h=350)
         st.plotly_chart(fig_safe, width='stretch')
