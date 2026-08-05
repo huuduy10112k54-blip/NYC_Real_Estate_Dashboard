@@ -1688,7 +1688,7 @@ with tab6:
                 "Always reply in Vietnamese unless instructed otherwise. "
             )
             
-            sdf = SmartDataframe(df, config={
+            agent = Agent(df, config={
                 "llm": llm,
                 "enforce_privacy": True,
                 "custom_instructions": instructions,
