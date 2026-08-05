@@ -17,3 +17,5 @@ duckdb
 faker
 openai
 pydantic
+
+duckdb

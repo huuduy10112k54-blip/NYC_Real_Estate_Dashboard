@@ -55,6 +55,20 @@ def load_clean_csv() -> pd.DataFrame:
     log(f"Đang đọc file CSV sạch: {os.path.basename(CLEAN_CSV)}")
     df = pd.read_csv(CLEAN_CSV, low_memory=False)
     log(f"  → Tải thành công: {len(df):,} dòng × {len(df.columns)} cột")
+    
+    # [TÍCH HỢP POSTGIS] Ghi đè amenity_score bằng Dữ liệu Không gian thật
+    import json
+    try:
+        with open('data/true_amenity_scores.json', 'r', encoding='utf-8') as f:
+            true_scores = json.load(f)
+        df['amenity_score'] = df.apply(
+            lambda row: true_scores.get(f"{row['borough_name']}_{row['neighborhood']}", row['amenity_score']), 
+            axis=1
+        )
+        log("  → ĐÃ TÍCH HỢP: Điểm tiện ích không gian thực (True PostGIS) đã được bơm vào DataPipeline!")
+    except Exception as e:
+        log(f"  → Bỏ qua True Scores do lỗi: {e}")
+        
     return df
 
 # ═════════════════════════════════════════════════════════════════════════════
