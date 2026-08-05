@@ -10,7 +10,7 @@ geopandas
 shapely
 statsmodels
 matplotlib
-pandasai
+pandasai<3.0.0
 google-generativeai
 sqlglot
 astor

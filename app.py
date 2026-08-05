@@ -1620,8 +1620,8 @@ with tab5:
         top_active = long_term.sort_values('flip_rate', ascending=False).head(5)
         fig_act = px.bar(top_active, x='flip_rate', y='neighborhood', orientation='h',
                          color='avg_profit', color_continuous_scale='RdYlGn',
-                         labels={'num_flips': 'S? l�?t l�?t s�ng', 'neighborhood': 'Khu v?c', 'avg_profit': 'L?i nhu?n TB ($)'},
-                         title="Top 5 Khu v?c nhi?u giao d?ch l�?t s�ng nh?t")
+                         labels={'num_flips': 'S? l�?t l�?t s�ng', 'neighborhood': 'Khu vực', 'avg_profit': 'Lợi nhuận TB ($)'},
+                         title="Top 5 Khu vực nhi?u giao d?ch l�?t s�ng nh?t")
         fig_act.update_layout(yaxis={'categoryorder':'total ascending'})
         clayout(fig_act, h=350)
         st.plotly_chart(fig_act, width='stretch')
@@ -1634,8 +1634,8 @@ with tab5:
         top_roi['roi_pct'] = top_roi['avg_roi'] * 100
         fig_roi = px.bar(top_roi, x='roi_pct', y='neighborhood', orientation='h',
                          color='roi_pct', color_continuous_scale='Sunsetdark',
-                         labels={'roi_pct': 'ROI TB (%)', 'neighborhood': 'Khu v?c'},
-                         title="Top 5 Khu v?c c� T? su?t sinh l?i (ROI) l�?t s�ng cao nh?t")
+                         labels={'roi_pct': 'ROI TB (%)', 'neighborhood': 'Khu vực'},
+                         title="Top 5 Khu vực c� T? su?t sinh l?i (ROI) l�?t s�ng cao nh?t")
         fig_roi.update_layout(yaxis={'categoryorder':'total ascending'})
         clayout(fig_roi, h=350)
         st.plotly_chart(fig_roi, width='stretch')
@@ -1646,8 +1646,8 @@ with tab5:
         
         top_safe = long_term.sort_values('flip_rate', ascending=True).head(5)
         fig_safe = px.scatter(top_safe, x='total_sales', y='flip_rate', size='total_sales', color='neighborhood',
-                              labels={'total_sales': 'T?ng s? giao d?ch', 'flip_rate': 'T? l? l�?t s�ng (%)', 'neighborhood': 'Khu v?c'},
-                              title="Top 5 Khu v?c ?n �?nh nh?t (T? l? l�?t s�ng th?p)")
+                              labels={'total_sales': 'T?ng s? giao d?ch', 'flip_rate': 'T? l? l�?t s�ng (%)', 'neighborhood': 'Khu vực'},
+                              title="Top 5 Khu vực ?n �?nh nh?t (T? l? l�?t s�ng th?p)")
         clayout(fig_safe, h=350)
         st.plotly_chart(fig_safe, width='stretch')
 
