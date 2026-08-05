@@ -382,9 +382,9 @@ def get_flipping_stats(df_in):
 
     results = []
     for prop, group in df_flipped.groupby('property_id'):
-        group = group.sort_values('sale_date')
+        group = group.sort_values('sale_date_parsed')
         prices = group['sale_price'].tolist()
-        dates = group['sale_date'].tolist()
+        dates = group['sale_date_parsed'].tolist()
         neigh = group['neighborhood'].iloc[0]
         boro = group['borough_name'].iloc[0]
         
