@@ -160,14 +160,14 @@ MONTH_FULL  = {1:'Tháng 1',2:'Tháng 2',3:'Tháng 3',4:'Tháng 4',
 FEATURE_LABELS = {
     'gross_sqft':'Diện tích tổng (sqft)', 'building_age':'Tuổi công trình (năm)',
     'land_sqft':'Diện tích đất (sqft)',   'pop_density':'Mật độ dân số (/km²)',
-    'amenity_score':'Điểm tiện ích (0–10)','total_units':'Số căn trong tòa',
+    'total_units':'Số căn trong tòa',
     'gdp_local':'GDP địa phương (%)',      'avg_income':'Thu nhập bình quân ($)',
     'dist_center':'KC đến trung tâm (km)',
 }
 REQUIRED_COLS = [
     'borough','neighborhood','building_type','gross_sqft','land_sqft',
     'sale_price','sale_year','sale_date','building_age','total_units',
-    'pop_density','avg_income','gdp_local','dist_center','amenity_score',
+    'pop_density','avg_income','gdp_local','dist_center',
 ]
 
 # Tọa độ địa lý NYC cho bản đồ Nhiệt (Hotspot Heatmap)
@@ -334,8 +334,7 @@ def load_data():
                 s.pop_density,
                 s.avg_income,
                 s.gdp_local,
-                s.dist_center,
-                s.amenity_score
+                s.dist_center
             FROM fact_sales f
             JOIN dim_location       l ON f.location_id    = l.location_id
             JOIN dim_neighborhood   n ON l.neighborhood_id = n.neighborhood_id
@@ -359,7 +358,6 @@ def load_data():
     df['building_age']  = pd.to_numeric(df['building_age'],  errors='coerce')
     df['sale_year']     = pd.to_numeric(df['sale_year'],     errors='coerce')
     df['avg_income']    = pd.to_numeric(df['avg_income'],    errors='coerce')
-    df['amenity_score'] = pd.to_numeric(df['amenity_score'], errors='coerce')
     df['dist_center']   = pd.to_numeric(df['dist_center'],   errors='coerce')
     df['pop_density']   = pd.to_numeric(df['pop_density'],   errors='coerce')
     df = df[df['sale_price'] > 10_000].copy()
@@ -370,6 +368,67 @@ def load_data():
     df['sale_date_parsed'] = pd.to_datetime(df['sale_date'], dayfirst=True, errors='coerce')
     df['sale_month']       = df['sale_date_parsed'].dt.month
     return df, None
+
+@st.cache_data
+def get_flipping_stats(df_in):
+    # Tạo mã định danh duy nhất cho từng lô đất
+    df_f = df_in.copy()
+    df_f['property_id'] = df_f['borough_name'].astype(str) + '-' + df_f['block'].astype(str) + '-' + df_f['lot'].astype(str)
+    df_f = df_f.sort_values(by=['property_id', 'sale_date'])
+
+    counts = df_f['property_id'].value_counts()
+    flipped_props = counts[counts > 1].index
+    df_flipped = df_f[df_f['property_id'].isin(flipped_props)].copy()
+
+    results = []
+    for prop, group in df_flipped.groupby('property_id'):
+        group = group.sort_values('sale_date')
+        prices = group['sale_price'].tolist()
+        dates = group['sale_date'].tolist()
+        neigh = group['neighborhood_name'].iloc[0]
+        boro = group['borough_name'].iloc[0]
+        
+        for i in range(1, len(prices)):
+            buy_date = dates[i-1]
+            sell_date = dates[i]
+            days_held = (sell_date - buy_date).days
+            
+            # Lọc lướt sóng từ 1 tháng đến 3 năm
+            if 30 < days_held <= 1095:
+                buy_price = prices[i-1]
+                sell_price = prices[i]
+                profit = sell_price - buy_price
+                roi = profit / buy_price if buy_price > 0 else 0
+                results.append({
+                    'neighborhood_name': neigh,
+                    'borough_name': boro,
+                    'days_held': days_held,
+                    'profit': profit,
+                    'roi': roi
+                })
+
+    df_res = pd.DataFrame(results)
+    
+    if len(df_res) == 0:
+        return None, None, None
+
+    neigh_stats = df_res.groupby(['borough_name', 'neighborhood_name']).agg(
+        num_flips=('neighborhood_name', 'count'),
+        avg_profit=('profit', 'mean'),
+        avg_roi=('roi', 'mean'),
+        avg_days=('days_held', 'mean')
+    ).reset_index()
+    
+    neigh_stats = neigh_stats[neigh_stats['num_flips'] >= 5]
+    
+    # Khu vực định cư (Ít lướt sóng)
+    all_sales = df_f.groupby('neighborhood_name')['property_id'].count().reset_index(name='total_sales')
+    long_term = pd.merge(all_sales, neigh_stats, on='neighborhood_name', how='left')
+    long_term['num_flips'] = long_term['num_flips'].fillna(0)
+    long_term['flip_rate'] = (long_term['num_flips'] / long_term['total_sales']) * 100
+    long_term = long_term[long_term['total_sales'] > 150]
+
+    return df_res, neigh_stats, long_term
 
 @st.cache_data
 def load_ml_data():
@@ -419,7 +478,7 @@ def render_factor_summary_matrix(df_in):
     factors = [
         ('gross_sqft', 'Diện tích công trình (gross_sqft)', 'Quy mô không gian sử dụng; biến số quan trọng hàng đầu định giá tổng tài sản.'),
         ('avg_income', 'Thu nhập khu vực (avg_income)', 'Mặt bằng thu nhập cư dân; đại diện cho sức mua và mức độ đắt đỏ của vùng.'),
-        ('amenity_score', 'Điểm tiện ích (amenity_score)', 'Chất lượng tiện ích kết nối xung quanh (giao thông, trường học, dịch vụ).'),
+
         ('dist_center', 'KC đến trung tâm (dist_center)', 'Khoảng cách địa lý tới trung tâm tài chính Manhattan (càng xa giá giảm).'),
         ('pop_density', 'Mật độ dân số (pop_density)', 'Mật độ dân cư sinh sống; phản ánh độ sầm uất và nhu cầu nhà ở khu vực.'),
         ('building_age', 'Tuổi công trình (building_age)', 'Số năm công trình đã vận hành (công trình cũ chịu khấu hao tài sản).'),
@@ -560,12 +619,13 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # ════════════════════════════════════════════════════════════
 # TABS
 # ════════════════════════════════════════════════════════════
-tab0, tab1, tab2, tab3, tab4 = st.tabs([
-    "🏙️  Tổng quan",
-    "🗺️  Phân tích khu vực",
-    "📐  Yếu tố quyết định giá",
+tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "📍  Tổng quan",
+    "🏢  Phân tích khu vực",
+    "📊  Yếu tố quyết định giá",
     "Xu hướng & Khuyến nghị đầu tư",
     "🤖  Dự báo & Mô hình ML",
+    "🌊 Lướt sóng & Đầu cơ",
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -953,9 +1013,9 @@ with tab2:
         "Ma trận tương quan tổng thể giữa các yếu tố với Giá bán",
         "Đọc bản đồ nhiệt: ô màu đỏ = tương quan thuận (+); ô màu xanh = tương quan nghịch (-). Số trong ô là hệ số tương quan r."
     )
-    cc_cols = ['sale_price','gross_sqft','avg_income','amenity_score','dist_center','pop_density','building_age']
+    cc_cols = ['sale_price','gross_sqft','avg_income','dist_center','pop_density','building_age']
     cc_lbl  = {'sale_price':'Giá bán','gross_sqft':'Diện tích','avg_income':'Thu nhập TB',
-               'amenity_score':'Điểm tiện ích','dist_center':'KC trung tâm','pop_density':'Mật độ dân số','building_age':'Tuổi công trình'}
+               'dist_center':'KC trung tâm','pop_density':'Mật độ dân số','building_age':'Tuổi công trình'}
     cc_data = df[cc_cols].dropna()
     cc_mat  = cc_data.corr()
     cc_mat.columns = [cc_lbl[c] for c in cc_mat.columns]
@@ -1534,3 +1594,134 @@ with tab4:
                     yaxis=dict(tickformat='$,.0f', automargin=True, title='Giá dự báo ($)'),
                     legend=dict(font_size=11))
                 st.plotly_chart(fig_av4, width='stretch')
+# ????????????????????????????????????????????????????????????
+# TAB 5 � L�?T S�NG & �?U C�
+# ????????????????????????????????????????????????????????????
+with tab5:
+    st.markdown("""
+    <div style='background:linear-gradient(135deg,#4338ca,#6366f1,#818cf8);border-radius:14px;
+    padding:18px 24px;color:#fff;margin-bottom:22px;
+    box-shadow:0 6px 24px rgba(99,102,241,0.35)'>
+        <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'>?? L�?t s�ng & �?u c� (House Flipping)</h2>
+        <p style='margin:8px 0 0;font-size:15px;opacity:0.9;'>Ph�n t�ch h�nh vi mua �i b�n l?i (gi? d�?i 3 n�m) �? t?m ra c�c �i?m n�ng �?u c� v� khu v?c an c� l? t�?ng.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.spinner("�ang ph�n t�ch l?ch s? giao d?ch BBL..."):
+        df_flip, neigh_stats, long_term = get_flipping_stats(df)
+        
+    if neigh_stats is None or len(neigh_stats) == 0:
+        st.warning("Kh�ng t?m th?y �? d? li?u giao d?ch l�?t s�ng trong b? l?c hi?n t?i.")
+    else:
+        st.markdown("### ?? Top Khu v?c L�?t s�ng Kh?c li?t nh?t")
+        st.markdown("Nh� �?u t� giao d?ch mua �i b�n l?i li�n t?c, thanh kho?n c?c cao nh�ng r?i ro '�u �?nh' l?n.")
+        
+        top_active = long_term.sort_values('flip_rate', ascending=False).head(5)
+        fig_act = px.bar(top_active, x='flip_rate', y='neighborhood_name', orientation='h',
+                         color='avg_profit', color_continuous_scale='RdYlGn',
+                         labels={'num_flips': 'S? l�?t l�?t s�ng', 'neighborhood_name': 'Khu v?c', 'avg_profit': 'L?i nhu?n TB ($)'},
+                         title="Top 5 Khu v?c nhi?u giao d?ch l�?t s�ng nh?t")
+        fig_act.update_layout(yaxis={'categoryorder':'total ascending'})
+        clayout(fig_act, h=350)
+        st.plotly_chart(fig_act, width='stretch')
+        
+        divider()
+        st.markdown("### ?? Top Khu v?c L�?t s�ng Si�u l?i nhu?n")
+        st.markdown("T? su?t l?i nhu?n (ROI) kh?ng l?, ph� h?p cho d�n �?u c� '��nh nhanh r�t g?n'.")
+        
+        top_roi = neigh_stats.sort_values('avg_roi', ascending=False).head(5)
+        top_roi['roi_pct'] = top_roi['avg_roi'] * 100
+        fig_roi = px.bar(top_roi, x='roi_pct', y='neighborhood_name', orientation='h',
+                         color='roi_pct', color_continuous_scale='Sunsetdark',
+                         labels={'roi_pct': 'ROI TB (%)', 'neighborhood_name': 'Khu v?c'},
+                         title="Top 5 Khu v?c c� T? su?t sinh l?i (ROI) l�?t s�ng cao nh?t")
+        fig_roi.update_layout(yaxis={'categoryorder':'total ascending'})
+        clayout(fig_roi, h=350)
+        st.plotly_chart(fig_roi, width='stretch')
+        
+        divider()
+        st.markdown("### ?? Top Khu v?c �?nh c� L�u d�i (An c� l?c nghi?p)")
+        st.markdown("N�i c� h�ng tr�m giao d?ch nh�ng t? l? l�?t s�ng r?t th?p. Th? tr�?ng ?n �?nh, ch?ng l?m ph�t t?t, l? t�?ng �? mua ?.")
+        
+        top_safe = long_term.sort_values('flip_rate', ascending=True).head(5)
+        fig_safe = px.scatter(top_safe, x='total_sales', y='flip_rate', size='total_sales', color='neighborhood_name',
+                              labels={'total_sales': 'T?ng s? giao d?ch', 'flip_rate': 'T? l? l�?t s�ng (%)', 'neighborhood_name': 'Khu v?c'},
+                              title="Top 5 Khu v?c ?n �?nh nh?t (T? l? l�?t s�ng th?p)")
+        clayout(fig_safe, h=350)
+        st.plotly_chart(fig_safe, width='stretch')
+
+
+
+# ============================================================
+# TAB 6 – TRỢ LÝ AI (PANDASAI)
+# ============================================================
+with tab6:
+    st.header("💬 Trợ lý AI Phân tích Dữ liệu")
+    st.markdown("---")
+    
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        st.warning("⚠️ Chưa tìm thấy API Key. Vui lòng thêm GEMINI_API_KEY vào file .env")
+    else:
+        try:
+            from pandasai import SmartDataframe
+            from pandasai.llm import GoogleGemini
+            
+            # Cấu hình LLM
+            llm = GoogleGemini(api_key=api_key)
+            
+            # Khởi tạo SmartDataframe
+            # Custom instructions đóng vai trò là Lớp 4 (System Prompt)
+            instructions = (
+                "You are an expert Data Analyst and Real Estate Assistant for NYC. "
+                "The dataframe contains real estate sales data. "
+                "CRITICAL SECURITY RULE: You operate in READ-ONLY mode. "
+                "Under NO circumstances should you generate code to modify, delete, drop, or alter the dataframe. "
+                "If the user asks to delete or modify data, politely refuse and state you are a read-only assistant. "
+                "Always reply in Vietnamese unless instructed otherwise. "
+            )
+            
+            sdf = SmartDataframe(df, config={
+                "llm": llm,
+                "enforce_privacy": True,
+                "custom_instructions": instructions,
+                "enable_cache": False
+            })
+            
+            # Giao diện Chat
+            if "chat_history" not in st.session_state:
+                st.session_state.chat_history = []
+                
+            # Hiển thị lịch sử
+            for msg in st.session_state.chat_history:
+                with st.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
+                    
+            # Ô nhập câu hỏi
+            if prompt := st.chat_input("Hãy hỏi bất cứ điều gì về dữ liệu BĐS này... (VD: Trung bình giá nhà ở Brooklyn?)"):
+                # Lưu câu hỏi
+                st.session_state.chat_history.append({"role": "user", "content": prompt})
+                with st.chat_message("user"):
+                    st.markdown(prompt)
+                    
+                # Gọi PandasAI
+                with st.chat_message("assistant"):
+                    with st.spinner("🤖 AI đang suy nghĩ và phân tích dữ liệu..."):
+                        try:
+                            # Thực thi bằng PandasAI
+                            response = sdf.chat(prompt)
+                            
+                            # Hiển thị kết quả
+                            st.markdown(str(response))
+                            st.session_state.chat_history.append({"role": "assistant", "content": str(response)})
+                        except Exception as e:
+                            error_msg = f"Xin lỗi, AI gặp lỗi khi xử lý câu hỏi này (có thể do quá tải hoặc cú pháp). Vui lòng thử lại bằng cách hỏi cụ thể hơn! Chi tiết lỗi: {e}"
+                            st.error(error_msg)
+                            st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
+                            
+        except ImportError:
+            st.error("Thư viện 'pandasai' chưa được cài đặt. Vui lòng chạy 'pip install pandasai'")
