@@ -1695,7 +1695,7 @@ with tab6:
                     full_stats_str = "| Khu vực | Số giao dịch | Tỷ lệ lướt sóng | ROI (%) | Lợi nhuận ($) |\n|---|---|---|---|---|\n"
                     for _, row in combined.iterrows():
                         roi_pct = row.get('avg_roi', 0) * 100
-                        flip_rate = row.get('flip_rate', 0) * 100
+                        flip_rate = row.get('flip_rate', 0)
                         profit = row.get('avg_profit', 0)
                         sales = row.get('total_sales', 0)
                         full_stats_str += f"| {row['neighborhood']} | {sales:,.0f} | {flip_rate:.1f}% | {roi_pct:.1f}% |  |\n"
