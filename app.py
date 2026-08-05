@@ -1667,7 +1667,7 @@ with tab6:
         st.warning("⚠️ Chưa tìm thấy API Key. Vui lòng thêm GEMINI_API_KEY vào file .env")
     else:
         try:
-            from pandasai import SmartDataframe
+            from pandasai import Agent
             from pandasai.llm import GoogleGemini
         except Exception as e:
             import traceback
@@ -1716,7 +1716,7 @@ with tab6:
                     with st.spinner("🤖 AI đang suy nghĩ và phân tích dữ liệu..."):
                         try:
                             # Thực thi bằng PandasAI
-                            response = sdf.chat(prompt)
+                            response = agent.chat(prompt)
                             
                             # Hiển thị kết quả
                             st.markdown(str(response))
