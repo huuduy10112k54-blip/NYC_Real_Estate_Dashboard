@@ -1658,7 +1658,7 @@ with tab5:
 # TAB 6 – TRỢ LÝ AI (GEMINI NATIVE)
 # ============================================================
 with tab6:
-    st.header("💬 Trợ lý AI Phân tích Dữ liệu")
+    st.header("💬 Trợ lý AI Phân tích Dữ liệu (Đang thử nghiệm)")
     st.markdown("---")
     
     import os
