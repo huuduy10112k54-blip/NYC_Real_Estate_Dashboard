@@ -626,6 +626,7 @@ tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "Xu hướng & Khuyến nghị đầu tư",
     "🤖  Dự báo & Mô hình ML",
     "🌊 Lướt sóng & Đầu cơ",
+    "💬 Trợ lý AI (Phân tích Data)",
 ])
 
 # ════════════════════════════════════════════════════════════
