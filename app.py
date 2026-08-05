@@ -1719,7 +1719,8 @@ BẢNG DỮ LIỆU CHI TIẾT TỪNG KHU VỰC:
 Nhiệm vụ của bạn:
 1. Dựa vào bảng dữ liệu trên để trả lời các câu hỏi về ROI, số giao dịch.
 2. NẾU người dùng hỏi một câu hỏi ĐẶC BIỆT yêu cầu truy vấn DỮ LIỆU THÔ (Ví dụ: "Căn nhà đắt nhất giá bao nhiêu?", "Có bao nhiêu nhà bán dưới 500 ngàn đô?"):
-   - Bạn CÓ THỂ viết code Python pandas để truy vấn bản copy của dữ liệu (biến df_ai).
+   - Bạn CÓ THỂ viết code Python pandas để truy vấn bản copy của dữ liệu gốc (biến df_ai).
+   - Các cột của df_ai bao gồm: {", ".join(df.columns.tolist())}
    - HÃY ĐẶT ĐOẠN CODE ĐÓ VÀO GIỮA THẺ <python> và </python>.
    - Ví dụ: <python>df_ai['sale_price'].max()</python>
    - Chỉ được viết MỘT BIỂU THỨC (expression) duy nhất, KHÔNG gán biến.
