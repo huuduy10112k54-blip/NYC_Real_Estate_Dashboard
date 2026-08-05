@@ -1143,8 +1143,8 @@ with tab3:
     <div style='background:linear-gradient(135deg,#b45309,#d97706,#fbbf24);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(245,158,11,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>Phân tích lợi suất đầu tư</b><br>
-    <span style='font-size:12px;opacity:0.9'>Theo dõi tỷ suất sinh lời theo thời gian thực để phân tích xu hướng tăng trưởng và đánh giá rủi ro tại các khu vực.</span>
+    <b style='font-size:15px;letter-spacing:-0.3px'>Phân tích xu hướng tăng trưởng giá</b><br>
+    <span style='font-size:12px;opacity:0.9'>Theo dõi tỷ lệ biến động giá theo thời gian thực để phân tích xu hướng tăng trưởng và đánh giá rủi ro tại các khu vực.</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1170,16 +1170,16 @@ with tab3:
             elif val < 0: return "color: #DC2626; font-weight: bold;" # Red
             return "color: #475569; font-weight: bold;" # Slate (0%)
         
-        format_dict = {"Lợi Suất (%)": "{:+.1f}%"}
+        format_dict = {"Tăng Trưởng (%)": "{:+.1f}%"}
         for col in df_tbl.columns:
             if "Giá" in col:
                 format_dict[col] = "${:,.0f}"
                 
-        return df_tbl.style.format(format_dict).map(get_text_color, subset=["Lợi Suất (%)"])
+        return df_tbl.style.format(format_dict).map(get_text_color, subset=["Tăng Trưởng (%)"])
 
     with st.expander("🔍 Xem thêm: Dữ liệu Toàn cảnh & Phân hóa cấp Quận", expanded=False):
         st.markdown("<h4 style='color:#1e293b; margin-top:0px;'>Toàn cảnh thị trường</h4>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#64748b; font-size:14px;'>Đường xu hướng (nét đứt) cho thấy quỹ đạo lợi suất của giá trung vị toàn khu vực đang chọn.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748b; font-size:14px;'>Đường xu hướng (nét đứt) cho thấy quỹ đạo tăng trưởng của giá trung vị toàn khu vực đang chọn.</p>", unsafe_allow_html=True)
         mts_all = df_t3.groupby('ym_dt')['sale_price'].median().reset_index().sort_values('ym_dt')
         if len(mts_all) > 0:
             base_price_all = mts_all['sale_price'].iloc[0]
@@ -1227,11 +1227,11 @@ with tab3:
                 "Quận": boro,
                 col_start: start_p,
                 col_end: end_p,
-                "Lợi Suất (%)": pct
+                "Tăng Trưởng (%)": pct
             })
         
         if boro_stats:
-            df_table = pd.DataFrame(boro_stats).sort_values("Lợi Suất (%)", ascending=False)
+            df_table = pd.DataFrame(boro_stats).sort_values("Tăng Trưởng (%)", ascending=False)
             st.dataframe(format_table(df_table), use_container_width=True, hide_index=True)
             
     divider()
@@ -1262,17 +1262,17 @@ with tab3:
 
             neigh_stats.append({
                 "Quận": boro, "Khu Vực": n, col_start: start_p, 
-                col_end: end_p, "Lợi Suất (%)": pct, 
+                col_end: end_p, "Tăng Trưởng (%)": pct, 
                 "Slope": coef[0], "R2": r2, "Số tháng": len(sub), "Số GD": n_gd
             })
     
     if neigh_stats:
         df_neigh_all = pd.DataFrame(neigh_stats)
-        top_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=False).head(3).reset_index(drop=True)
-        bot_3 = df_neigh_all.sort_values("Lợi Suất (%)", ascending=True).head(3).reset_index(drop=True)
+        top_3 = df_neigh_all.sort_values("Tăng Trưởng (%)", ascending=False).head(3).reset_index(drop=True)
+        bot_3 = df_neigh_all.sort_values("Tăng Trưởng (%)", ascending=True).head(3).reset_index(drop=True)
         
-        top_3_disp = top_3[["Khu Vực", col_start, col_end, "Lợi Suất (%)"]]
-        bot_3_disp = bot_3[["Khu Vực", col_start, col_end, "Lợi Suất (%)"]]
+        top_3_disp = top_3[["Khu Vực", col_start, col_end, "Tăng Trưởng (%)"]]
+        bot_3_disp = bot_3[["Khu Vực", col_start, col_end, "Tăng Trưởng (%)"]]
 
         c1, c2 = st.columns(2)
         with c1:
@@ -1387,7 +1387,7 @@ with tab3:
                 (valid_neighs['R2'] * 30).clip(upper=30)
             ).round(0)
             
-            df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "Lợi Suất (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
+            df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "Tăng Trưởng (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
             
             all_options = sorted(df_leaderboard['Khu Vực'].unique())
             search_query = st.multiselect(
@@ -1408,7 +1408,7 @@ with tab3:
                 selection_mode="single-row",
                 column_config={
                     col_end: st.column_config.NumberColumn(col_end, format="$%d"),
-                    "Lợi Suất (%)": st.column_config.NumberColumn("Lợi Suất (%)", format="%.1f%%"),
+                    "Tăng Trưởng (%)": st.column_config.NumberColumn("Tăng Trưởng (%)", format="%.1f%%"),
                     "Điểm Tin Cậy": st.column_config.ProgressColumn("Điểm Tin Cậy (/100)", format="%d", min_value=0, max_value=100)
                 }
             )
