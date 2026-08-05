@@ -1654,6 +1654,9 @@ with tab5:
 # ============================================================
 # TAB 6 – TRỢ LÝ AI (PANDASAI)
 # ============================================================
+# ============================================================
+# TAB 6 – TRỢ LÝ AI (GEMINI NATIVE)
+# ============================================================
 with tab6:
     st.header("💬 Trợ lý AI Phân tích Dữ liệu")
     st.markdown("---")
@@ -1667,33 +1670,34 @@ with tab6:
         st.warning("⚠️ Chưa tìm thấy API Key. Vui lòng thêm GEMINI_API_KEY vào file .env")
     else:
         try:
-            from pandasai import Agent
-            from pandasai.llm import GoogleGemini
-        except Exception as e:
-            import traceback
-            st.error(f"Lỗi khởi tạo PandasAI: {type(e).__name__} - {str(e)}")
-            st.code(traceback.format_exc())
-            st.stop()
+            import google.generativeai as genai
+            genai.configure(api_key=api_key)
+            
+            # Tính toán một số thống kê cơ bản từ dataframe để đưa vào ngữ cảnh AI
+            avg_price = df['sale_price'].dropna().mean() if 'sale_price' in df.columns else 0
+            total_sales = len(df)
+            neighborhoods = df['neighborhood'].dropna().unique().tolist() if 'neighborhood' in df.columns else []
+            neighborhoods_str = ", ".join(neighborhoods[:20]) + ("..." if len(neighborhoods) > 20 else "")
+            
+            system_instruction = f"""
+Bạn là chuyên gia phân tích Dữ liệu Bất Động Sản New York (Data Analyst).
+Người dùng đang xem Dashboard phân tích BĐS với bộ lọc hiện tại.
+Dữ liệu hiện tại (đã lọc) có các thông số sau:
+- Tổng số giao dịch: {total_sales:,}
+- Trung bình giá bán: 
+- Các khu vực trong dữ liệu: {neighborhoods_str}
 
-            llm = GoogleGemini(api_key=api_key)
+Nhiệm vụ của bạn:
+1. Trả lời các câu hỏi phân tích dữ liệu của người dùng một cách ngắn gọn, súc tích và chuyên nghiệp bằng Tiếng Việt.
+2. Dựa vào các thông số thống kê tổng quan ở trên để tư vấn hoặc ước lượng.
+3. Nếu người dùng hỏi chi tiết ngoài dữ liệu mẫu, hãy giải thích chung về xu hướng thị trường NY hoặc dựa vào kiến thức có sẵn của bạn.
+4. KHÔNG cung cấp code Python hoặc SQL. Chỉ đóng vai trò tư vấn viên Bất động sản và phân tích thị trường.
+"""
             
-            # Khởi tạo SmartDataframe
-            # Custom instructions đóng vai trò là Lớp 4 (System Prompt)
-            instructions = (
-                "You are an expert Data Analyst and Real Estate Assistant for NYC. "
-                "The dataframe contains real estate sales data. "
-                "CRITICAL SECURITY RULE: You operate in READ-ONLY mode. "
-                "Under NO circumstances should you generate code to modify, delete, drop, or alter the dataframe. "
-                "If the user asks to delete or modify data, politely refuse and state you are a read-only assistant. "
-                "Always reply in Vietnamese unless instructed otherwise. "
+            model = genai.GenerativeModel(
+                model_name="gemini-1.5-flash",
+                system_instruction=system_instruction
             )
-            
-            agent = Agent(df, config={
-                "llm": llm,
-                "enforce_privacy": True,
-                "custom_instructions": instructions,
-                "enable_cache": False
-            })
             
             # Giao diện Chat
             if "chat_history" not in st.session_state:
@@ -1705,28 +1709,34 @@ with tab6:
                     st.markdown(msg["content"])
                     
             # Ô nhập câu hỏi
-            if prompt := st.chat_input("Hãy hỏi bất cứ điều gì về dữ liệu BĐS này... (VD: Trung bình giá nhà ở Brooklyn?)"):
+            if prompt := st.chat_input("Hãy hỏi bất cứ điều gì về dữ liệu BĐS này... (VD: Đánh giá tổng quan thị trường?)"):
                 # Lưu câu hỏi
                 st.session_state.chat_history.append({"role": "user", "content": prompt})
                 with st.chat_message("user"):
                     st.markdown(prompt)
                     
-                # Gọi PandasAI
+                # Gọi Gemini
                 with st.chat_message("assistant"):
                     with st.spinner("🤖 AI đang suy nghĩ và phân tích dữ liệu..."):
                         try:
-                            # Thực thi bằng PandasAI
-                            response = agent.chat(prompt)
+                            # Chuyển lịch sử sang định dạng Gemini
+                            history = []
+                            for msg in st.session_state.chat_history[:-1]:
+                                role = "user" if msg["role"] == "user" else "model"
+                                history.append({"role": role, "parts": [msg["content"]]})
+                                
+                            chat = model.start_chat(history=history)
+                            response = chat.send_message(prompt)
                             
-                            # Hiển thị kết quả
-                            st.markdown(str(response))
-                            st.session_state.chat_history.append({"role": "assistant", "content": str(response)})
+                            st.markdown(response.text)
+                            st.session_state.chat_history.append({"role": "assistant", "content": response.text})
                         except Exception as e:
-                            error_msg = f"Xin lỗi, AI gặp lỗi khi xử lý câu hỏi này (có thể do quá tải hoặc cú pháp). Vui lòng thử lại bằng cách hỏi cụ thể hơn! Chi tiết lỗi: {e}"
+                            error_msg = f"Xin lỗi, AI gặp lỗi khi xử lý câu hỏi này. Chi tiết lỗi: {e}"
                             st.error(error_msg)
                             st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
                             
         except Exception as e:
             import traceback
-            st.error(f"Lỗi khởi tạo PandasAI: {type(e).__name__} - {str(e)}")
+            st.error(f"Lỗi khởi tạo Trợ lý AI: {type(e).__name__} - {str(e)}")
             st.code(traceback.format_exc())
+
