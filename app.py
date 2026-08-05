@@ -1724,5 +1724,7 @@ with tab6:
                             st.error(error_msg)
                             st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
                             
-        except ImportError:
-            st.error("Thư viện 'pandasai' chưa được cài đặt. Vui lòng chạy 'pip install pandasai'")
+        except Exception as e:
+            import traceback
+            st.error(f"Lỗi khởi tạo PandasAI: {type(e).__name__} - {str(e)}")
+            st.code(traceback.format_exc())
