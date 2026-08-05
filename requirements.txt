@@ -12,3 +12,9 @@ statsmodels
 matplotlib
 pandasai
 google-generativeai
+sqlglot
+astor
+duckdb
+faker
+openai
+pydantic
