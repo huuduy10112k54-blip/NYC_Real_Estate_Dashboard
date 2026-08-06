@@ -46,7 +46,7 @@ def log(msg: str):
 
 def safe_int(val, default=0):
     try:
-        v = int(val)
+        v = int(float(val))
         return v if not np.isnan(v) else default
     except Exception:
         return default
@@ -69,10 +69,17 @@ def load_clean_csv() -> pd.DataFrame:
             lambda row: true_scores.get(f"{row['borough_name']}_{row['neighborhood']}", row['amenity_score']), 
             axis=1
         )
-        log("  → ĐÃ TÍCH HỢP: Điểm tiện ích không gian thực (True PostGIS) đã được bơm vào DataPipeline!")
+        log(f"  → ĐÃ TÍCH HỢP: Điểm tiện ích không gian thực (True PostGIS) đã được bơm vào DataPipeline!")
     except Exception as e:
         log(f"  → Bỏ qua True Scores do lỗi: {e}")
         
+    df = df.rename(columns={
+        'gross_square_feet': 'gross_sqft',
+        'land_square_feet': 'land_sqft',
+        'tax_class_at_present': 'tax_class_present',
+        'building_class_at_present': 'building_class_present'
+    })
+    
     return df
 
 
@@ -199,11 +206,12 @@ def load_dim_borough(conn: sqlite3.Connection, df: pd.DataFrame) -> dict:
 def load_dim_neighborhood(conn: sqlite3.Connection, df: pd.DataFrame, borough_map: dict) -> dict:
     """Trả về dict: (neighborhood_name, borough_id) → neighborhood_id"""
     log("Nạp dim_neighborhood...")
-    unique_neighborhoods = df[['neighborhood', 'borough_name']].drop_duplicates()
+    unique_neighborhoods = df[['neighborhood', 'borough']].drop_duplicates()
     rows = []
     for _, row in unique_neighborhoods.iterrows():
-        bname = str(row['borough_name']).strip()
-        bid   = borough_map.get(bname, 1)
+        bid = safe_int(row.get('borough', 1))
+        if bid not in [1, 2, 3, 4, 5]:
+            bid = 1
         nname = str(row['neighborhood']).strip()
         rows.append((nname, bid))
 
@@ -223,15 +231,26 @@ def load_dim_location(conn: sqlite3.Connection, df: pd.DataFrame,
                       neighborhood_map: dict, borough_map: dict) -> pd.Series:
     """Nạp dim_location, trả về Series location_id theo index gốc của df"""
     log("Nạp dim_location...")
-    loc_cols = ['address', 'zip_code', 'block', 'lot', 'neighborhood', 'borough_name']
-    sub = df[loc_cols].copy().reset_index(drop=False)  # giữ index gốc
+    sub = df[['address', 'zip_code', 'block', 'lot', 'neighborhood', 'borough']].copy()
 
+    def clean_zip(z):
+        if pd.isna(z) or z == '': return ''
+        z_str = str(z).strip()
+        if '.' in z_str: z_str = z_str.split('.')[0]
+        if len(z_str) > 0 and len(z_str) <= 5: return z_str.zfill(5)
+        return z_str[:5]
+
+    sub['address']  = sub['address'].apply(lambda x: str(x)[:200] if pd.notna(x) else '')
+    sub['zip_code'] = sub['zip_code'].apply(clean_zip)
+    sub['block']    = sub['block'].apply(lambda x: str(x)[:20] if pd.notna(x) else '').str.strip()
+    sub['lot']      = sub['lot'].apply(lambda x: str(x)[:20] if pd.notna(x) else '').str.strip()
     rows = []
     for _, row in sub.iterrows():
-        bname = str(row['borough_name']).strip()
-        bid   = borough_map.get(bname, 1)
         nname = str(row['neighborhood']).strip()
-        nid   = neighborhood_map.get((nname, bid), 1)
+        bid = safe_int(row.get('borough', 1))
+        if bid not in [1, 2, 3, 4, 5]:
+            bid = 1
+        nid   = neighborhood_map.get((nname, bid), None)
         rows.append((
             str(row['address']).strip()[:200],
             str(row['zip_code']).strip(),
@@ -358,8 +377,9 @@ def load_fact_sales(conn: sqlite3.Connection, df: pd.DataFrame,
     log("Nạp fact_sales...")
     rows = []
     for idx, row in df.iterrows():
-        bname = str(row['borough_name']).strip()
-        bid   = borough_map.get(bname, 1)
+        bid   = safe_int(row.get('borough', 1))
+        if bid not in [1, 2, 3, 4, 5]:
+            bid = 1
         sid   = social_map.get(bid, bid)
 
         rows.append((
