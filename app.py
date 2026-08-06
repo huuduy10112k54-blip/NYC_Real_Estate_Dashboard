@@ -369,21 +369,35 @@ def load_data(query=None, zip_mtime=None):
         """, engine, chunksize=50000)
         
         processed_chunks = []
+        num_cols = ['gross_sqft', 'land_sqft', 'building_age', 'sale_year', 'avg_income', 'dist_center', 'pop_density']
+        
         for chunk in _chunks:
             # Lọc bớt dòng rác ngay từ đầu để giảm số lượng
             chunk['sale_price'] = pd.to_numeric(chunk['sale_price'], errors='coerce')
-            chunk = chunk[chunk['sale_price'] > 10_000]
+            chunk = chunk[chunk['sale_price'] > 10_000].copy()
             
-            # Ép kiểu object (chuỗi) sang category để tiết kiệm tới 80% RAM
-            for c in chunk.select_dtypes(include=['object']).columns:
-                chunk[c] = chunk[c].astype('category')
-                
-            # Hạ bậc kiểu số (int64 -> int32, float64 -> float32)
+            # Chuẩn hoá số
+            for c in num_cols:
+                if c in chunk.columns:
+                    chunk[c] = pd.to_numeric(chunk[c], errors='coerce', downcast='float')
+            
+            chunk.loc[chunk['gross_sqft'] <= 0, 'gross_sqft'] = np.nan
+            chunk.loc[chunk['land_sqft']  <= 0, 'land_sqft']  = np.nan
+            chunk['price_per_sqft']   = np.where(chunk['gross_sqft'].notna(),
+                                              chunk['sale_price'] / chunk['gross_sqft'], np.nan)
+            
+            # Xử lý ngày tháng ngay trong chunk để giải phóng text
+            chunk['sale_date_parsed'] = pd.to_datetime(chunk['sale_date'], dayfirst=True, errors='coerce')
+            chunk['sale_month']       = chunk['sale_date_parsed'].dt.month.fillna(0).astype('int16')
+            chunk.drop(columns=['sale_date'], inplace=True, errors='ignore')
+            
+            # Ép kiểu int/float để giảm dung lượng
             for c in chunk.select_dtypes(include=['int64', 'float64']).columns:
                 if chunk[c].dtype == 'int64':
                     chunk[c] = pd.to_numeric(chunk[c], downcast='integer')
                 else:
                     chunk[c] = pd.to_numeric(chunk[c], downcast='float')
+                    
             processed_chunks.append(chunk)
             
         df = pd.concat(processed_chunks, ignore_index=True)
@@ -395,20 +409,7 @@ def load_data(query=None, zip_mtime=None):
     if missing:
         return None, f"Thiếu cột sau JOIN: {', '.join(missing)}"
 
-    # Chuẩn hoá thêm một số cột text ra số
-    num_cols = ['gross_sqft', 'land_sqft', 'building_age', 'sale_year', 'avg_income', 'dist_center', 'pop_density']
-    for c in num_cols:
-        df[c] = pd.to_numeric(df[c], errors='coerce', downcast='float')
-
-    df.loc[df['gross_sqft'] <= 0, 'gross_sqft'] = np.nan
-    df.loc[df['land_sqft']  <= 0, 'land_sqft']  = np.nan
-    df['price_per_sqft']   = np.where(df['gross_sqft'].notna(),
-                                      df['sale_price'] / df['gross_sqft'], np.nan)
-    df['sale_date_parsed'] = pd.to_datetime(df['sale_date'], dayfirst=True, errors='coerce')
-    df['sale_month']       = df['sale_date_parsed'].dt.month
-    
-    # --- BƯỚC NÉN DỮ LIỆU (OLAP MEMORY COMPRESSION) ---
-    # Chuyển đổi chuỗi sang category (tiết kiệm 90% RAM cho cột chữ)
+    # Chuyển đổi chuỗi sang category một lần sau khi concat (tiết kiệm 90% RAM)
     for c in df.select_dtypes(include=['object', 'string']).columns:
         if df[c].nunique() < 1000:
             df[c] = df[c].astype('category')
