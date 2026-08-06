@@ -318,10 +318,36 @@ def load_data(query=None, zip_mtime=None):
                 # Kiểm tra nếu file zip mới hơn file db thì giải nén đè lên
                 if os.path.getmtime(zip_path) <= os.path.getmtime(db_path):
                     need_extract = False
+                    # Kiểm tra DB có bị hỏng do race condition trước đó không
+                    try:
+                        conn_test = sqlite3.connect(db_path)
+                        conn_test.execute("SELECT 1 FROM fact_sales LIMIT 1")
+                        conn_test.close()
+                    except sqlite3.DatabaseError:
+                        need_extract = True
             
             if need_extract:
-                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                    zip_ref.extractall(os.path.dirname(db_path))
+                try:
+                    import filelock
+                    lock_path = db_path + ".lock"
+                    with filelock.FileLock(lock_path, timeout=60):
+                        do_extract = True
+                        if os.path.exists(db_path):
+                            try:
+                                c2 = sqlite3.connect(db_path)
+                                c2.execute("SELECT 1 FROM fact_sales LIMIT 1")
+                                c2.close()
+                                if os.path.getmtime(zip_path) <= os.path.getmtime(db_path):
+                                    do_extract = False
+                            except sqlite3.DatabaseError:
+                                do_extract = True
+                        
+                        if do_extract:
+                            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                                zip_ref.extractall(os.path.dirname(db_path))
+                except ImportError:
+                    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                        zip_ref.extractall(os.path.dirname(db_path))
                 
         conn = sqlite3.connect(db_path)
         
