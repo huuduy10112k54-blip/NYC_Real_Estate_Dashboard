@@ -212,7 +212,7 @@ def load_dim_neighborhood(conn: sqlite3.Connection, df: pd.DataFrame, borough_ma
         if bid not in [1, 2, 3, 4, 5]:
             bid = 1
         nname = str(row['neighborhood']).strip()
-        bname = str(row.get('borough_name', 'Unknown')).strip()
+        bname = BOROUGH_MAP.get(bid, 'Unknown')
         
         # Tra cứu điểm tiện ích
         am_score = true_scores.get(f"{bname}_{nname}", 10.0)
