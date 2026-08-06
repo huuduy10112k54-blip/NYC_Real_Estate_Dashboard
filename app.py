@@ -301,10 +301,17 @@ def load_data(query=None):
         db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.db')
         zip_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.zip')
         
-        # Tự động giải nén nếu chưa có db (dùng cho Streamlit Cloud deploy)
-        if not os.path.exists(db_path) and os.path.exists(zip_path):
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(os.path.dirname(db_path))
+        # Tự động giải nén nếu chưa có db hoặc zip mới hơn
+        if os.path.exists(zip_path):
+            need_extract = True
+            if os.path.exists(db_path):
+                # Kiểm tra nếu file zip mới hơn file db thì giải nén đè lên
+                if os.path.getmtime(zip_path) <= os.path.getmtime(db_path):
+                    need_extract = False
+            
+            if need_extract:
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(os.path.dirname(db_path))
                 
         conn = sqlite3.connect(db_path)
         
