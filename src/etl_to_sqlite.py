@@ -411,13 +411,16 @@ def run_etl():
     os.makedirs(WAREHOUSE_DIR, exist_ok=True)
 
     # Xóa DB cũ để build lại từ đầu (idempotent)
-    if os.path.exists(DB_PATH):
-        os.remove(DB_PATH)
-        log("Đã xóa file DB cũ, build lại từ đầu.")
-
     # Kết nối SQLite
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA journal_mode=WAL")
+    
+    # DROP existing tables
+    tables = ['fact_sales', 'dim_location', 'dim_neighborhood', 'dim_borough', 'dim_property', 'dim_social_metrics']
+    for t in tables:
+        conn.execute(f"DROP TABLE IF EXISTS {t}")
+    conn.commit()
+
     conn.execute("PRAGMA synchronous=NORMAL")
 
     try:

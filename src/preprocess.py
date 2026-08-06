@@ -15,7 +15,7 @@ if sys.stdout.encoding != 'utf-8':
 warnings.filterwarnings('ignore')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW_DATA_PATH = os.path.join(BASE_DIR, 'data', 'raw', 'nyc_sales.csv')
-CLEAN_DATA_PATH = os.path.join(BASE_DIR, 'data', 'processed', 'nyc_sales_clean.csv')
+CLEAN_DATA_PATH = os.path.join(BASE_DIR, 'data', 'data clean', 'Dulieu_Cleaned.csv')
 
 BOROUGH_MAP = {
     '1': 'Manhattan',
@@ -41,7 +41,7 @@ def collect_external_data(df: pd.DataFrame) -> pd.DataFrame:
         '5': {'pop_density':  9000, 'avg_income': 74000, 'gdp_local': 6.2, 'dist_center': 16.0},
     }
 
-    df['borough_str'] = df['borough'].astype(str)
+    df['borough_str'] = pd.to_numeric(df['borough'], errors='coerce').fillna(0).astype(int).astype(str)
 
     for key in ['pop_density', 'avg_income', 'gdp_local', 'dist_center']:
         df[key] = df['borough_str'].map(
@@ -63,6 +63,8 @@ def load_data(file_path: str = None):
     
     print(f"[LOG] Loading data from: {file_path}")
     df = pd.read_csv(file_path)
+    # Normalize column names to lowercase snake_case
+    df.columns = df.columns.str.lower().str.replace(' ', '_').str.replace('-', '_')
     print(f"       Loaded {len(df):,} records with {len(df.columns)} columns")
     return df
 
@@ -115,7 +117,9 @@ def clean_data(df: pd.DataFrame):
     df['sale_month'] = df['sale_date_parsed'].dt.month
 
     # Thêm tên borough tiếng Anh
-    df['borough_name'] = df['borough'].astype(str).map(BOROUGH_MAP).fillna('Unknown')
+    # Chuyển đổi an toàn: 2.0 -> 2 -> '2'
+    df['borough_clean'] = pd.to_numeric(df['borough'], errors='coerce').fillna(0).astype(int).astype(str)
+    df['borough_name'] = df['borough_clean'].map(BOROUGH_MAP).fillna('Unknown')
 
     return df, stats
 
