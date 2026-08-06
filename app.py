@@ -290,9 +290,19 @@ def get_neighborhood_coords(neighborhood, borough_name):
 # ════════════════════════════════════════════════════════════
 # HÀM DỮ LIỆU
 # ════════════════════════════════════════════════════════════
+def _get_zip_mtime():
+    """Lấy modification time của zip để làm cache-key. Khi deploy zip mới → cache tự invalidate."""
+    try:
+        zip_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.zip')
+        return os.path.getmtime(zip_path) if os.path.exists(zip_path) else 0
+    except:
+        return 0
+
 @st.cache_data
-def load_data(query=None):
-    # BUST CACHE FOR REAL
+def load_data(query=None, _zip_mtime=None):
+    # Cache tự động invalidate khi _zip_mtime thay đổi (khi deploy zip mới)
+
+
     """Đọc dữ liệu từ SQLite Data Warehouse local."""
     try:
         import sqlite3
@@ -581,7 +591,7 @@ def render_factor_summary_matrix(df_in):
 # ════════════════════════════════════════════════════════════
 # LOAD DỮ LIỆU
 # ════════════════════════════════════════════════════════════
-df_raw, load_err = load_data()
+df_raw, load_err = load_data(_zip_mtime=_get_zip_mtime())
 if df_raw is None:
     st.error(f"⚠️ **Lỗi:** {load_err}")
     st.info("Hãy chạy `main.py` trước.")
