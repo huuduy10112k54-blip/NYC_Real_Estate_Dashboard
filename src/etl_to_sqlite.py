@@ -438,8 +438,15 @@ def run_etl():
         property_ids     = load_dim_property(conn, df)
         social_map       = load_dim_social_metrics(conn, df, borough_map)
 
-        # 4. Fact
+        # 4. Parse sale_year và sale_month từ sale_date (CSV không có 2 cột này)
+        df['sale_date_dt'] = pd.to_datetime(df['sale_date'], errors='coerce')
+        df['sale_year']  = df['sale_date_dt'].dt.year.fillna(0).astype(int)
+        df['sale_month'] = df['sale_date_dt'].dt.month.fillna(0).astype(int)
+        log(f"  → Đã parse sale_year/sale_month từ sale_date: {df['sale_year'].between(2000,2030).sum():,} dòng hợp lệ")
+
+        # 5. Fact
         load_fact_sales(conn, df, location_ids, property_ids, social_map, borough_map)
+
 
     finally:
         conn.close()
