@@ -299,8 +299,8 @@ def _get_zip_mtime():
         return 0
 
 @st.cache_data
-def load_data(query=None, _zip_mtime=None):
-    # Cache tự động invalidate khi _zip_mtime thay đổi (khi deploy zip mới)
+def load_data(query=None, zip_mtime=None):
+    # Cache tự động invalidate khi zip_mtime thay đổi (khi deploy zip mới)
 
 
     """Đọc dữ liệu từ SQLite Data Warehouse local."""
@@ -466,7 +466,7 @@ def get_flipping_stats(df_in):
     return df_res, neigh_stats, long_term
 
 @st.cache_data
-def load_ml_data():
+def load_ml_data(mtime=None):
     paths = {'pred': os.path.join(ROOT_DIR, 'output', 'ml_predictions.csv'),
              'imp':  os.path.join(ROOT_DIR, 'output', 'ml_importance.csv'),
              'met':  os.path.join(ROOT_DIR, 'output', 'ml_metrics.json')}
@@ -582,7 +582,7 @@ def render_factor_summary_matrix(df_in):
 # ════════════════════════════════════════════════════════════
 # LOAD DỮ LIỆU
 # ════════════════════════════════════════════════════════════
-df_raw, load_err = load_data(_zip_mtime=_get_zip_mtime())
+df_raw, load_err = load_data(zip_mtime=_get_zip_mtime())
 if df_raw is None:
     st.error(f"⚠️ **Lỗi:** {load_err}")
     st.info("Hãy chạy `main.py` trước.")
@@ -1585,12 +1585,12 @@ with tab4:
     </div>
     """, unsafe_allow_html=True)
 
-    pred_df4, imp4, ml4 = load_ml_data()
+    df_pred, df_imp, ml_metrics = load_ml_data(mtime=_get_zip_mtime())
 
-    if not ml4:
+    if not ml_metrics:
         st.warning("⚠️ Chưa có kết quả ML. Hãy chạy `main.py` trước.")
     else:
-        rf4 = ml4.get('Random Forest', {}); lr4 = ml4.get('Linear Regression', {})
+        rf4 = ml_metrics.get('Random Forest', {}); lr4 = ml_metrics.get('Linear Regression', {})
         m1,m2,m3,m4 = st.columns(4)
         acc4 = max(0,(1-rf4.get('MAE',0)/df['sale_price'].median())*100)
         mape4 = rf4.get('MAPE', None)
@@ -1609,15 +1609,15 @@ with tab4:
                    'Sai số TB ($)': f"${m['MAE']:,.0f}",
                    'Căn SSBT ($)': f"${m['RMSE']:,.0f}",
                    'Đánh giá': '✅ Tốt hơn' if n == 'Random Forest' else '📊 Tham khảo'}
-                 for n, m in ml4.items()]
+                 for n, m in ml_metrics.items()]
         st.dataframe(pd.DataFrame(rows4).set_index('Mô hình'), width='stretch')
 
         divider()
         ci1, ci2 = st.columns(2)
         with ci1:
             section_q("Yếu tố nào mô hình cho là quyết định nhất?","")
-            if imp4 is not None:
-                imp4s = imp4.copy()
+            if df_imp is not None:
+                imp4s = df_imp.copy()
                 imp4s['Tên'] = imp4s['Feature'].map(lambda f: FEATURE_LABELS.get(f,f))
                 imp4s = imp4s.sort_values('Importance')
                 fig_i = px.bar(imp4s, x='Importance', y='Tên', orientation='h',
@@ -1634,8 +1634,8 @@ with tab4:
                 st.plotly_chart(fig_i, width='stretch')
         with ci2:
             section_q("Dự báo sát thực tế đến mức nào?","")
-            if pred_df4 is not None:
-                pp4 = pred_df4.sample(n=min(1500,len(pred_df4)), random_state=42)
+            if df_pred is not None:
+                pp4 = df_pred.sample(n=min(1500,len(df_pred)), random_state=42)
                 fig_av4 = px.scatter(pp4, x='Actual', y='Predicted', opacity=0.4,
                                      color_discrete_sequence=[C_BLUE2],
                                      labels={'Actual':'Giá thực ($)','Predicted':'Giá dự báo ($)'},
@@ -1645,7 +1645,7 @@ with tab4:
                 for trace in fig_av4.data:
                     if hasattr(trace, 'name') and trace.name and 'OLS' in str(trace.name):
                         trace.name = 'Xu hướng OLS'
-                vm4 = max(pred_df4['Actual'].max(), pred_df4['Predicted'].max())
+                vm4 = max(df_pred['Actual'].max(), df_pred['Predicted'].max())
                 fig_av4.add_trace(go.Scatter(x=[0,vm4], y=[0,vm4], mode='lines',
                                              name='Lý tưởng (y=x)',
                                              line=dict(color=C_RED, dash='dash', width=1.5)))
@@ -1657,7 +1657,7 @@ with tab4:
                     legend=dict(font_size=11))
                 st.plotly_chart(fig_av4, width='stretch')
 # ????????????????????????????????????????????????????????????
-# TAB 5 � L�?T S�NG & �?U C�
+# TAB 5  L?T SNG & ?U C
 # ????????????????????????????????????????????????????????????
 with tab5:
     st.markdown("""
@@ -1726,9 +1726,9 @@ with tab7:
         WHERE z.lat IS NOT NULL AND f.sale_price > 10000
         GROUP BY l.zip_code, z.lat, z.lon
         """
-        df_geo = load_data(query_geo)
+        df_geo = load_data(query_geo, zip_mtime=_get_zip_mtime())
         
-        if not df_geo.empty:
+        if df_geo is not None and not df_geo.empty:
             df_geo['avg_price'] = df_geo['avg_price'].fillna(0).astype(float)
             df_geo['total_sales'] = df_geo['total_sales'].fillna(0).astype(int)
             
