@@ -1255,7 +1255,6 @@ with tab3:
                 fig_all.update_layout(
                     title_text="",
                     hovermode='x unified',
-                    xaxis=dict(tickformat="%m/%Y"),
                     yaxis=dict(ticksuffix='%', title="Tỷ suất Sinh lời (%)", zeroline=False))
                 st.plotly_chart(fig_all, width='stretch')
             else:
