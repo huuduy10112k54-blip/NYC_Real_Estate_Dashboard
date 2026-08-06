@@ -416,7 +416,8 @@ def load_data(query=None, _zip_mtime=None):
 @st.cache_data
 def get_flipping_stats(df_in):
     # Tạo mã định danh duy nhất cho từng lô đất
-    df_f = df_in.copy()
+    cols = ['borough_name', 'block', 'lot', 'sale_date', 'sale_date_parsed', 'sale_price', 'neighborhood']
+    df_f = df_in[cols].copy()
     df_f['property_id'] = df_f['borough_name'].astype(str) + '-' + df_f['block'].astype(str) + '-' + df_f['lot'].astype(str)
     df_f = df_f.sort_values(by=['property_id', 'sale_date'])
 
@@ -641,7 +642,7 @@ if len(df) == 0:
     st.stop()
 
 df_sample = df.sample(n=min(3000, len(df)), random_state=42)
-df_ppsf   = df[df['price_per_sqft'].notna() & (df['price_per_sqft'] < 5000)].copy()
+df_ppsf   = df.loc[df['price_per_sqft'].notna() & (df['price_per_sqft'] < 5000), ['price_per_sqft']]
 
 # ════════════════════════════════════════════════════════════
 # TIÊU ĐỀ
@@ -1014,7 +1015,7 @@ with tab1:
     with cn2:
         # price_per_sqft_real có thể được dùng nếu price_per_sqft thiếu
         ppsf_col = 'price_per_sqft' if 'price_per_sqft' in df.columns and df['price_per_sqft'].notna().sum() > 0 else 'price_per_sqft_real'
-        df_ppsf2 = df[df[ppsf_col].notna() & (df[ppsf_col] > 0) & (df[ppsf_col] < 5000)].copy()
+        df_ppsf2 = df.loc[df[ppsf_col].notna() & (df[ppsf_col] > 0) & (df[ppsf_col] < 5000), ['neighborhood', 'borough_name', ppsf_col]]
         if len(df_ppsf2) > 0:
             t15p = (df_ppsf2.groupby(['neighborhood','borough_name'])[ppsf_col]
                     .agg(med_ppsf='median', cnt='count').reset_index())
@@ -1098,8 +1099,9 @@ with tab2:
     section_q("1. Biến số DIỆN TÍCH CÔNG TRÌNH (gross_sqft) — Mức độ tác động: 🚀 RẤT MẠNH",
               "Phân tích mối quan hệ giữa quy mô diện tích sàn sử dụng và tổng giá bán bất động sản.")
     
-    df_sq = df[df['gross_sqft'].notna() & df['gross_sqft'].between(100, 4000)].copy()
-    df_sq = df_sq[df_sq['sale_price'] < df_sq['sale_price'].quantile(0.97)]
+    mask = df['gross_sqft'].notna() & df['gross_sqft'].between(100, 4000)
+    q97 = df.loc[mask, 'sale_price'].quantile(0.97)
+    df_sq = df.loc[mask & (df['sale_price'] < q97), ['gross_sqft', 'sale_price']].copy()
     corr_sq = df_sq['gross_sqft'].corr(df_sq['sale_price']) if len(df_sq) >= 20 else 0
 
     if len(df_sq) >= 50:
@@ -1132,7 +1134,7 @@ with tab2:
     section_q("2. Biến số THU NHẬP BÌNH QUÂN KHU VỰC (avg_income) — Mức độ tác động: 📈 MẠNH",
               "Phân tích tác động của sức mua và mức độ đắt đỏ của dân cư sinh sống tại khu vực đến mặt bằng giá nhà.")
 
-    df_inc = df[df['avg_income'].notna()].copy()
+    df_inc = df.loc[df['avg_income'].notna(), ['avg_income', 'sale_price', 'price_per_sqft', 'borough_name']].copy()
     corr_inc = df_inc['avg_income'].corr(df_inc['sale_price']) if len(df_inc) >= 20 else 0
 
     inc_summary = df_inc.groupby('borough_name').agg(
@@ -1165,7 +1167,7 @@ with tab2:
     section_q("3. Biến số TUỔI CÔNG TRÌNH (building_age) — Mức độ tác động: 📉 YẾU / ÂM",
               "Phân tích tác động của thời gian vận hành công trình đến giá bán (khấu hao vật lý vs giá trị vị trí).")
 
-    df_age = df[df['building_age'].notna() & df['building_age'].between(0, 120)].copy()
+    df_age = df.loc[df['building_age'].notna() & df['building_age'].between(0, 120), ['building_age', 'sale_price']].copy()
     corr_age = df_age['building_age'].corr(df_age['sale_price']) if len(df_age) >= 20 else 0
 
     df_age['age_group'] = pd.cut(
@@ -1205,7 +1207,8 @@ with tab3:
 
     # Tính ym_dt cho df (đã filter qua sidebar)
     # Lọc sale_month hợp lệ (1-12) trước để tránh crash khi tháng=0 do float->int cast
-    df_t3 = df.dropna(subset=['sale_year', 'sale_month']).copy()
+    cols_t3 = ['sale_year', 'sale_month', 'sale_price', 'borough_name', 'neighborhood']
+    df_t3 = df.dropna(subset=['sale_year', 'sale_month'])[cols_t3].copy()
     df_t3['sale_month_int'] = pd.to_numeric(df_t3['sale_month'], errors='coerce').fillna(0).astype(int)
     df_t3['sale_year_int']  = pd.to_numeric(df_t3['sale_year'],  errors='coerce').fillna(0).astype(int)
     df_t3 = df_t3[(df_t3['sale_month_int'] >= 1) & (df_t3['sale_month_int'] <= 12) & (df_t3['sale_year_int'] >= 2000)]
