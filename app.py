@@ -390,6 +390,17 @@ def load_data(query=None, zip_mtime=None):
             chunk['sale_date_parsed'] = pd.to_datetime(chunk['sale_date'], dayfirst=True, errors='coerce')
             chunk['sale_month']       = chunk['sale_date_parsed'].dt.month.fillna(0).astype('int16')
             
+            # Khôi phục building_category và building_type từ building_class_category (bị thiếu trong SQLite)
+            if 'building_class_category' in chunk.columns:
+                split_cols = chunk['building_class_category'].astype(str).str.split('-', n=1, expand=True)
+                chunk['building_category'] = split_cols[0].str.strip()
+                if split_cols.shape[1] > 1:
+                    chunk['building_type'] = split_cols[1].str.strip()
+                    # Điền missing type bằng category nếu split không ra 2 phần
+                    chunk['building_type'] = chunk['building_type'].fillna(chunk['building_category'])
+                else:
+                    chunk['building_type'] = chunk['building_category']
+            
             # Ép kiểu int/float để giảm dung lượng
             for c in chunk.select_dtypes(include=['int64', 'float64']).columns:
                 if chunk[c].dtype == 'int64':
