@@ -331,11 +331,11 @@ def load_data(query=None, _zip_mtime=None):
             return df
             
         engine = conn
-        _chunks = pd.read_sql_query("""
-            SELECT
-                b.borough_id                AS borough,
+        _chunks = pd.read_sql("""
+            SELECT 
+                b.borough_id AS borough,
                 b.borough_name,
-                n.neighborhood_name         AS neighborhood,
+                n.neighborhood_name as neighborhood,
                 p.building_class_category,
                 p.building_category,
                 p.building_type,
@@ -343,10 +343,7 @@ def load_data(query=None, _zip_mtime=None):
                 p.tax_class_present,
                 p.gross_sqft,
                 p.land_sqft,
-                p.year_built,
                 p.building_age,
-                p.residential_units,
-                p.commercial_units,
                 p.total_units,
                 p.is_residential,
                 l.address,
@@ -371,26 +368,36 @@ def load_data(query=None, _zip_mtime=None):
             JOIN dim_borough        b ON n.borough_id      = b.borough_id
             JOIN dim_property       p ON f.property_id     = p.property_id
             JOIN dim_social_metrics s ON f.social_id       = s.social_id
-        """, engine, chunksize=10000)
-        df = pd.concat(_chunks, ignore_index=True)
+        """, engine, chunksize=50000)
+        
+        processed_chunks = []
+        for chunk in _chunks:
+            # Lọc bớt dòng rác ngay từ đầu để giảm số lượng
+            chunk['sale_price'] = pd.to_numeric(chunk['sale_price'], errors='coerce')
+            chunk = chunk[chunk['sale_price'] > 10_000]
+            
+            # Hạ bậc kiểu số (int64 -> int32, float64 -> float32)
+            for c in chunk.select_dtypes(include=['int64', 'float64']).columns:
+                if chunk[c].dtype == 'int64':
+                    chunk[c] = pd.to_numeric(chunk[c], downcast='integer')
+                else:
+                    chunk[c] = pd.to_numeric(chunk[c], downcast='float')
+            processed_chunks.append(chunk)
+            
+        df = pd.concat(processed_chunks, ignore_index=True)
         engine.close()
     except Exception as e:
-        return None, f"Lỗi đọc PostgreSQL: {e}"
+        return None, f"Lỗi đọc SQLite: {e}"
 
     missing = [c for c in REQUIRED_COLS if c not in df.columns]
     if missing:
         return None, f"Thiếu cột sau JOIN: {', '.join(missing)}"
 
-    # Chuẩn hoá kiểu dữ liệu — giống hệt bản CSV
-    df['sale_price']    = pd.to_numeric(df['sale_price'],    errors='coerce')
-    df['gross_sqft']    = pd.to_numeric(df['gross_sqft'],    errors='coerce')
-    df['land_sqft']     = pd.to_numeric(df['land_sqft'],     errors='coerce')
-    df['building_age']  = pd.to_numeric(df['building_age'],  errors='coerce')
-    df['sale_year']     = pd.to_numeric(df['sale_year'],     errors='coerce')
-    df['avg_income']    = pd.to_numeric(df['avg_income'],    errors='coerce')
-    df['dist_center']   = pd.to_numeric(df['dist_center'],   errors='coerce')
-    df['pop_density']   = pd.to_numeric(df['pop_density'],   errors='coerce')
-    df = df[df['sale_price'] > 10_000].copy()
+    # Chuẩn hoá thêm một số cột text ra số
+    num_cols = ['gross_sqft', 'land_sqft', 'building_age', 'sale_year', 'avg_income', 'dist_center', 'pop_density']
+    for c in num_cols:
+        df[c] = pd.to_numeric(df[c], errors='coerce', downcast='float')
+
     df.loc[df['gross_sqft'] <= 0, 'gross_sqft'] = np.nan
     df.loc[df['land_sqft']  <= 0, 'land_sqft']  = np.nan
     df['price_per_sqft']   = np.where(df['gross_sqft'].notna(),
@@ -403,13 +410,6 @@ def load_data(query=None, _zip_mtime=None):
     for c in df.select_dtypes(include=['object', 'string']).columns:
         if df[c].nunique() < 1000:
             df[c] = df[c].astype('category')
-            
-    # Hạ bậc kiểu số (int64 -> int32, float64 -> float32)
-    for c in df.select_dtypes(include=['int64', 'float64']).columns:
-        if df[c].dtype == 'int64':
-            df[c] = pd.to_numeric(df[c], downcast='integer')
-        else:
-            df[c] = pd.to_numeric(df[c], downcast='float')
             
     return df, None
 
