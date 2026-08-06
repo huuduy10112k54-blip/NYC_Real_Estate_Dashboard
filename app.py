@@ -1343,23 +1343,18 @@ with tab3:
             def plot_single_neighborhood(boro_name, neigh_name, title, color_neigh, height=320):
                 fig = go.Figure()
 
-                df_neigh = df_t3[(df_t3["borough_name"] == boro_name) & (df_t3["neighborhood"] == neigh_name)]
-                sub_n = df_neigh.groupby("ym_dt")["sale_price"].median().reset_index().sort_values("ym_dt")
+                sub_n = df_neigh_agg[(df_neigh_agg["borough_name"] == boro_name) & (df_neigh_agg["neighborhood"] == neigh_name)].sort_values("ym_dt")
                 final_pct = 0
                 if len(sub_n) > 0:
                     base_n = sub_n["sale_price"].iloc[0]
                     sub_n['growth_pct'] = (sub_n['sale_price'] - base_n) / base_n * 100
                     final_pct = sub_n['growth_pct'].iloc[-1]
-                
-                    text_labels = [f"{v:+.0f}%" for v in sub_n['growth_pct']]
+                    
                     fig.add_trace(go.Scatter(
                         x=sub_n['ym_dt'], y=sub_n['growth_pct'],
-                        mode='lines+markers+text', name=neigh_name,
-                        text=text_labels,
-                        textposition="top center",
-                        textfont=dict(size=11, color=color_neigh),
-                        marker=dict(size=6),
-                        line=dict(color=color_neigh, width=3),
+                        mode='lines+markers', name=neigh_name,
+                        marker=dict(size=4),
+                        line=dict(color=color_neigh, width=2.5),
                         customdata=sub_n['sale_price'],
                         hovertemplate=f'<b>{neigh_name}</b><br>%{{x|%m/%Y}}<br>Lợi suất: <b>%{{y:+.1f}}%</b><br>Giá: $%{{customdata:,.0f}}<extra></extra>'))
 
@@ -1371,12 +1366,10 @@ with tab3:
                             x=sub_n['ym_dt'], y=trend, mode='lines', showlegend=False,
                             line=dict(color=color_neigh, width=1.5, dash='dash'), hoverinfo='skip'))
 
-            
                 clayout(fig, h=height, t=40, b=10)
                 fig.update_layout(
                     title=dict(text=title, font=dict(size=14, color='#374151')),
                     hovermode='x unified',
-                    xaxis=dict(tickformat="%m/%Y"),
                     yaxis=dict(ticksuffix='%', title="", zeroline=False),
                     legend=dict(orientation='h', y=1.1, x=0))
                 return fig, final_pct
@@ -1395,24 +1388,21 @@ with tab3:
                 except: pass
 
             # 4. NGHỊCH LÝ
-            col_a, col_b = st.columns(2)
             if len(top_3) > 0:
                 top_boro = top_3.iloc[0]["Quận"]
                 top_neigh = top_3.iloc[0]["Khu Vực"]
-                with col_a:
-                    section_q("2. Khu vực tăng trưởng cao nhất", "")
-                    fig_top, pct_top = plot_single_neighborhood(top_boro, top_neigh, f"{top_neigh}", C_RED)
-                    st.plotly_chart(fig_top, width='stretch')
-                    render_mini_confidence(top_neigh)
+                section_q("2. Khu vực tăng trưởng cao nhất", "")
+                fig_top, pct_top = plot_single_neighborhood(top_boro, top_neigh, f"{top_neigh}", C_RED)
+                st.plotly_chart(fig_top, use_container_width=True)
+                render_mini_confidence(top_neigh)
 
             if len(bot_3) > 0:
                 bot_boro = bot_3.iloc[0]["Quận"]
                 bot_neigh = bot_3.iloc[0]["Khu Vực"]
-                with col_b:
-                    section_q("3. Khu vực sụt giảm mạnh nhất", "")
-                    fig_bot, pct_bot = plot_single_neighborhood(bot_boro, bot_neigh, f"{bot_neigh}", C_GREEN)
-                    st.plotly_chart(fig_bot, width='stretch')
-                    render_mini_confidence(bot_neigh)
+                section_q("3. Khu vực sụt giảm mạnh nhất", "")
+                fig_bot, pct_bot = plot_single_neighborhood(bot_boro, bot_neigh, f"{bot_neigh}", C_GREEN)
+                st.plotly_chart(fig_bot, use_container_width=True)
+                render_mini_confidence(bot_neigh)
 
             divider()
 
@@ -1426,7 +1416,7 @@ with tab3:
                 up_neigh = stable_up.iloc[0]["Khu Vực"]
                 section_q("4. Tăng trưởng ổn định nhất", "")
                 fig_up, pct_up = plot_single_neighborhood(up_boro, up_neigh, f"{up_neigh}", C_ORANGE)
-                st.plotly_chart(fig_up, width='stretch')
+                st.plotly_chart(fig_up, use_container_width=True)
                 render_mini_confidence(up_neigh)
 
             # --- BẢNG XẾP HẠNG (LEADERBOARD) ---
