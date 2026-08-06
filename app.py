@@ -1559,14 +1559,14 @@ with tab3:
                 """,
                 height=0, width=0
             )
-        elif len(valid_neighs) > 0:
+        if len(selected_rows) == 0 and len(valid_neighs) > 0:
             st.markdown("""
             <div style='text-align:center; padding: 40px 20px; border: 2px dashed #cbd5e1; border-radius: 12px; margin-top: 20px;'>
                 <div style='color:#64748b; font-size:18px; font-weight:bold; margin-bottom:10px;'>Hãy click vào một khu vực trên bảng xếp hạng</div>
                 <p style='color:#94a3b8; font-size:15px;'>Hệ thống sẽ tự động hiển thị biểu đồ lịch sử giá và phân tích rủi ro cho khu vực bạn chọn.</p>
             </div>
             """, unsafe_allow_html=True)
-        else:
+        elif len(selected_rows) == 0 and len(valid_neighs) == 0:
             st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản (>= 30 giao dịch) trong bộ lọc hiện tại.")
 
 
