@@ -1098,13 +1098,13 @@ with tab2:
     cc_cols = ['sale_price','gross_sqft','avg_income','dist_center','pop_density','building_age']
     cc_lbl  = {'sale_price':'Giá bán','gross_sqft':'Diện tích','avg_income':'Thu nhập TB',
                'dist_center':'KC trung tâm','pop_density':'Mật độ dân số','building_age':'Tuổi công trình'}
-    cc_data = df[cc_cols].dropna()
     
-    # Loại bỏ các cột không có sự biến thiên (hằng số) để tránh lỗi NaN trong ma trận tương quan
-    cc_data = cc_data.loc[:, cc_data.nunique() > 1]
+    # Tính ma trận tương quan cực kỳ tối ưu bộ nhớ: Không copy DataFrame (.dropna() hay .loc[])
+    # Dùng .std() > 0 để lọc các cột hằng số (phương sai = 0) với độ phức tạp bộ nhớ O(1)
+    valid_cols = [c for c in cc_cols if df[c].std() > 0]
     
-    if len(cc_data.columns) > 1:
-        cc_mat  = cc_data.corr()
+    if len(valid_cols) > 1:
+        cc_mat  = df[valid_cols].corr()
         cc_mat.columns = [cc_lbl[c] for c in cc_mat.columns]
         cc_mat.index   = [cc_lbl[c] for c in cc_mat.index]
         
