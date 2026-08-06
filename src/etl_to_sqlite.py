@@ -60,15 +60,12 @@ def load_clean_csv() -> pd.DataFrame:
     df = pd.read_csv(CLEAN_CSV, low_memory=False)
     log(f"  → Tải thành công: {len(df):,} dòng × {len(df.columns)} cột")
     
-    # Bỏ qua việc ghi đè trực tiếp amenity_score ở df tổng, 
-    # chúng ta sẽ thực hiện việc này trong hàm nạp dim_neighborhood.
-        
-    df = df.rename(columns={
-        'gross_square_feet': 'gross_sqft',
-        'land_square_feet': 'land_sqft',
-        'tax_class_at_present': 'tax_class_present',
-        'building_class_at_present': 'building_class_present'
-    })
+    # Lọc dữ liệu năm 2024-2025
+    df['sale_year_temp'] = pd.to_numeric(df['sale_year'], errors='coerce')
+    df = df[df['sale_year_temp'] >= 2024].copy()
+    df.drop(columns=['sale_year_temp'], inplace=True)
+    df.reset_index(drop=True, inplace=True)
+    log(f"  → Đã lọc chỉ lấy giao dịch từ năm 2024 trở đi: {len(df):,} dòng")
     
     return df
 
@@ -101,7 +98,10 @@ CREATE TABLE IF NOT EXISTS dim_location (
     block           TEXT,
     lot             TEXT,
     neighborhood_id INTEGER NOT NULL,
-    FOREIGN KEY (neighborhood_id) REFERENCES dim_neighborhood(neighborhood_id)
+    latitude        REAL,
+    longitude       REAL,
+    FOREIGN KEY (neighborhood_id) REFERENCES dim_neighborhood(neighborhood_id),
+    UNIQUE(neighborhood_id, block, lot)
 );
 
 -- Bảng Bất động sản (tính chất vật lý)
@@ -231,55 +231,82 @@ def load_dim_neighborhood(conn: sqlite3.Connection, df: pd.DataFrame, borough_ma
     return result
 
 
-def load_dim_location(conn: sqlite3.Connection, df: pd.DataFrame,
-                      neighborhood_map: dict, borough_map: dict) -> pd.Series:
-    """Nạp dim_location, trả về Series location_id theo index gốc của df"""
+def load_dim_location(conn, df, neighborhood_map, borough_map):
     log("Nạp dim_location...")
     sub = df[['address', 'zip_code', 'block', 'lot', 'neighborhood', 'borough']].copy()
-
+    
     def clean_zip(z):
         if pd.isna(z) or z == '': return ''
         z_str = str(z).strip()
         if '.' in z_str: z_str = z_str.split('.')[0]
         if len(z_str) > 0 and len(z_str) <= 5: return z_str.zfill(5)
         return z_str[:5]
-
+    
     sub['address']  = sub['address'].apply(lambda x: str(x)[:200] if pd.notna(x) else '')
     sub['zip_code'] = sub['zip_code'].apply(clean_zip)
     sub['block']    = sub['block'].apply(lambda x: str(x)[:20] if pd.notna(x) else '').str.strip()
     sub['lot']      = sub['lot'].apply(lambda x: str(x)[:20] if pd.notna(x) else '').str.strip()
-    rows = []
-    for _, row in sub.iterrows():
-        nname = str(row['neighborhood']).strip()
+    
+    cur = conn.cursor()
+    location_cache = {}
+    location_ids = []
+    
+    log("  → Đang xử lý địa điểm duy nhất...")
+    for idx, row in sub.iterrows():
+        bname = str(row['borough'])
         bid = safe_int(row.get('borough', 1))
-        if bid not in [1, 2, 3, 4, 5]:
-            bid = 1
-        nid   = neighborhood_map.get((nname, bid), None)
-        rows.append((
-            str(row['address']).strip()[:200],
-            str(row['zip_code']).strip(),
-            str(row['block']).strip(),
-            str(row['lot']).strip(),
-            nid
-        ))
-
-    conn.executemany(
-        """INSERT INTO dim_location
-           (address, zip_code, block, lot, neighborhood_id)
-           VALUES (?, ?, ?, ?, ?)""",
-        rows
-    )
+        nname = str(row['neighborhood']).strip()
+        
+        nid = neighborhood_map.get(f"{BOROUGH_MAP.get(bid, 'Unknown')}_{nname}", 1)
+        # fallback if not mapped correctly
+        if nid == 1 and (nname, bid) in neighborhood_map:
+            nid = neighborhood_map[(nname, bid)]
+            
+        block = str(row['block'])
+        lot = str(row['lot'])
+        address = str(row['address'])
+        zip_code = str(row['zip_code'])
+        
+        cache_key = (nid, block, lot)
+        
+        if cache_key not in location_cache:
+            location_cache[cache_key] = {
+                'address': address,
+                'zip_code': zip_code
+            }
+    
+    log(f"  → Có {len(location_cache):,} địa điểm duy nhất. Tiến hành insert...")
+    
+    insert_data = []
+    for k, v in location_cache.items():
+        nid, block, lot = k
+        insert_data.append((v['address'], v['zip_code'], block, lot, nid, None, None))
+        
+    cur.executemany("""
+        INSERT OR IGNORE INTO dim_location (address, zip_code, block, lot, neighborhood_id, latitude, longitude)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, insert_data)
     conn.commit()
-
-    # Lấy lại location_id theo thứ tự insert (ROWID)
-    first_id = conn.execute(
-        "SELECT MIN(location_id) FROM dim_location"
-    ).fetchone()[0]
-    total = len(rows)
-    location_ids = list(range(first_id, first_id + total))
-    log(f"  → {total:,} địa chỉ đã nạp.")
+    
+    log("  → Đọc lại ID của location_id...")
+    cur.execute("SELECT neighborhood_id, block, lot, location_id FROM dim_location")
+    db_locations = cur.fetchall()
+    db_cache = {(str(r[0]), str(r[1]), str(r[2])): r[3] for r in db_locations}
+    
+    log("  → Gắn location_id cho bảng fact...")
+    for idx, row in sub.iterrows():
+        bid = safe_int(row.get('borough', 1))
+        nname = str(row['neighborhood']).strip()
+        nid = neighborhood_map.get(f"{BOROUGH_MAP.get(bid, 'Unknown')}_{nname}", 1)
+        if nid == 1 and (nname, bid) in neighborhood_map:
+            nid = neighborhood_map[(nname, bid)]
+            
+        block = str(row['block'])
+        lot = str(row['lot'])
+        location_ids.append(db_cache.get((str(nid), str(block), str(lot)), 1))
+        
+    log(f"  ✅ Đã tạo/nạp {len(location_cache):,} địa điểm duy nhất (location).")
     return pd.Series(location_ids, index=df.index)
-
 
 def load_dim_property(conn: sqlite3.Connection, df: pd.DataFrame) -> pd.Series:
     """Nạp dim_property, trả về Series property_id theo index gốc của df"""
