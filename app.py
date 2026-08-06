@@ -346,8 +346,6 @@ def load_data(query=None, _zip_mtime=None):
                 p.building_age,
                 p.total_units,
                 p.is_residential,
-                l.address,
-                l.zip_code,
                 l.block,
                 l.lot,
                 f.sale_price,
@@ -376,6 +374,10 @@ def load_data(query=None, _zip_mtime=None):
             chunk['sale_price'] = pd.to_numeric(chunk['sale_price'], errors='coerce')
             chunk = chunk[chunk['sale_price'] > 10_000]
             
+            # Ép kiểu object (chuỗi) sang category để tiết kiệm tới 80% RAM
+            for c in chunk.select_dtypes(include=['object']).columns:
+                chunk[c] = chunk[c].astype('category')
+                
             # Hạ bậc kiểu số (int64 -> int32, float64 -> float32)
             for c in chunk.select_dtypes(include=['int64', 'float64']).columns:
                 if chunk[c].dtype == 'int64':

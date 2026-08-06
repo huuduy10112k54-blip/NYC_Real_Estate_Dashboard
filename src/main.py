@@ -83,6 +83,7 @@ def collect_external_data(df: pd.DataFrame) -> pd.DataFrame:
 
 def load_and_describe(file_path: str):
     df = pd.read_csv(file_path)
+    df = df.rename(columns={'gross_square_feet': 'gross_sqft', 'land_square_feet': 'land_sqft'})
     df = collect_external_data(df)
 
     # ── Công thức tính building_age ───────────────────────────────────────────
@@ -134,13 +135,17 @@ def clean_data(df: pd.DataFrame):
     # 2.3 Xử lý ngoại lệ bằng IQR clipping
     # IQR (Interquartile Range) = khoảng từ phân vị 25% đến 75% của dữ liệu.
     # Ngưỡng cắt: giới hạn dưới = Q1 − 1.5×IQR, giới hạn trên = Q3 + 1.5×IQR.
-    # Giá trị ngoài ngưỡng được kẹp về giới hạn (clip) thay vì xóa,
-    # giữ lại số lượng mẫu trong khi loại ảnh hưởng của outlier cực đoan.
+    # Giá trị ngoại ngưỡng được kẹp về giới hạn dưới (clip) thay vì xóa,
+    # Riêng sale_price không kẹp upper bound vì BĐS NYC giá trị cao là bình thường.
     for col in ['sale_price', 'gross_sqft', 'land_sqft']:
         if col in df.columns:
             Q1, Q3 = df[col].quantile(0.25), df[col].quantile(0.75)
             IQR = Q3 - Q1
-            df[col] = np.clip(df[col], Q1 - 1.5 * IQR, Q3 + 1.5 * IQR)
+            if col == 'sale_price':
+                # Chỉ giới hạn dưới cho giá, không giới hạn trên
+                df[col] = df[col].clip(lower=Q1 - 1.5 * IQR)
+            else:
+                df[col] = np.clip(df[col], Q1 - 1.5 * IQR, Q3 + 1.5 * IQR)
 
     # 2.4 Tạo biến phái sinh
     df['is_residential'] = df.get('tax_class_present', pd.Series(dtype=str)).apply(
@@ -158,6 +163,12 @@ def clean_data(df: pd.DataFrame):
     df['sale_date_parsed'] = pd.to_datetime(df.get('sale_date', pd.Series(dtype=str)),
                                             dayfirst=True, errors='coerce')
     df['sale_month'] = df['sale_date_parsed'].dt.month
+    df['sale_year'] = df['sale_date_parsed'].dt.year
+
+    # ── Công thức tính building_age ───────────────────────────────────────────
+    if 'building_age' not in df.columns and 'year_built' in df.columns and 'sale_year' in df.columns:
+        df['building_age'] = df['sale_year'] - df['year_built']
+        df['building_age'] = df['building_age'].clip(0, 200)
 
     # ── Tính chỉ số biến động giá YoY theo borough ────────────────────────────
     # YoY (Year-over-Year) = % thay đổi giá trung vị giữa 2 năm liên tiếp theo từng quận.
