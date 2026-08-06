@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import pydeck as pdk
 import json
 import os
 import zlib
@@ -290,17 +291,29 @@ def get_neighborhood_coords(neighborhood, borough_name):
 # HÀM DỮ LIỆU
 # ════════════════════════════════════════════════════════════
 @st.cache_data
-def load_data():
-    """Đọc dữ liệu từ PostgreSQL Data Warehouse trên Cloud.
-    Trả về DataFrame giống hệt bản CSV để tương thích 100% với toàn bộ code phía dưới.
-    # Cache busted
-    """
-    db_url = os.getenv('DATABASE_URL')
-    if not db_url:
-        return None, "Không tìm thấy biến DATABASE_URL trong file .env"
+def load_data(query=None):
+    # BUST CACHE FOR REAL
+    """Đọc dữ liệu từ SQLite Data Warehouse local."""
     try:
-        from sqlalchemy import create_engine
-        engine = create_engine(db_url, connect_args={'options': '-c statement_timeout=0'})
+        import sqlite3
+        import os
+        import zipfile
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.db')
+        zip_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.zip')
+        
+        # Tự động giải nén nếu chưa có db (dùng cho Streamlit Cloud deploy)
+        if not os.path.exists(db_path) and os.path.exists(zip_path):
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(os.path.dirname(db_path))
+                
+        conn = sqlite3.connect(db_path)
+        
+        if query:
+            df = pd.read_sql_query(query, conn)
+            conn.close()
+            return df
+            
+        engine = conn
         _chunks = pd.read_sql_query("""
             SELECT
                 b.borough_id                AS borough,
@@ -343,7 +356,7 @@ def load_data():
             JOIN dim_social_metrics s ON f.social_id       = s.social_id
         """, engine, chunksize=10000)
         df = pd.concat(_chunks, ignore_index=True)
-        engine.dispose()
+        engine.close()
     except Exception as e:
         return None, f"Lỗi đọc PostgreSQL: {e}"
 
@@ -367,6 +380,20 @@ def load_data():
                                       df['sale_price'] / df['gross_sqft'], np.nan)
     df['sale_date_parsed'] = pd.to_datetime(df['sale_date'], dayfirst=True, errors='coerce')
     df['sale_month']       = df['sale_date_parsed'].dt.month
+    
+    # --- BƯỚC NÉN DỮ LIỆU (OLAP MEMORY COMPRESSION) ---
+    # Chuyển đổi chuỗi sang category (tiết kiệm 90% RAM cho cột chữ)
+    for c in df.select_dtypes(include=['object', 'string']).columns:
+        if df[c].nunique() < 1000:
+            df[c] = df[c].astype('category')
+            
+    # Hạ bậc kiểu số (int64 -> int32, float64 -> float32)
+    for c in df.select_dtypes(include=['int64', 'float64']).columns:
+        if df[c].dtype == 'int64':
+            df[c] = pd.to_numeric(df[c], downcast='integer')
+        else:
+            df[c] = pd.to_numeric(df[c], downcast='float')
+            
     return df, None
 
 @st.cache_data
@@ -619,7 +646,7 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # ════════════════════════════════════════════════════════════
 # TABS
 # ════════════════════════════════════════════════════════════
-tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📍  Tổng quan",
     "🏢  Phân tích khu vực",
     "📊  Yếu tố quyết định giá",
@@ -627,6 +654,7 @@ tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "🤖  Dự báo & Mô hình ML",
     "🌊 Lướt sóng & Đầu cơ",
     "💬 Trợ lý AI (Phân tích Data)",
+    "🗺️ Bản đồ Nhiệt (Heatmap)",
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -719,7 +747,8 @@ with tab0:
     with cd:
         df_bt0 = df[df['building_type'].isin(top6_bt)]
         med_bt0 = df_bt0.groupby('building_type')['sale_price'].median().sort_values(ascending=False)
-        fig = px.box(df_bt0, x='building_type', y='sale_price',
+        df_bt0_sample = df_bt0.sample(n=min(10000, len(df_bt0)), random_state=42)
+        fig = px.box(df_bt0_sample, x='building_type', y='sale_price',
                      color='building_type',
                      color_discrete_sequence=[C_BLUE,C_SKY,C_ORANGE,C_GREEN,'#8b5cf6',C_GRAY],
                      points=False, labels={'building_type':'Loại hình BĐS','sale_price':'Giá bán ($)'},
@@ -923,7 +952,8 @@ with tab1:
               "Đường giữa = trung vị. Hộp = khoảng tứ phân vị (25%–75%). Nhãn giá trung vị được ghi trực tiếp.")
 
     bor_ord1 = df.groupby('borough_name')['sale_price'].median().sort_values(ascending=False).index.tolist()
-    fig = px.box(df, x='borough_name', y='sale_price', color='borough_name',
+    df_box_sample = df.sample(n=min(10000, len(df)), random_state=42)
+    fig = px.box(df_box_sample, x='borough_name', y='sale_price', color='borough_name',
                  color_discrete_map=BOROUGH_COLORS, points=False,
                  labels={'borough_name':'Quận','sale_price':'Giá bán (USD)'},
                  category_orders={'borough_name': bor_ord1},
@@ -1599,196 +1629,73 @@ with tab4:
 # TAB 5 � L�?T S�NG & �?U C�
 # ????????????????????????????????????????????????????????????
 with tab5:
+    st.info("🚧 Tính năng này đang được bảo trì để nâng cấp cho dữ liệu lớn. Vui lòng quay lại sau!")
+
+with tab6:
+    st.info("🚧 Tính năng Trợ lý AI đang được bảo trì để tối ưu hóa với bộ dữ liệu 2.1 triệu giao dịch. Vui lòng quay lại sau!")
+
+with tab7:
     st.markdown("""
     <div style='background:linear-gradient(135deg,#4338ca,#6366f1,#818cf8);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(99,102,241,0.35)'>
-        <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'>🌊 Lướt sóng & Đầu cơ (House Flipping)</h2>
-        <p style='margin:8px 0 0;font-size:15px;opacity:0.9;'>Phân tích hành vi mua đi bán lại (giữ dưới 3 năm) để tìm ra các điểm nóng đầu cơ và khu vực an cư lý tưởng.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    <b style='font-size:15px;letter-spacing:-0.3px'>📍 Trực quan Hóa Tọa độ Bất Động Sản (Geospatial Analysis)</b><br>
+    <span style='font-size:13px;opacity:0.9'>Phân tích giá nhà trung bình và mật độ giao dịch theo Zip Code trên toàn New York City.</span>
+    </div>""", unsafe_allow_html=True)
     
-    with st.spinner("Đang phân tích lịch sử giao dịch BBL..."):
-        df_flip, neigh_stats, long_term = get_flipping_stats(df)
-        
-    if neigh_stats is None or len(neigh_stats) == 0:
-        st.warning("Không tìm thấy đủ dữ liệu giao dịch lướt sóng trong bộ lọc hiện tại.")
-    else:
-        st.markdown("### 📈 Top Khu vực Lướt sóng Khốc liệt nhất")
-        st.markdown("Nhà đầu tư giao dịch mua đi bán lại liên tục, thanh khoản cực cao nhưng rủi ro đu đỉnh lớn.")
-        
-        top_active = long_term.sort_values('flip_rate', ascending=False).head(5)
-        fig_act = px.bar(top_active, x='flip_rate', y='neighborhood', orientation='h',
-                         color='avg_profit', color_continuous_scale='RdYlGn',
-                         labels={'num_flips': 'Số lượt lướt sóng', 'neighborhood': 'Khu vực', 'avg_profit': 'Lợi nhuận TB ($)'},
-                         title="Top 5 Khu vực nhiều giao dịch lướt sóng nhất")
-        fig_act.update_layout(yaxis={'categoryorder':'total ascending'})
-        clayout(fig_act, h=350)
-        st.plotly_chart(fig_act, width='stretch')
-        
-        divider()
-        st.markdown("### 💰 Top Khu vực có ROI Lướt sóng cao nhất")
-        st.markdown("Tỷ suất lợi nhuận (ROI) khổng lồ, phù hợp cho dân đầu cơ 'đánh nhanh rút gọn'.")
-        
-        top_roi = neigh_stats.sort_values('avg_roi', ascending=False).head(5)
-        top_roi['roi_pct'] = top_roi['avg_roi'] * 100
-        fig_roi = px.bar(top_roi, x='roi_pct', y='neighborhood', orientation='h',
-                         color='roi_pct', color_continuous_scale='Sunsetdark',
-                         labels={'roi_pct': 'ROI TB (%)', 'neighborhood': 'Khu vực'},
-                         title="Top 5 Khu vực có Tỷ suất sinh lời (ROI) lướt sóng cao nhất")
-        fig_roi.update_layout(yaxis={'categoryorder':'total ascending'})
-        clayout(fig_roi, h=350)
-        st.plotly_chart(fig_roi, width='stretch')
-        
-        divider()
-        st.markdown("### 🛡️ Top Khu vực Ổn định (An Cư)")
-        st.markdown("Nơi có hàng trăm giao dịch nhưng tỷ lệ lướt sóng rất thấp. Thị trường ổn định, chống lạm phát tốt, lý tưởng để mua ở.")
-        
-        top_safe = long_term.sort_values('flip_rate', ascending=True).head(5)
-        fig_safe = px.scatter(top_safe, x='total_sales', y='flip_rate', size='total_sales', color='neighborhood',
-                              labels={'total_sales': 'Tổng số giao dịch', 'flip_rate': 'Tỷ lệ lướt sóng (%)', 'neighborhood': 'Khu vực'},
-                              title="Top 5 Khu vực Ổn định nhất (Tỷ lệ lướt sóng thấp)")
-        clayout(fig_safe, h=350)
-        st.plotly_chart(fig_safe, width='stretch')
+    st.markdown("<div class='section-q'>Bản đồ Tương tác 3D</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-cap'>Các cột biểu diễn số lượng giao dịch hoặc giá trị trung bình theo mã Zip Code. Giữ phím Ctrl/Cmd hoặc click chuột phải để xoay bản đồ 3D!</div>", unsafe_allow_html=True)
 
-# ============================================================
-# TAB 6 – TRỢ LÝ AI (PANDASAI)
-# ============================================================
-# ============================================================
-# TAB 6 – TRỢ LÝ AI (GEMINI NATIVE)
-# ============================================================
-with tab6:
-    st.header("💬 Trợ lý AI Phân tích Dữ liệu (Đang thử nghiệm)")
-    st.warning("⚠️ **Lưu ý:** Trợ lý AI đang trong giai đoạn thử nghiệm (Beta). Kiến trúc **Agentic Retrieval** giúp AI tự động dùng mã lệnh trích xuất dữ liệu gốc, nhưng AI không phải vạn năng và có thể đôi lúc đưa ra kết luận chưa chính xác.")
-    st.markdown("---")
-    
-    import os
-    from dotenv import load_dotenv
-    load_dotenv()
-    
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        st.warning("⚠️ Chưa tìm thấy API Key. Vui lòng thêm GEMINI_API_KEY vào file .env")
-    else:
-        try:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
+    try:
+        # Lấy dữ liệu Heatmap từ DB
+        query_geo = """
+        SELECT l.zip_code, AVG(f.sale_price) as avg_price, COUNT(f.sale_id) as total_sales, z.lat, z.lon
+        FROM fact_sales f
+        JOIN dim_location l ON f.location_id = l.location_id
+        JOIN dim_zipcode z ON l.zip_code = z.zip_code
+        WHERE z.lat IS NOT NULL AND f.sale_price > 10000
+        GROUP BY l.zip_code, z.lat, z.lon
+        """
+        df_geo = load_data(query_geo)
+        
+        if not df_geo.empty:
+            df_geo['avg_price'] = df_geo['avg_price'].fillna(0).astype(float)
+            df_geo['total_sales'] = df_geo['total_sales'].fillna(0).astype(int)
             
-            # Tính toán một số thống kê cơ bản từ dataframe để đưa vào ngữ cảnh AI
-            total_sales = len(df)
+            # Chuẩn hóa độ cao (Elevation) để vẽ 3D đẹp hơn
+            df_geo['elevation'] = df_geo['avg_price'] / 1000
             
-            # Trích xuất dữ liệu thống kê khu vực
-            full_stats_str = ""
-            if 'neigh_stats' in locals() and neigh_stats is not None and len(neigh_stats) > 0:
-                try:
-                    import pandas as pd
-                    combined = long_term.copy() if 'long_term' in locals() and long_term is not None else neigh_stats.copy()
-                    combined = combined.fillna(0).sort_values('total_sales', ascending=False)
-                    full_stats_str = "| Khu vực | Số giao dịch | Tỷ lệ lướt sóng | ROI (%) | Lợi nhuận ($) |\n|---|---|---|---|---|\n"
-                    for _, row in combined.iterrows():
-                        full_stats_str += f"| {row['neighborhood']} | {row.get('total_sales', 0):,.0f} | {row.get('flip_rate', 0):.1f}% | {row.get('avg_roi', 0)*100:.1f}% |  |\n"
-                except Exception as e:
-                    full_stats_str = f"(Lỗi bảng: {e})"
-            else:
-                full_stats_str = "(Không có đủ dữ liệu để tính toán chi tiết)"
-                
-            # 1. Định nghĩa Công cụ (Tool) cho LLM
-            def query_database(sql_query: str) -> str:
-                """Công cụ bắt buộc phải dùng để tra cứu dữ liệu gốc của dự án khi cần lấy số liệu chính xác.
-                Thực thi lệnh SQL (CHỈ ĐƯỢC DÙNG SELECT) trên bảng 'df' (chứa dữ liệu bất động sản) và trả về dữ liệu thô.
-                """
-                import duckdb
-                query_lower = sql_query.lower()
-                if any(kw in query_lower for kw in ["update", "delete", "drop", "insert", "alter", "create"]):
-                    return "Lỗi: Bạn chỉ được phép dùng lệnh SELECT để đọc dữ liệu."
-                try:
-                    conn = duckdb.connect()
-                    conn.register('df', df)
-                    res_df = conn.execute(sql_query).df()
-                    conn.close()
-                    if len(res_df) == 0:
-                        return "Không tìm thấy kết quả nào. Hãy thử nới lỏng điều kiện lọc."
-                    return res_df.head(20).to_string()
-                except Exception as e:
-                    return f"Lỗi cú pháp SQL: {e}. Vui lòng thử viết lại câu SQL với cấu trúc khác."
-            
-            # 2. Cập nhật System Prompt cho kiến trúc Grounded Synthesis
-            system_instruction = f"""
-Bạn là chuyên gia phân tích Dữ liệu Bất Động Sản New York (Data Analyst Agent).
+            # Custom Tooltip
+            tooltip = {
+                "html": "<b>Zip Code:</b> {zip_code} <br/> <b>Giá TB:</b>  <br/> <b>Giao dịch:</b> {total_sales}",
+                "style": {"backgroundColor": "#4c1d95", "color": "white"}
+            }
 
-Tổng quan dữ liệu hiện tại: Tổng số giao dịch: {total_sales:,}
-
-BẢNG DỮ LIỆU CHI TIẾT TỪNG KHU VỰC:
-{full_stats_str}
-
-CÁC CỘT CỦA BẢNG DỮ LIỆU GỐC df:
-{", ".join(df.columns.tolist())}
-
-NHIỆM VỤ CỦA BẠN (Agentic Retrieval + Grounded Synthesis):
-1. Với câu hỏi chung chung, hãy dùng Bảng dữ liệu chi tiết trên để trả lời.
-2. VỚI CÂU HỎI PHỨC TẠP, CẦN LỌC ĐIỀU KIỆN (VD: ngân sách 300k, 5 người ở):
-   - BẠN BẮT BUỘC PHẢI GỌI CÔNG CỤ query_database để lấy số liệu thực tế.
-   - TUYỆT ĐỐI KHÔNG TỰ BỊA SỐ LIỆU (No Hallucination). Mọi con số bạn đưa ra phải dựa trên kết quả từ công cụ.
-3. Nếu lệnh SQL lỗi, công cụ sẽ báo lỗi. Hãy tự động sửa lỗi và gọi lại công cụ.
-"""
-            
-            # Tự động tìm model khả dụng tốt nhất
-            available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-            model_name = "gemini-1.5-flash"
-            for m in ["models/gemini-1.5-flash", "models/gemini-1.5-pro", "models/gemini-pro"]:
-                if m in available_models:
-                    model_name = m
-                    break
-            else:
-                if available_models:
-                    model_name = available_models[0]
-                
-            model = genai.GenerativeModel(
-                model_name=model_name,
-                system_instruction=system_instruction,
-                tools=[query_database] # ĐĂNG KÝ TOOL
+            layer = pdk.Layer(
+                'ColumnLayer',
+                data=df_geo,
+                get_position='[lon, lat]',
+                get_elevation='elevation',
+                elevation_scale=1.5,
+                radius=600,
+                get_fill_color='[255, 140 - (elevation/100), 0, 200]',
+                pickable=True,
+                auto_highlight=True,
             )
+
+            view_state = pdk.ViewState(
+                latitude=40.7128,
+                longitude=-74.0060,
+                zoom=10,
+                pitch=50,
+            )
+
+            r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip=tooltip, map_style="mapbox://styles/mapbox/dark-v10")
+            st.pydeck_chart(r)
             
-            # Giao diện Chat
-            if "chat_history" not in st.session_state:
-                st.session_state.chat_history = []
-                
-            # Khởi tạo Chat Session hỗ trợ Tự động gọi hàm
-            if "ai_chat_session" not in st.session_state:
-                st.session_state.ai_chat_session = model.start_chat(enable_automatic_function_calling=True)
-                
-            chat = st.session_state.ai_chat_session
-                
-            # Hiển thị lịch sử (UI)
-            for msg in st.session_state.chat_history:
-                with st.chat_message(msg["role"]):
-                    st.markdown(msg["content"])
-                    
-            # Ô nhập câu hỏi
-            if prompt := st.chat_input("Hãy hỏi bất cứ điều gì về dữ liệu BĐS này... (VD: Đánh giá tổng quan thị trường?)"):
-                st.session_state.chat_history.append({"role": "user", "content": prompt})
-                with st.chat_message("user"):
-                    st.markdown(prompt)
-                    
-                with st.chat_message("assistant"):
-                    with st.spinner("🤖 AI đang phân tích ý định, gọi công cụ tra cứu và tổng hợp dữ liệu..."):
-                        try:
-                            # Agentic Loop: LLM tự động gọi hàm, nhận kết quả và suy luận tiếp
-                            response = chat.send_message(prompt)
-                            
-                            st.markdown(response.text)
-                            st.session_state.chat_history.append({"role": "assistant", "content": response.text})
-                        except Exception as e:
-                            error_str = str(e)
-                            if "429" in error_str or "Quota exceeded" in error_str:
-                                error_msg = "⏳ AI đang hoạt động quá công suất! API Key của bạn bị giới hạn số lần hỏi liên tục. Vui lòng đợi khoảng 40 giây rồi thử lại!"
-                            else:
-                                error_msg = f"Xin lỗi, AI gặp lỗi khi xử lý câu hỏi này. Chi tiết lỗi: {e}"
-                            st.error(error_msg)
-                            if "429" not in error_str and "Quota exceeded" not in error_str:
-                                st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
-                            
-        except Exception as e:
-            import traceback
-            st.error(f"Lỗi khởi tạo Trợ lý AI: {type(e).__name__} - {str(e)}")
-            st.code(traceback.format_exc())
+        else:
+            st.info("Chưa có dữ liệu tọa độ hoặc dữ liệu chưa đủ để vẽ bản đồ.")
+    except Exception as e:
+        st.error(f"Lỗi khi load bản đồ: {e}")
+
+# Cache bust 2
