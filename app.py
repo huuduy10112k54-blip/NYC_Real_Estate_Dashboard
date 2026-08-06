@@ -168,7 +168,7 @@ FEATURE_LABELS = {
 REQUIRED_COLS = [
     'borough','neighborhood','building_type','gross_sqft','land_sqft',
     'sale_price','sale_year','sale_date','building_age','total_units',
-    'pop_density','avg_income','gdp_local','dist_center',
+    'pop_density','avg_income','gdp_local','dist_center','amenity_score'
 ]
 
 # Tọa độ địa lý NYC cho bản đồ Nhiệt (Hotspot Heatmap)
@@ -385,7 +385,8 @@ def load_data(query=None, zip_mtime=None):
                 s.pop_density,
                 s.avg_income,
                 s.gdp_local,
-                s.dist_center
+                s.dist_center,
+                s.amenity_score
             FROM fact_sales f
             JOIN dim_location       l ON f.location_id    = l.location_id
             JOIN dim_neighborhood   n ON l.neighborhood_id = n.neighborhood_id
@@ -1095,9 +1096,10 @@ with tab2:
         "Ma trận tương quan tổng thể giữa các yếu tố với Giá bán",
         "Đọc bản đồ nhiệt: ô màu đỏ = tương quan thuận (+); ô màu xanh = tương quan nghịch (-). Số trong ô là hệ số tương quan r."
     )
-    cc_cols = ['sale_price','gross_sqft','avg_income','dist_center','pop_density','building_age']
+    cc_cols = ['sale_price','gross_sqft','avg_income','dist_center','pop_density','amenity_score','building_age']
     cc_lbl  = {'sale_price':'Giá bán','gross_sqft':'Diện tích','avg_income':'Thu nhập TB',
-               'dist_center':'KC trung tâm','pop_density':'Mật độ dân số','building_age':'Tuổi công trình'}
+               'dist_center':'KC trung tâm','pop_density':'Mật độ dân số','amenity_score':'Tiện ích',
+               'building_age':'Tuổi công trình'}
     
     # Tính ma trận tương quan cực kỳ tối ưu bộ nhớ: Không copy DataFrame (.dropna() hay .loc[])
     # Dùng .std() > 0 để lọc các cột hằng số (phương sai = 0) với độ phức tạp bộ nhớ O(1)
