@@ -1096,9 +1096,9 @@ with tab2:
         "Ma trận tương quan tổng thể giữa các yếu tố với Giá bán",
         "Đọc bản đồ nhiệt: ô màu đỏ = tương quan thuận (+); ô màu xanh = tương quan nghịch (-). Số trong ô là hệ số tương quan r."
     )
-    cc_cols = ['sale_price','gross_sqft','avg_income','dist_center','pop_density','amenity_score','building_age']
+    cc_cols = ['sale_price','gross_sqft','avg_income','dist_center','pop_density','building_age']
     cc_lbl  = {'sale_price':'Giá bán','gross_sqft':'Diện tích','avg_income':'Thu nhập TB',
-               'dist_center':'KC trung tâm','pop_density':'Mật độ dân số','amenity_score':'Tiện ích',
+               'dist_center':'KC trung tâm','pop_density':'Mật độ dân số',
                'building_age':'Tuổi công trình'}
     
     # Tính ma trận tương quan trực tiếp, không drop cột hằng số để giữ nguyên lưới biểu đồ.
