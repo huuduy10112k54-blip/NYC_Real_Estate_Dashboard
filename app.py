@@ -389,7 +389,6 @@ def load_data(query=None, zip_mtime=None):
             # Xử lý ngày tháng ngay trong chunk để giải phóng text
             chunk['sale_date_parsed'] = pd.to_datetime(chunk['sale_date'], dayfirst=True, errors='coerce')
             chunk['sale_month']       = chunk['sale_date_parsed'].dt.month.fillna(0).astype('int16')
-            chunk.drop(columns=['sale_date'], inplace=True, errors='ignore')
             
             # Ép kiểu int/float để giảm dung lượng
             for c in chunk.select_dtypes(include=['int64', 'float64']).columns:
