@@ -1099,19 +1099,26 @@ with tab2:
     cc_lbl  = {'sale_price':'Giá bán','gross_sqft':'Diện tích','avg_income':'Thu nhập TB',
                'dist_center':'KC trung tâm','pop_density':'Mật độ dân số','building_age':'Tuổi công trình'}
     cc_data = df[cc_cols].dropna()
-    cc_mat  = cc_data.corr()
-    cc_mat.columns = [cc_lbl[c] for c in cc_mat.columns]
-    cc_mat.index   = [cc_lbl[c] for c in cc_mat.index]
     
-    fig_corr_mat = px.imshow(cc_mat, text_auto='.2f', color_continuous_scale='RdBu_r',
-                            zmin=-1, zmax=1, aspect='equal',
-                            title='Ma trận tương quan giữa các yếu tố và Giá bán')
-    clayout(fig_corr_mat, h=360, t=40, b=20)
-    fig_corr_mat.update_layout(
-        coloraxis_colorbar=dict(title='Hệ số r', len=0.8),
-        title_font=dict(size=13, color='#374151')
-    )
-    st.plotly_chart(fig_corr_mat, width='stretch')
+    # Loại bỏ các cột không có sự biến thiên (hằng số) để tránh lỗi NaN trong ma trận tương quan
+    cc_data = cc_data.loc[:, cc_data.nunique() > 1]
+    
+    if len(cc_data.columns) > 1:
+        cc_mat  = cc_data.corr()
+        cc_mat.columns = [cc_lbl[c] for c in cc_mat.columns]
+        cc_mat.index   = [cc_lbl[c] for c in cc_mat.index]
+        
+        fig_corr_mat = px.imshow(cc_mat, text_auto='.2f', color_continuous_scale='RdBu_r',
+                                zmin=-1, zmax=1, aspect='equal',
+                                title='Ma trận tương quan giữa các yếu tố và Giá bán')
+        clayout(fig_corr_mat, h=360, t=40, b=20)
+        fig_corr_mat.update_layout(
+            coloraxis_colorbar=dict(title='Hệ số r', len=0.8),
+            title_font=dict(size=13, color='#374151')
+        )
+        st.plotly_chart(fig_corr_mat, width='stretch')
+    else:
+        st.info("Không đủ biến số có sự phân tán dữ liệu để vẽ ma trận tương quan.")
 
     divider()
 
