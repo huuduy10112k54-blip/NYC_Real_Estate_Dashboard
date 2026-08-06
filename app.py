@@ -1012,25 +1012,31 @@ with tab1:
                           title_font=dict(size=13, color='#374151'))
         st.plotly_chart(fig, width='stretch')
     with cn2:
-        if len(df_ppsf) > 0:
-            t15p = (df_ppsf.groupby(['neighborhood','borough_name'])['price_per_sqft']
+        # price_per_sqft_real có thể được dùng nếu price_per_sqft thiếu
+        ppsf_col = 'price_per_sqft' if 'price_per_sqft' in df.columns and df['price_per_sqft'].notna().sum() > 0 else 'price_per_sqft_real'
+        df_ppsf2 = df[df[ppsf_col].notna() & (df[ppsf_col] > 0) & (df[ppsf_col] < 5000)].copy()
+        if len(df_ppsf2) > 0:
+            t15p = (df_ppsf2.groupby(['neighborhood','borough_name'])[ppsf_col]
                     .agg(med_ppsf='median', cnt='count').reset_index())
             t15p = t15p[t15p['cnt'] >= 5].nlargest(15,'med_ppsf').sort_values('med_ppsf')
             t15p['Khu vực'] = t15p['neighborhood'].str.title().str[:25]
             if len(t15p) > 0:
                 top_n_ppsf_row = t15p.iloc[-1]
-            fig = px.bar(t15p, x='med_ppsf', y='Khu vực', orientation='h',
-                         color='borough_name', color_discrete_map=BOROUGH_COLORS,
-                         text=t15p['med_ppsf'].apply(lambda v: f'${v:,.0f}'),
-                         title="Top 15 khu vực giá/sqft cao nhất (trung vị)",
-                         labels={'borough_name':'Quận','med_ppsf':'$/sqft (trung vị)'})
-            fig.update_traces(textposition='auto')
-            clayout(fig, h=460, t=40, b=20, r=80, leg=True)
-            fig.update_layout(yaxis=dict(automargin=True, tickfont_size=11, title='Khu vực'),
-                              xaxis=dict(tickformat='$,.0f', automargin=True, title='$/sqft (trung vị)'),
-                              legend=dict(orientation='h', y=-0.1, x=0, font_size=11),
-                              title_font=dict(size=13, color='#374151'))
-            st.plotly_chart(fig, width='stretch')
+            if len(t15p) > 0:
+                fig = px.bar(t15p, x='med_ppsf', y='Khu vực', orientation='h',
+                             color='borough_name', color_discrete_map=BOROUGH_COLORS,
+                             text=t15p['med_ppsf'].apply(lambda v: f'${v:,.0f}'),
+                             title="Top 15 khu vực giá/sqft cao nhất (trung vị)",
+                             labels={'borough_name':'Quận','med_ppsf':'$/sqft (trung vị)'})
+                fig.update_traces(textposition='auto')
+                clayout(fig, h=460, t=40, b=20, r=80, leg=True)
+                fig.update_layout(yaxis=dict(automargin=True, tickfont_size=11, title='Khu vực'),
+                                  xaxis=dict(tickformat='$,.0f', automargin=True, title='$/sqft (trung vị)'),
+                                  legend=dict(orientation='h', y=-0.1, x=0, font_size=11),
+                                  title_font=dict(size=13, color='#374151'))
+                st.plotly_chart(fig, width='stretch')
+            else:
+                st.info("Không đủ dữ liệu giá/sqft sau khi lọc.")
         else:
             st.info("Không đủ dữ liệu giá/sqft.")
 
@@ -1198,10 +1204,15 @@ with tab3:
     import matplotlib.dates as mdates
 
     # Tính ym_dt cho df (đã filter qua sidebar)
+    # Lọc sale_month hợp lệ (1-12) trước để tránh crash khi tháng=0 do float->int cast
     df_t3 = df.dropna(subset=['sale_year', 'sale_month']).copy()
+    df_t3['sale_month_int'] = pd.to_numeric(df_t3['sale_month'], errors='coerce').fillna(0).astype(int)
+    df_t3['sale_year_int']  = pd.to_numeric(df_t3['sale_year'],  errors='coerce').fillna(0).astype(int)
+    df_t3 = df_t3[(df_t3['sale_month_int'] >= 1) & (df_t3['sale_month_int'] <= 12) & (df_t3['sale_year_int'] >= 2000)]
     df_t3["ym_dt"] = pd.to_datetime(
-        df_t3["sale_year"].astype(int).astype(str) + "-" + df_t3["sale_month"].astype(int).astype(str).str.zfill(2),
-        format="%Y-%m")
+        df_t3["sale_year_int"].astype(str) + "-" + df_t3["sale_month_int"].astype(str).str.zfill(2),
+        format="%Y-%m", errors='coerce')
+    df_t3 = df_t3.dropna(subset=['ym_dt'])
 
     start_dt_str = df_t3['ym_dt'].min().strftime('%m/%Y') if not df_t3.empty else "N/A"
     end_dt_str = df_t3['ym_dt'].max().strftime('%m/%Y') if not df_t3.empty else "N/A"
