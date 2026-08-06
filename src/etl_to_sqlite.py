@@ -60,18 +60,8 @@ def load_clean_csv() -> pd.DataFrame:
     df = pd.read_csv(CLEAN_CSV, low_memory=False)
     log(f"  → Tải thành công: {len(df):,} dòng × {len(df.columns)} cột")
     
-    # [TÍCH HỢP POSTGIS] Ghi đè amenity_score bằng Dữ liệu Không gian thật
-    import json
-    try:
-        with open('data/true_amenity_scores.json', 'r', encoding='utf-8') as f:
-            true_scores = json.load(f)
-        df['amenity_score'] = df.apply(
-            lambda row: true_scores.get(f"{row['borough_name']}_{row['neighborhood']}", row['amenity_score']), 
-            axis=1
-        )
-        log(f"  → ĐÃ TÍCH HỢP: Điểm tiện ích không gian thực (True PostGIS) đã được bơm vào DataPipeline!")
-    except Exception as e:
-        log(f"  → Bỏ qua True Scores do lỗi: {e}")
+    # Bỏ qua việc ghi đè trực tiếp amenity_score ở df tổng, 
+    # chúng ta sẽ thực hiện việc này trong hàm nạp dim_neighborhood.
         
     df = df.rename(columns={
         'gross_square_feet': 'gross_sqft',
@@ -98,6 +88,7 @@ CREATE TABLE IF NOT EXISTS dim_neighborhood (
     neighborhood_id   INTEGER PRIMARY KEY AUTOINCREMENT,
     neighborhood_name TEXT NOT NULL,
     borough_id        INTEGER NOT NULL,
+    amenity_score     REAL,
     FOREIGN KEY (borough_id) REFERENCES dim_borough(borough_id),
     UNIQUE (neighborhood_name, borough_id)
 );
@@ -139,7 +130,6 @@ CREATE TABLE IF NOT EXISTS dim_social_metrics (
     avg_income       REAL,
     gdp_local        REAL,
     dist_center      REAL,
-    amenity_score    REAL,
     num_parks        INTEGER,
     num_hospitals    INTEGER,
     num_supermarkets INTEGER,
@@ -206,17 +196,31 @@ def load_dim_borough(conn: sqlite3.Connection, df: pd.DataFrame) -> dict:
 def load_dim_neighborhood(conn: sqlite3.Connection, df: pd.DataFrame, borough_map: dict) -> dict:
     """Trả về dict: (neighborhood_name, borough_id) → neighborhood_id"""
     log("Nạp dim_neighborhood...")
-    unique_neighborhoods = df[['neighborhood', 'borough']].drop_duplicates()
+    
+    # Nạp điểm số không gian thực từ json
+    true_scores = {}
+    try:
+        with open('data/true_amenity_scores.json', 'r', encoding='utf-8') as f:
+            true_scores = json.load(f)
+    except Exception as e:
+        log(f"  → Cảnh báo: Lỗi đọc true_amenity_scores.json: {e}")
+
+    unique_neighborhoods = df[['neighborhood', 'borough', 'borough_name']].drop_duplicates()
     rows = []
     for _, row in unique_neighborhoods.iterrows():
         bid = safe_int(row.get('borough', 1))
         if bid not in [1, 2, 3, 4, 5]:
             bid = 1
         nname = str(row['neighborhood']).strip()
-        rows.append((nname, bid))
+        bname = str(row.get('borough_name', 'Unknown')).strip()
+        
+        # Tra cứu điểm tiện ích
+        am_score = true_scores.get(f"{bname}_{nname}", 10.0)
+        
+        rows.append((nname, bid, am_score))
 
     conn.executemany(
-        "INSERT OR IGNORE INTO dim_neighborhood (neighborhood_name, borough_id) VALUES (?, ?)",
+        "INSERT OR IGNORE INTO dim_neighborhood (neighborhood_name, borough_id, amenity_score) VALUES (?, ?, ?)",
         rows
     )
     conn.commit()
@@ -348,7 +352,6 @@ def load_dim_social_metrics(conn: sqlite3.Connection, df: pd.DataFrame, borough_
             float(data.get('avg_income',   0)),
             float(data.get('gdp_local',    0)),
             float(data.get('dist_center',  0)),
-            float(data.get('amenity_score', 0)),
             int(data.get('num_parks', 0)),
             int(data.get('num_hospitals', 0)),
             int(data.get('num_supermarkets', 0)),
@@ -358,9 +361,9 @@ def load_dim_social_metrics(conn: sqlite3.Connection, df: pd.DataFrame, borough_
 
     conn.executemany(
         """INSERT OR IGNORE INTO dim_social_metrics
-           (social_id, borough_id, pop_density, avg_income, gdp_local, dist_center, amenity_score,
+           (social_id, borough_id, pop_density, avg_income, gdp_local, dist_center,
             num_parks, num_hospitals, num_supermarkets, source_census, source_osm)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         rows
     )
     conn.commit()

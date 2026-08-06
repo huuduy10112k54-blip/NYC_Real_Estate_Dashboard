@@ -386,7 +386,7 @@ def load_data(query=None, zip_mtime=None):
                 s.avg_income,
                 s.gdp_local,
                 s.dist_center,
-                s.amenity_score
+                n.amenity_score
             FROM fact_sales f
             JOIN dim_location       l ON f.location_id    = l.location_id
             JOIN dim_neighborhood   n ON l.neighborhood_id = n.neighborhood_id
