@@ -417,42 +417,30 @@ def load_data(query=None, _zip_mtime=None):
 def get_flipping_stats(df_in):
     # Tạo mã định danh duy nhất cho từng lô đất
     cols = ['borough_name', 'block', 'lot', 'sale_date', 'sale_date_parsed', 'sale_price', 'neighborhood']
-    df_f = df_in[cols].copy()
+    df_f = df_in.loc[:, cols].copy()
     df_f['property_id'] = df_f['borough_name'].astype(str) + '-' + df_f['block'].astype(str) + '-' + df_f['lot'].astype(str)
-    df_f = df_f.sort_values(by=['property_id', 'sale_date'])
+    
+    # Sắp xếp theo ID và ngày bán
+    df_f = df_f.sort_values(by=['property_id', 'sale_date_parsed'])
+    
+    # Dùng shift() để so sánh với giao dịch liền trước
+    df_f['prev_prop'] = df_f['property_id'].shift(1)
+    df_f['buy_date'] = df_f['sale_date_parsed'].shift(1)
+    df_f['buy_price'] = df_f['sale_price'].shift(1)
 
-    counts = df_f['property_id'].value_counts()
-    flipped_props = counts[counts > 1].index
-    df_flipped = df_f[df_f['property_id'].isin(flipped_props)].copy()
+    # Chỉ giữ lại những giao dịch là lần bán thứ 2 trở lên của cùng 1 property
+    flips = df_f[df_f['property_id'] == df_f['prev_prop']].copy()
+    
+    if len(flips) == 0:
+        return None, None, None
 
-    results = []
-    for prop, group in df_flipped.groupby('property_id'):
-        group = group.sort_values('sale_date_parsed')
-        prices = group['sale_price'].tolist()
-        dates = group['sale_date_parsed'].tolist()
-        neigh = group['neighborhood'].iloc[0]
-        boro = group['borough_name'].iloc[0]
-        
-        for i in range(1, len(prices)):
-            buy_date = dates[i-1]
-            sell_date = dates[i]
-            days_held = (sell_date - buy_date).days
-            
-            # Lọc lướt sóng từ 1 tháng đến 3 năm
-            if 30 < days_held <= 1095:
-                buy_price = prices[i-1]
-                sell_price = prices[i]
-                profit = sell_price - buy_price
-                roi = profit / buy_price if buy_price > 0 else 0
-                results.append({
-                    'neighborhood': neigh,
-                    'borough_name': boro,
-                    'days_held': days_held,
-                    'profit': profit,
-                    'roi': roi
-                })
+    # Tính toán các chỉ số
+    flips['days_held'] = (flips['sale_date_parsed'] - flips['buy_date']).dt.days
+    flips['profit'] = flips['sale_price'] - flips['buy_price']
+    flips['roi'] = np.where(flips['buy_price'] > 0, flips['profit'] / flips['buy_price'], 0)
 
-    df_res = pd.DataFrame(results)
+    # Lọc điều kiện lướt sóng: giữ nhà từ 1 tháng (30 ngày) đến 3 năm (1095 ngày)
+    df_res = flips[(flips['days_held'] > 30) & (flips['days_held'] <= 1095)].copy()
     
     if len(df_res) == 0:
         return None, None, None
