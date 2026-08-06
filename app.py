@@ -1387,7 +1387,7 @@ with tab3:
                     n_gd = n_stats['Số GD']
                     n_thang = n_stats['Số tháng']
                     n_r2 = n_stats['R2']
-                    total_score = min((n_gd/100)*40, 40) + min((n_thang/12)*30, 30) + min(n_r2*30, 30)
+                    total_score = min((n_gd/500)*40, 40) + min((n_thang/60)*30, 30) + min(n_r2*30, 30)
                     if total_score >= 80: rating = "Cực kỳ đáng tin"
                     elif total_score >= 60: rating = "Khá đáng tin"
                     else: rating = "Tin cậy TB"
@@ -1437,8 +1437,8 @@ with tab3:
             valid_neighs = df_neigh_all[(df_neigh_all['Số GD'] >= 30) & (df_neigh_all['Số tháng'] >= 5)].copy()
             if len(valid_neighs) > 0:
                 valid_neighs['Điểm Tin Cậy'] = (
-                    (valid_neighs['Số GD'] / 100 * 40).clip(upper=40) + 
-                    (valid_neighs['Số tháng'] / 12 * 30).clip(upper=30) + 
+                    (valid_neighs['Số GD'] / 500 * 40).clip(upper=40) + 
+                    (valid_neighs['Số tháng'] / 60 * 30).clip(upper=30) + 
                     (valid_neighs['R2'] * 30).clip(upper=30)
                 ).round(0)
             
@@ -1501,8 +1501,8 @@ with tab3:
                         n_r2 = n_stats['R2']
                     
                         # Calculate Reliability Score
-                        vol_score = min((n_gd / 100) * 40, 40)
-                        time_score = min((n_thang / 12) * 30, 30)
+                        vol_score = min((n_gd / 500) * 40, 40)
+                        time_score = min((n_thang / 60) * 30, 30)
                         trend_score = min(n_r2 * 30, 30)
                         total_score = vol_score + time_score + trend_score
                     
