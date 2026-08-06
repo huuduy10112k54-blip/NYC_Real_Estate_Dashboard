@@ -22,29 +22,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-def check_password():
-    """Returns `True` if the user had the correct password."""
-    def password_entered():
-        if st.session_state["password"] == "duy123":
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]  # don't store password
-        else:
-            st.session_state["password_correct"] = False
-
-    if "password_correct" not in st.session_state:
-        st.text_input("Vui lòng nhập mật khẩu để truy cập Dashboard:", type="password", on_change=password_entered, key="password")
-        return False
-    elif not st.session_state["password_correct"]:
-        st.text_input("Vui lòng nhập mật khẩu để truy cập Dashboard:", type="password", on_change=password_entered, key="password")
-        st.error("Mật khẩu không đúng!")
-        return False
-    else:
-        return True
-
-if not check_password():
-    st.stop()
-
-
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
