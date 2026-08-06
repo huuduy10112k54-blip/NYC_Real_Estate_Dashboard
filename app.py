@@ -1288,14 +1288,20 @@ with tab3:
 
         # 1. ĐÁNH GIÁ TỶ SUẤT KHU VỰC
         section_q("1. Đánh giá tỷ suất: Cấp độ khu vực", "Soi rọi toàn bộ các khu vực để phân tích chi tiết mức độ sinh lời và rủi ro.")
+        
+        df_neigh_agg = df_t3.groupby(["borough_name", "neighborhood", "ym_dt"])["sale_price"].median().reset_index()
+        df_neigh_count = df_t3.groupby(["borough_name", "neighborhood"]).size().reset_index(name="S_GD")
+        
         neigh_stats = []
-        for boro in df_t3["borough_name"].unique():
-            b_df = df_t3[df_t3["borough_name"] == boro]
+        for boro in df_neigh_agg["borough_name"].unique():
+            b_df = df_neigh_agg[df_neigh_agg["borough_name"] == boro]
             for n in b_df["neighborhood"].unique():
-                sub = b_df[b_df["neighborhood"] == n].groupby("ym_dt")["sale_price"].median().reset_index().sort_values("ym_dt")
-                n_gd = len(b_df[b_df["neighborhood"]==n])
+                sub = b_df[b_df["neighborhood"] == n].sort_values("ym_dt")
+                n_gd = df_neigh_count[(df_neigh_count["borough_name"] == boro) & (df_neigh_count["neighborhood"] == n)]["S_GD"].iloc[0]
+                
                 if len(sub) < 3 or n_gd < 10: 
                     continue
+                    
                 start_p = sub["sale_price"].iloc[0]
                 end_p = sub["sale_price"].iloc[-1]
                 pct = (end_p - start_p) / start_p * 100
@@ -1315,7 +1321,7 @@ with tab3:
                     col_end: end_p, "Tăng Trưởng (%)": pct, 
                     "Slope": coef[0], "R2": r2, "Số tháng": len(sub), "Số GD": n_gd
                 })
-    
+        
         if neigh_stats:
             df_neigh_all = pd.DataFrame(neigh_stats)
             top_3 = df_neigh_all.sort_values("Tăng Trưởng (%)", ascending=False).head(3).reset_index(drop=True)
