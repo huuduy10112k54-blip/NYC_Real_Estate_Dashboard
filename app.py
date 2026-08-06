@@ -1101,12 +1101,11 @@ with tab2:
                'dist_center':'KC trung tâm','pop_density':'Mật độ dân số','amenity_score':'Tiện ích',
                'building_age':'Tuổi công trình'}
     
-    # Tính ma trận tương quan cực kỳ tối ưu bộ nhớ: Không copy DataFrame (.dropna() hay .loc[])
-    # Dùng .std() > 0 để lọc các cột hằng số (phương sai = 0) với độ phức tạp bộ nhớ O(1)
-    valid_cols = [c for c in cc_cols if df[c].std() > 0]
+    # Tính ma trận tương quan trực tiếp, không drop cột hằng số để giữ nguyên lưới biểu đồ.
+    # Các giá trị lỗi (NaN do phương sai = 0) sẽ được điền 0 (không có tương quan tuyến tính).
+    cc_mat = df[cc_cols].corr().fillna(0)
     
-    if len(valid_cols) > 1:
-        cc_mat  = df[valid_cols].corr()
+    if len(cc_mat.columns) > 1:
         cc_mat.columns = [cc_lbl[c] for c in cc_mat.columns]
         cc_mat.index   = [cc_lbl[c] for c in cc_mat.index]
         
