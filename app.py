@@ -1659,6 +1659,7 @@ with tab5:
 # ============================================================
 with tab6:
     st.header("💬 Trợ lý AI Phân tích Dữ liệu (Đang thử nghiệm)")
+    st.warning("⚠️ **Lưu ý:** Trợ lý AI đang trong giai đoạn thử nghiệm (Beta). Kiến trúc **Agentic Retrieval** giúp AI tự động dùng mã lệnh trích xuất dữ liệu gốc, nhưng AI không phải vạn năng và có thể đôi lúc đưa ra kết luận chưa chính xác.")
     st.markdown("---")
     
     import os
@@ -1674,149 +1675,115 @@ with tab6:
             genai.configure(api_key=api_key)
             
             # Tính toán một số thống kê cơ bản từ dataframe để đưa vào ngữ cảnh AI
-            avg_price = df['sale_price'].dropna().mean() if 'sale_price' in df.columns else 0
             total_sales = len(df)
-            neighborhoods = df['neighborhood'].dropna().unique().tolist() if 'neighborhood' in df.columns else []
-            neighborhoods_str = ", ".join(neighborhoods[:20]) + ("..." if len(neighborhoods) > 20 else "")
             
-            # Trích xuất toàn bộ dữ liệu thống kê khu vực để AI có thể trả lời chi tiết
+            # Trích xuất dữ liệu thống kê khu vực
             full_stats_str = ""
             if 'neigh_stats' in locals() and neigh_stats is not None and len(neigh_stats) > 0:
-                # long_term đã chứa đầy đủ thông tin gộp của neigh_stats
                 try:
                     import pandas as pd
-                    if 'long_term' in locals() and long_term is not None:
-                        combined = long_term.copy()
-                    else:
-                        combined = neigh_stats.copy()
-                    
+                    combined = long_term.copy() if 'long_term' in locals() and long_term is not None else neigh_stats.copy()
                     combined = combined.fillna(0).sort_values('total_sales', ascending=False)
-                    # Tạo bảng Markdown cho tất cả các khu vực
                     full_stats_str = "| Khu vực | Số giao dịch | Tỷ lệ lướt sóng | ROI (%) | Lợi nhuận ($) |\n|---|---|---|---|---|\n"
                     for _, row in combined.iterrows():
-                        roi_pct = row.get('avg_roi', 0) * 100
-                        flip_rate = row.get('flip_rate', 0)
-                        profit = row.get('avg_profit', 0)
-                        sales = row.get('total_sales', 0)
-                        full_stats_str += f"| {row['neighborhood']} | {sales:,.0f} | {flip_rate:.1f}% | {roi_pct:.1f}% |  |\n"
+                        full_stats_str += f"| {row['neighborhood']} | {row.get('total_sales', 0):,.0f} | {row.get('flip_rate', 0):.1f}% | {row.get('avg_roi', 0)*100:.1f}% |  |\n"
                 except Exception as e:
-                    full_stats_str = f"(Lỗi khi tạo bảng dữ liệu: {e})"
+                    full_stats_str = f"(Lỗi bảng: {e})"
             else:
                 full_stats_str = "(Không có đủ dữ liệu để tính toán chi tiết)"
+                
+            # 1. Định nghĩa Công cụ (Tool) cho LLM
+            def query_database(sql_query: str) -> str:
+                """Công cụ bắt buộc phải dùng để tra cứu dữ liệu gốc của dự án khi cần lấy số liệu chính xác.
+                Thực thi lệnh SQL (CHỈ ĐƯỢC DÙNG SELECT) trên bảng 'df' (chứa dữ liệu bất động sản) và trả về dữ liệu thô.
+                """
+                import duckdb
+                query_lower = sql_query.lower()
+                if any(kw in query_lower for kw in ["update", "delete", "drop", "insert", "alter", "create"]):
+                    return "Lỗi: Bạn chỉ được phép dùng lệnh SELECT để đọc dữ liệu."
+                try:
+                    conn = duckdb.connect()
+                    conn.register('df', df)
+                    res_df = conn.execute(sql_query).df()
+                    conn.close()
+                    if len(res_df) == 0:
+                        return "Không tìm thấy kết quả nào. Hãy thử nới lỏng điều kiện lọc."
+                    return res_df.head(20).to_string()
+                except Exception as e:
+                    return f"Lỗi cú pháp SQL: {e}. Vui lòng thử viết lại câu SQL với cấu trúc khác."
             
+            # 2. Cập nhật System Prompt cho kiến trúc Grounded Synthesis
             system_instruction = f"""
-Bạn là chuyên gia phân tích Dữ liệu Bất Động Sản New York (Data Analyst).
-Người dùng đang xem Dashboard phân tích BĐS.
+Bạn là chuyên gia phân tích Dữ liệu Bất Động Sản New York (Data Analyst Agent).
 
-Tổng quan dữ liệu hiện tại:
-- Tổng số giao dịch: {total_sales:,}
-- Trung bình giá bán: 
+Tổng quan dữ liệu hiện tại: Tổng số giao dịch: {total_sales:,}
 
 BẢNG DỮ LIỆU CHI TIẾT TỪNG KHU VỰC:
-(Hãy sử dụng bảng dữ liệu THỰC TẾ này để trả lời các câu hỏi phổ biến)
 {full_stats_str}
 
-Nhiệm vụ của bạn:
-1. Dựa vào bảng dữ liệu trên để trả lời các câu hỏi về ROI, số giao dịch.
-2. NẾU người dùng hỏi một câu hỏi ĐẶC BIỆT yêu cầu truy vấn DỮ LIỆU THÔ (Ví dụ: "Nhà dưới 300k cho 5 người ở", "Căn nhà đắt nhất giá bao nhiêu?"):
-   - Bắt buộc phải dùng truy vấn SQL để tra cứu trên bảng cơ sở dữ liệu ảo tên là df.
-   - Các cột của bảng df bao gồm: {", ".join(df.columns.tolist())}
-   - Cột is_residential (True/False), cột 
-esidential_units (số lượng phòng/người ở).
-   - HÃY ĐẶT CÂU LỆNH SQL VÀO GIỮA THẺ <sql> và </sql>.
-   - Ví dụ: <sql>SELECT neighborhood, count(*) FROM df WHERE sale_price <= 300000 AND is_residential = True GROUP BY neighborhood ORDER BY count(*) DESC LIMIT 5</sql>
-   - Hệ thống sẽ chạy SQL qua thư viện DuckDB siêu tốc và trả kết quả cho bạn để bạn tư vấn.
-3. Nếu không cần tính toán nâng cao, hãy trả lời bình thường.
+CÁC CỘT CỦA BẢNG DỮ LIỆU GỐC df:
+{", ".join(df.columns.tolist())}
+
+NHIỆM VỤ CỦA BẠN (Agentic Retrieval + Grounded Synthesis):
+1. Với câu hỏi chung chung, hãy dùng Bảng dữ liệu chi tiết trên để trả lời.
+2. VỚI CÂU HỎI PHỨC TẠP, CẦN LỌC ĐIỀU KIỆN (VD: ngân sách 300k, 5 người ở):
+   - BẠN BẮT BUỘC PHẢI GỌI CÔNG CỤ query_database để lấy số liệu thực tế.
+   - TUYỆT ĐỐI KHÔNG TỰ BỊA SỐ LIỆU (No Hallucination). Mọi con số bạn đưa ra phải dựa trên kết quả từ công cụ.
+3. Nếu lệnh SQL lỗi, công cụ sẽ báo lỗi. Hãy tự động sửa lỗi và gọi lại công cụ.
 """
             
             # Tự động tìm model khả dụng tốt nhất
             available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-            
-            # Ưu tiên các model xịn, nếu không có thì lấy cái đầu tiên
             model_name = "gemini-1.5-flash"
-            if "models/gemini-1.5-flash" in available_models:
-                model_name = "models/gemini-1.5-flash"
-            elif "models/gemini-1.5-pro" in available_models:
-                model_name = "models/gemini-1.5-pro"
-            elif "models/gemini-pro" in available_models:
-                model_name = "models/gemini-pro"
+            for m in ["models/gemini-1.5-flash", "models/gemini-1.5-pro", "models/gemini-pro"]:
+                if m in available_models:
+                    model_name = m
+                    break
             elif available_models:
                 model_name = available_models[0]
                 
             model = genai.GenerativeModel(
                 model_name=model_name,
-                system_instruction=system_instruction
+                system_instruction=system_instruction,
+                tools=[query_database] # ĐĂNG KÝ TOOL
             )
             
             # Giao diện Chat
             if "chat_history" not in st.session_state:
                 st.session_state.chat_history = []
                 
-            # Hiển thị lịch sử
+            # Khởi tạo Chat Session hỗ trợ Tự động gọi hàm
+            if "ai_chat_session" not in st.session_state:
+                st.session_state.ai_chat_session = model.start_chat(enable_automatic_function_calling=True)
+                
+            chat = st.session_state.ai_chat_session
+                
+            # Hiển thị lịch sử (UI)
             for msg in st.session_state.chat_history:
                 with st.chat_message(msg["role"]):
                     st.markdown(msg["content"])
                     
             # Ô nhập câu hỏi
             if prompt := st.chat_input("Hãy hỏi bất cứ điều gì về dữ liệu BĐS này... (VD: Đánh giá tổng quan thị trường?)"):
-                # Lưu câu hỏi
                 st.session_state.chat_history.append({"role": "user", "content": prompt})
                 with st.chat_message("user"):
                     st.markdown(prompt)
                     
-                # Gọi Gemini
                 with st.chat_message("assistant"):
-                    with st.spinner("🤖 AI đang suy nghĩ và phân tích dữ liệu..."):
+                    with st.spinner("🤖 AI đang phân tích ý định, gọi công cụ tra cứu và tổng hợp dữ liệu..."):
                         try:
-                            # Chuyển lịch sử sang định dạng Gemini
-                            history = []
-                            for msg in st.session_state.chat_history[:-1]:
-                                role = "user" if msg["role"] == "user" else "model"
-                                history.append({"role": role, "parts": [msg["content"]]})
-                                
-                            chat = model.start_chat(history=history)
+                            # Agentic Loop: LLM tự động gọi hàm, nhận kết quả và suy luận tiếp
                             response = chat.send_message(prompt)
                             
-                            # Text-to-SQL (DuckDB): Gọi duy nhất 1 lần để tiết kiệm API
-                            if "<sql>" in response.text:
-                                import re
-                                match = re.search(r'<sql>(.*?)</sql>', response.text, re.DOTALL | re.IGNORECASE)
-                                if match:
-                                    sql_query = match.group(1).strip()
-                                    try:
-                                        import duckdb
-                                        # DuckDB sẽ tự động nhận diện biến 'df' (pandas DataFrame) đang tồn tại trong global namespace
-                                        # Hoặc an toàn hơn, đăng ký trực tiếp DataFrame vào bộ nhớ DuckDB tạm thời
-                                        conn = duckdb.connect()
-                                        conn.register('df', df)
-                                        res_df = conn.execute(sql_query).df()
-                                        conn.close()
-                                        
-                                        # Chuyển Dataframe kết quả thành dạng chữ để đưa cho AI
-                                        res_str = res_df.to_string()
-                                        if len(res_str) > 2000:
-                                            res_str = res_str[:2000] + "\n... (Dữ liệu đã bị cắt bớt do quá dài)"
-                                            
-                                        follow_up_prompt = f"Kết quả truy vấn SQL từ DB:\n{res_str}\n\nDựa vào kết quả này, hãy trả lời câu hỏi của người dùng một cách chuyên nghiệp. KHÔNG HIỂN THỊ thẻ <sql> nữa."
-                                        response = chat.send_message(follow_up_prompt)
-                                    except Exception as e:
-                                        response = chat.send_message(f"Lỗi truy vấn SQL: {e}\nHãy xin lỗi người dùng và thử tự ước lượng dựa trên kiến thức chung.")
-                                        
-                            # Lọc bỏ bất kỳ thẻ sql nào còn sót lại trước khi hiện cho người dùng
-                            import re
-                            final_text = re.sub(r'<sql>.*?</sql>', '', response.text, flags=re.DOTALL | re.IGNORECASE).strip()
-                            st.markdown(final_text)
-                            response.text = final_text # Update text to save cleanly in history
+                            st.markdown(response.text)
                             st.session_state.chat_history.append({"role": "assistant", "content": response.text})
                         except Exception as e:
                             error_str = str(e)
                             if "429" in error_str or "Quota exceeded" in error_str:
-                                error_msg = "⏳ AI đang hoạt động quá công suất! API Key của bạn (bản miễn phí) bị giới hạn số lần hỏi liên tục (15-20 lượt/phút). Vì AI tự động gọi lệnh nhiều vòng để lấy dữ liệu thô nên nó đã vượt mốc này. Bạn vui lòng đợi khoảng 40 giây rồi gửi lại câu hỏi nhé!"
+                                error_msg = "⏳ AI đang hoạt động quá công suất! API Key của bạn bị giới hạn số lần hỏi liên tục. Vui lòng đợi khoảng 40 giây rồi thử lại!"
                             else:
-                                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-                                error_msg = f"Xin lỗi, AI gặp lỗi khi xử lý câu hỏi này. Chi tiết lỗi: {e}\n\nCác model khả dụng cho API Key của bạn: {', '.join(available_models)}"
+                                error_msg = f"Xin lỗi, AI gặp lỗi khi xử lý câu hỏi này. Chi tiết lỗi: {e}"
                             st.error(error_msg)
-                            # Không lưu lỗi 429 vào lịch sử để người dùng có thể gửi lại dễ dàng
                             if "429" not in error_str and "Quota exceeded" not in error_str:
                                 st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
                             
@@ -1824,4 +1791,3 @@ esidential_units (số lượng phòng/người ở).
             import traceback
             st.error(f"Lỗi khởi tạo Trợ lý AI: {type(e).__name__} - {str(e)}")
             st.code(traceback.format_exc())
-
