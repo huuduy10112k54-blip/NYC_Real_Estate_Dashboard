@@ -97,7 +97,10 @@ def clean_data(df: pd.DataFrame):
         if col in df.columns:
             Q1, Q3 = df[col].quantile(0.25), df[col].quantile(0.75)
             IQR = Q3 - Q1
-            df[col] = np.clip(df[col], Q1 - 1.5 * IQR, Q3 + 1.5 * IQR)
+            if col == 'sale_price':
+                df[col] = df[col].clip(lower=Q1 - 1.5 * IQR)
+            else:
+                df[col] = np.clip(df[col], Q1 - 1.5 * IQR, Q3 + 1.5 * IQR)
 
     # 2.4 Tạo biến phái sinh
     df['is_residential'] = df.get('tax_class_present', pd.Series(dtype=str)).apply(
