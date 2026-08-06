@@ -1739,8 +1739,9 @@ NHIỆM VỤ CỦA BẠN (Agentic Retrieval + Grounded Synthesis):
                 if m in available_models:
                     model_name = m
                     break
-            elif available_models:
-                model_name = available_models[0]
+            else:
+                if available_models:
+                    model_name = available_models[0]
                 
             model = genai.GenerativeModel(
                 model_name=model_name,
