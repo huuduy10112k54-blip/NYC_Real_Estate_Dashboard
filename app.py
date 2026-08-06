@@ -1465,49 +1465,59 @@ with tab3:
         divider()
 
         # --- NỘI SOI KHU VỰC ĐỘNG ---
-        selected_rows = event.selection.rows if 'event' in locals() and event.selection else []
-        
-        if len(selected_rows) == 0 and search_query and len(search_query) == 1:
-            selected_rows = [0]
+        try:
+            selected_rows = []
+            if 'event' in locals() and hasattr(event, 'selection') and hasattr(event.selection, 'rows'):
+                selected_rows = event.selection.rows
+            elif 'event' in locals() and isinstance(event, dict) and 'selection' in event:
+                selected_rows = event['selection'].get('rows', [])
             
-        if len(selected_rows) > 0:
-            selected_idx = selected_rows[0]
-            selected_n = df_leaderboard.iloc[selected_idx]['Khu Vực']
-            
-            st.markdown(f"""
-            <div id='target-explorer' style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:10px 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:5px; margin-bottom: 5px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
-                <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 4px; font-size: 18px;'>🔎 Hồ sơ Phân tích: {selected_n}</h4>
-                <p style='color:#94A3B8; font-size:13px; margin-bottom: 0px;'>Chi tiết lịch sử giá và chỉ số rủi ro của khu vực bạn vừa chọn trên bảng xếp hạng.</p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Fetch stats
-            n_stats = valid_neighs[valid_neighs['Khu Vực'] == selected_n].iloc[0]
-            boro_of_n = n_stats['Quận']
-            n_gd = n_stats['Số GD']
-            n_thang = n_stats['Số tháng']
-            n_r2 = n_stats['R2']
-            
-            # Calculate Reliability Score
-            vol_score = min((n_gd / 100) * 40, 40)
-            time_score = min((n_thang / 12) * 30, 30)
-            trend_score = min(n_r2 * 30, 30)
-            total_score = vol_score + time_score + trend_score
-            
-            if total_score >= 80:
-                rating = "🟢 Cực kỳ đáng tin"
-                stars = "🌟🌟🌟🌟🌟"
-            elif total_score >= 60:
-                rating = "🟡 Khá đáng tin"
-                stars = "🌟🌟🌟🌟"
-            else:
-                rating = "🟠 Độ tin cậy trung bình"
-                stars = "🌟🌟🌟"
+            if len(selected_rows) == 0 and search_query and len(search_query) == 1:
+                selected_rows = [0]
                 
-            fig_explore, pct_explore = plot_single_neighborhood(boro_of_n, selected_n, f"Lịch sử giá chi tiết: {selected_n}", C_BLUE, height=220)
-            st.plotly_chart(fig_explore, width='stretch')
+            if len(selected_rows) > 0:
+                selected_idx = selected_rows[0]
+                if selected_idx < len(df_leaderboard):
+                    selected_n = df_leaderboard.iloc[selected_idx]['Khu Vực']
+                    
+                    st.markdown(f"""
+                    <div id='target-explorer' style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:10px 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:5px; margin-bottom: 5px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
+                        <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 4px; font-size: 18px;'>🔎 Hồ sơ Phân tích: {selected_n}</h4>
+                        <p style='color:#94A3B8; font-size:13px; margin-bottom: 0px;'>Chi tiết lịch sử giá và chỉ số rủi ro của khu vực bạn vừa chọn trên bảng xếp hạng.</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Fetch stats
+                    n_stats = valid_neighs[valid_neighs['Khu Vực'] == selected_n].iloc[0]
+                    boro_of_n = n_stats['Quận']
+                    n_gd = n_stats['Số GD']
+                    n_thang = n_stats['Số tháng']
+                    n_r2 = n_stats['R2']
+                    
+                    # Calculate Reliability Score
+                    vol_score = min((n_gd / 100) * 40, 40)
+                    time_score = min((n_thang / 12) * 30, 30)
+                    trend_score = min(n_r2 * 30, 30)
+                    total_score = vol_score + time_score + trend_score
+                    
+                    if total_score >= 80:
+                        rating = "🟢 Cực kỳ đáng tin"
+                        stars = "🌟🌟🌟🌟🌟"
+                    elif total_score >= 60:
+                        rating = "🟡 Khá đáng tin"
+                        stars = "🌟🌟🌟🌟"
+                    else:
+                        rating = "🟠 Độ tin cậy trung bình"
+                        stars = "🌟🌟🌟"
+                        
+                    fig_explore, pct_explore = plot_single_neighborhood(boro_of_n, selected_n, f"Lịch sử giá chi tiết: {selected_n}", C_BLUE, height=220)
+                    st.plotly_chart(fig_explore, width='stretch')
+        except Exception as e:
+            import traceback
+            st.error(f"Lỗi khi hiển thị biểu đồ: {str(e)}")
+            st.code(traceback.format_exc())
             
-            # Show Reliability Card
+        # Show Reliability Card
             st.markdown(f"""
             <div style='background-color:rgba(15, 23, 42, 0.04); border-left:4px solid #3B82F6; padding:10px 15px; border-radius:8px; margin-bottom: 8px; margin-top: -15px;'>
                 <div style='display:flex; justify-content:space-between; align-items:center;'>
