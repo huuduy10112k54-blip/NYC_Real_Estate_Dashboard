@@ -343,11 +343,19 @@ def load_data(query=None, zip_mtime=None):
                                 do_extract = True
                         
                         if do_extract:
-                            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                                zip_ref.extractall(os.path.dirname(db_path))
+                            try:
+                                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                                    zip_ref.extractall(os.path.dirname(db_path))
+                            except zipfile.BadZipFile as e:
+                                if not os.path.exists(db_path):
+                                    raise Exception(f"File zip bị lỗi (có thể do Git LFS) và không tìm thấy file db: {e}")
                 except ImportError:
-                    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                        zip_ref.extractall(os.path.dirname(db_path))
+                    try:
+                        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                            zip_ref.extractall(os.path.dirname(db_path))
+                    except zipfile.BadZipFile as e:
+                        if not os.path.exists(db_path):
+                            raise Exception(f"File zip bị lỗi (có thể do Git LFS) và không tìm thấy file db: {e}")
                 
         conn = sqlite3.connect(db_path)
         
