@@ -1840,15 +1840,74 @@ with tab7:
 
 @st.cache_data
 def load_comps_data():
+    """
+    Đọc trực tiếp từ fact_property_amenities + fact_sales + các dim tables.
+    Tính toán has_X_1km và amenity_score động từ dữ liệu thực tế.
+    """
     try:
-        import os
-        if not os.path.exists('output/recommendation_comps.csv'):
-            st.error(f"File không tồn tại. Thư mục hiện tại: {os.getcwd()}, các file: {os.listdir('output') if os.path.exists('output') else 'No output dir'}")
-            return pd.DataFrame()
-        return pd.read_csv('output/recommendation_comps.csv')
+        import sqlite3, os
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.db')
+        conn = sqlite3.connect(db_path)
+
+        df = pd.read_sql_query("""
+            SELECT
+                l.location_id,
+                l.address,
+                l.zip_code,
+                b.borough_name,
+                p.building_class_category,
+                fs.sale_price,
+                -- Khoảng cách (km)
+                fa.dist_to_nearest_subway,
+                fa.dist_to_nearest_park,
+                fa.dist_to_nearest_hospital,
+                fa.dist_to_nearest_school,
+                fa.dist_to_nearest_supermarket,
+                fa.dist_to_nearest_university,
+                -- Số lượng trong 1km
+                fa.num_subway_within_1km,
+                fa.num_park_within_1km,
+                fa.num_hospital_within_1km,
+                fa.num_school_within_1km,
+                fa.num_supermarket_within_1km,
+                fa.num_university_within_1km
+            FROM fact_sales fs
+            JOIN dim_location       l  ON fs.location_id    = l.location_id
+            JOIN dim_neighborhood   n  ON l.neighborhood_id  = n.neighborhood_id
+            JOIN dim_borough        b  ON n.borough_id       = b.borough_id
+            JOIN dim_property       p  ON fs.property_id     = p.property_id
+            JOIN fact_property_amenities fa ON l.location_id = fa.location_id
+            WHERE fs.sale_price > 10000
+              AND l.zip_code IS NOT NULL
+        """, conn)
+        conn.close()
+
+        # ── Tính has_X_1km (boolean: có tiện ích trong 1km không) ──
+        df['has_subway_1km']      = (df['num_subway_within_1km']      > 0).astype(int)
+        df['has_park_1km']        = (df['num_park_within_1km']        > 0).astype(int)
+        df['has_hospital_1km']    = (df['num_hospital_within_1km']    > 0).astype(int)
+        df['has_school_1km']      = (df['num_school_within_1km']      > 0).astype(int)
+        df['has_supermarket_1km'] = (df['num_supermarket_within_1km'] > 0).astype(int)
+        df['has_university_1km']  = (df['num_university_within_1km']  > 0).astype(int)
+
+        # ── Tính amenity_score (trọng số theo tầm quan trọng BĐS) ──
+        df['amenity_score'] = (
+            df['has_subway_1km']      * 30 +
+            df['has_school_1km']      * 25 +
+            df['has_supermarket_1km'] * 20 +
+            df['has_park_1km']        * 15 +
+            df['has_hospital_1km']    * 10
+        )
+
+        # Đảm bảo zip_code là string để group đúng
+        df['zip_code'] = df['zip_code'].astype(str).str.strip()
+
+        return df
+
     except Exception as e:
-        st.error(f"Lỗi đọc data: {e}")
+        st.error(f"Lỗi đọc dữ liệu AI Finder: {e}")
         return pd.DataFrame()
+
 
 with tab8:
     st.markdown("""
@@ -1886,7 +1945,6 @@ with tab8:
             req_park = st.checkbox("🌳 Có Công viên")
             req_supermarket = st.checkbox("🛒 Có Siêu thị/Tạp hóa")
             req_hospital = st.checkbox("🏥 Có Bệnh viện/Phòng khám")
-            req_gym = st.checkbox("💪 Có Phòng Gym")
             
             do_search = st.button("🔍 Tìm Kiếm Comps", use_container_width=True, type='primary')
             
@@ -1912,8 +1970,6 @@ with tab8:
                         filtered = filtered[filtered['has_supermarket_1km'] == 1]
                     if req_hospital:
                         filtered = filtered[filtered['has_hospital_1km'] == 1]
-                    if req_gym:
-                        filtered = filtered[filtered['has_gym_1km'] == 1]
                         
                     if len(filtered) == 0:
                         st.error("Không tìm thấy Bất động sản nào thỏa mãn toàn bộ tiêu chí. Vui lòng nới lỏng bộ lọc.")
@@ -1940,8 +1996,8 @@ with tab8:
                             best_boro = best_row['borough_name']
                             med_price = best_row['sale_price']
                             
-                        st.success(f"### 🎯 ĐỀ XUẤT TỐT NHẤT: Mã Bưu Chính (Zip Code) {int(best_zip)}")
-                        st.markdown(f"**📍 Khu vực:** {best_boro} | **💰 Giá trung vị (Comps):** ")
+                        st.success(f"### 🎯 ĐỀ XUẤT TỐT NHẤT: Mã Bưu Chính (Zip Code) {best_zip}")
+                        st.markdown(f"**📍 Khu vực:** {best_boro} | **💰 Giá trung vị (Comps):** ${med_price:,.0f}")
                         st.markdown("*Khu vực Zip Code này có mật độ tiện ích cao nhất đáp ứng đủ các tiêu chí bạn chọn. Dưới đây là các Căn nhà tham chiếu (Comps) tiêu biểu đã từng giao dịch:*")
                         
                         comps_in_zip = filtered[filtered['zip_code'] == best_zip].sort_values('amenity_score', ascending=False).head(3)
@@ -1953,15 +2009,14 @@ with tab8:
                             park_tag = "🌳 Công viên" if row['has_park_1km'] else ""
                             market_tag = "🛒 Siêu thị" if row.get('has_supermarket_1km') else ""
                             hosp_tag = "🏥 Bệnh viện" if row.get('has_hospital_1km') else ""
-                            gym_tag = "💪 Gym" if row.get('has_gym_1km') else ""
-                            tags = " | ".join(filter(None, [school_tag, subway_tag, park_tag, market_tag, hosp_tag, gym_tag]))
+                            tags = " | ".join(filter(None, [school_tag, subway_tag, park_tag, market_tag, hosp_tag]))
                             
                             st.markdown(f"""
                             <div style='border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #db2777; background: #fafafa;'>
                                 <h4 style='margin-top: 0; color: #1e293b;'>🏠 {row['address']}</h4>
                                 <div style='display: flex; justify-content: space-between; font-size: 14px;'>
                                     <div><b>Phân khúc:</b> {row['building_class_category']}</div>
-                                    <div style='color: #059669; font-weight: bold;'>💵 </div>
+                                    <div style='color: #059669; font-weight: bold;'>💵 ${row['sale_price']:,.0f}</div>
                                 </div>
                                 <div style='font-size: 13px; color: #64748b; margin-top: 8px;'>
                                     <b>Tiện ích 1km:</b> {tags}
