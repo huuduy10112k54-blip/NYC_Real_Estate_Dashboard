@@ -1852,41 +1852,39 @@ with tab8:
         }
         df_fi['Feature_Name'] = df_fi['Feature'].map(feature_names).fillna(df_fi['Feature'])
         
-        # Create Grouped Bar Chart
-        df_fi = df_fi.sort_values(by=['Importance'])
-        fig = px.bar(
-            df_fi, 
-            x='Importance', 
-            y='Feature_Name',
-            color='Year',
-            barmode='group',
-            orientation='h',
-            title='So sánh Mức độ đóng góp vào Giá Nhà (2024 vs 2025)',
-            labels={'Importance': 'Tỷ trọng ảnh hưởng', 'Feature_Name': 'Yếu tố', 'Year': 'Năm'},
-            color_discrete_sequence=['#4338ca', '#34d399']  # Purple-blue for 2024, Green for 2025
-        )
-        fig.update_layout(
-            yaxis={'categoryorder':'total ascending'},
-            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
-            margin=dict(r=20, t=60)
-        )
-        
-        col1, col2 = st.columns([2, 1])
+        df_2024 = df_fi[df_fi['Year'] == '2024'].sort_values('Importance')
+        df_2025 = df_fi[df_fi['Year'] == '2025'].sort_values('Importance')
+
+        fig_2024 = px.bar(df_2024, x='Importance', y='Feature_Name', orientation='h',
+                          title='Mức độ đóng góp Giá Nhà - Năm 2024',
+                          labels={'Importance': 'Tỷ trọng', 'Feature_Name': ''},
+                          color_discrete_sequence=['#4338ca'])
+        fig_2024.update_layout(yaxis={'categoryorder':'total ascending'}, margin=dict(l=0, r=20, t=50, b=10))
+
+        fig_2025 = px.bar(df_2025, x='Importance', y='Feature_Name', orientation='h',
+                          title='Mức độ đóng góp Giá Nhà - Năm 2025',
+                          labels={'Importance': 'Tỷ trọng', 'Feature_Name': ''},
+                          color_discrete_sequence=['#34d399'])
+        fig_2025.update_layout(yaxis={'categoryorder':'total ascending'}, margin=dict(l=0, r=20, t=50, b=10))
+
+        col1, col2 = st.columns(2)
         with col1:
-            st.plotly_chart(fig, use_container_width=True)
-            
+            st.plotly_chart(fig_2024, use_container_width=True)
         with col2:
-            st.info("""
-            **💡 Kết luận chính (Phân tích thực tế 2024-2025):**
+            st.plotly_chart(fig_2025, use_container_width=True)
             
-            1. 🥇 **Siêu thị (Supermarket):** Mật độ siêu thị trong bán kính 1km và khoảng cách đến siêu thị gần nhất là 2 yếu tố tác động mạnh nhất đến giá nhà ở (chiếm hơn 25% tổng tỷ trọng). Điều này phản ánh nhu cầu tiện ích sinh hoạt hàng ngày cực kỳ cao.
-            
-            2. 🥈 **Trường học (School):** Xếp ở vị trí thứ 3, chứng tỏ việc nhà gần trường học là một bảo chứng vững chắc cho giá trị bất động sản đô thị.
-            
-            3. 📉 **Ga Tàu & Bệnh viện:** Khá bất ngờ khi Ga tàu điện ngầm (Subway) đã giảm mạnh sức ảnh hưởng, nhường chỗ cho tiện ích dân sinh. Bệnh viện (Hospital) cũng xếp chót bảng do tác động từ tiếng ồn và xe cứu thương.
-            
-            *(Mô hình áp dụng công thức Haversine để tính chính xác khoảng cách địa lý theo đơn vị Mét cho hơn 35.000 căn nhà)*
-            """)
-            
+        st.info("""
+        **💡 Kết luận chính (Phân tích tổng hợp cả năm 2024 và cả năm 2025):**
+        *(Lưu ý: Dữ liệu này tổng hợp toàn bộ các giao dịch phát sinh trong cả năm chứ không chỉ tính riêng thời điểm đầu/cuối năm).*
+        
+        1. 🥇 **Siêu thị (Supermarket):** Mật độ siêu thị trong bán kính 1km và khoảng cách đến siêu thị gần nhất luôn là yếu tố tác động mạnh nhất đến giá nhà ở qua các năm. Điều này phản ánh nhu cầu tiện ích sinh hoạt hàng ngày cực kỳ cao.
+        
+        2. 🥈 **Trường học (School):** Xếp ở vị trí thứ 3, chứng tỏ việc nhà gần trường học là một bảo chứng vững chắc cho giá trị bất động sản đô thị.
+        
+        3. 📉 **Sự dịch chuyển (2024 -> 2025):** Các yếu tố tiện ích dân sinh tiếp tục giữ vị trí cốt lõi, trong khi hạ tầng giao thông như Ga tàu điện ngầm có xu hướng chững lại về sức ảnh hưởng.
+        
+        *(Mô hình áp dụng công thức Haversine để tính chính xác khoảng cách địa lý theo đơn vị Mét cho hơn 35.000 căn nhà)*
+        """)
+        
     except Exception as e:
         st.error(f"Chưa có dữ liệu phân tích không gian. Lỗi: {e}")
