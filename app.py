@@ -769,6 +769,7 @@ with tab0:
     with ca:
         fig = px.bar(bor_cnt.sort_values('Giao dịch'), x='Giao dịch', y='Borough', orientation='h',
                      color='Borough', color_discrete_map=BOROUGH_COLORS, text='Giao dịch',
+                     labels={'Borough':'Quận', 'Giao dịch':'Số giao dịch'},
                      title="Số giao dịch theo quận")
         fig.update_traces(texttemplate='%{text:,}', textposition='auto')
         clayout(fig, h=280, t=40, r=80)
@@ -779,6 +780,7 @@ with tab0:
         fig = px.bar(bor_med.sort_values('Giá trung vị'), x='Giá trung vị', y='Borough', orientation='h',
                      color='Borough', color_discrete_map=BOROUGH_COLORS,
                      text=bor_med.sort_values('Giá trung vị')['Giá trung vị'].apply(fmt_M),
+                     labels={'Borough':'Quận', 'Giá trung vị':'Giá trung vị ($)'},
                      title="Giá trung vị theo quận ($)")
         fig.update_traces(textposition='auto')
         clayout(fig, h=280, t=40, r=100)
@@ -1769,7 +1771,7 @@ with tab6:
 with tab7:
     st.markdown("""
     ## 🚇 Phân tích Tác động Tiện ích đến Giá nhà (2024 - 2025)
-    *Phân tích này sử dụng khoảng cách vật lý chính xác đến từng mét vuông từ **hơn 35.000 căn nhà** (dựa trên tệp dữ liệu không gian PLUTO) đến các tiện ích công cộng.*
+    *Phân tích này sử dụng khoảng cách vật lý chính xác từ **50.200 căn nhà** (dựa trên dữ liệu OpenStreetMap và Geocoding) đến các tiện ích công cộng.*
     *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
     """)
     
@@ -1821,13 +1823,11 @@ with tab7:
         **💡 Kết luận chính (Phân tích tổng hợp cả năm 2024 và cả năm 2025):**
         *(Lưu ý: Dữ liệu này tổng hợp toàn bộ các giao dịch phát sinh trong cả năm chứ không chỉ tính riêng thời điểm đầu/cuối năm).*
         
-        1. 🥇 **Siêu thị (Supermarket):** Mật độ siêu thị trong bán kính 1km và khoảng cách đến siêu thị gần nhất luôn là yếu tố tác động mạnh nhất đến giá nhà ở qua các năm. Điều này phản ánh nhu cầu tiện ích sinh hoạt hàng ngày cực kỳ cao.
+        1. 🥇 **Sự dịch chuyển xu hướng (2024 -> 2025):** Năm 2024, người mua định giá cao vị trí gần các trường Đại học, Bệnh viện và chú trọng tuổi thọ công trình. Sang 2025, xu hướng "Sống xanh & Tiện dụng" lên ngôi mạnh mẽ khi mật độ Công viên và khoảng cách đến Siêu thị chiếm vị trí top đầu.
         
-        2. 🥈 **Trường học (School):** Xếp ở vị trí thứ 3, chứng tỏ việc nhà gần trường học là một bảo chứng vững chắc cho giá trị bất động sản đô thị.
+        2. 🥈 **Hạ tầng cốt lõi (Subway & School):** Mật độ Ga Tàu điện ngầm (Subway) và Trường học luôn duy trì sức ảnh hưởng lớn qua các năm, khẳng định giao thông công cộng và giáo dục là bảo chứng vững chắc cho giá trị bất động sản đô thị.
         
-        3. 📉 **Sự dịch chuyển (2024 -> 2025):** Các yếu tố tiện ích dân sinh tiếp tục giữ vị trí cốt lõi, trong khi hạ tầng giao thông như Ga tàu điện ngầm có xu hướng chững lại về sức ảnh hưởng.
-        
-        *(Mô hình áp dụng công thức Haversine để tính chính xác khoảng cách địa lý theo đơn vị Mét cho hơn 35.000 căn nhà)*
+        *(Mô hình áp dụng thuật toán Không gian cKDTree để tính chính xác khoảng cách địa lý theo đơn vị Km cho 50.200 căn nhà)*
         """)
         
     except Exception as e:
