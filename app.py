@@ -1823,9 +1823,9 @@ with tab7:
         **💡 Kết luận chính (Phân tích tổng hợp cả năm 2024 và cả năm 2025):**
         *(Lưu ý: Dữ liệu này tổng hợp toàn bộ các giao dịch phát sinh trong cả năm chứ không chỉ tính riêng thời điểm đầu/cuối năm).*
         
-        1. 🥇 **Sự dịch chuyển xu hướng (2024 -> 2025):** Năm 2024, người mua định giá cao vị trí gần các trường Đại học, Bệnh viện và chú trọng tuổi thọ công trình. Sang 2025, xu hướng "Sống xanh & Tiện dụng" lên ngôi mạnh mẽ khi mật độ Công viên và khoảng cách đến Siêu thị chiếm vị trí top đầu.
+        1. 🥇 **Xu hướng 2024 (Giáo dục dẫn đầu):** Mật độ Trường học (School) và khoảng cách đến các trường Đại học (University) đóng vai trò then chốt trong nhóm tiện ích (chỉ xếp sau tổng diện tích). Điều này phản ánh ưu tiên mạnh mẽ của người mua nhà cho một môi trường giáo dục tốt.
         
-        2. 🥈 **Hạ tầng cốt lõi (Subway & School):** Mật độ Ga Tàu điện ngầm (Subway) và Trường học luôn duy trì sức ảnh hưởng lớn qua các năm, khẳng định giao thông công cộng và giáo dục là bảo chứng vững chắc cho giá trị bất động sản đô thị.
+        2. 🥈 **Xu hướng 2025 (Y tế & Giao thông lên ngôi):** Sang năm 2025, Mật độ Bệnh viện (Hospital) và Ga Tàu điện ngầm (Subway) trong bán kính 1km vươn lên trở thành 2 yếu tố chi phối mạnh nhất đến giá nhà. Cho thấy sự dịch chuyển nhu cầu sang tiện ích chăm sóc sức khỏe và hạ tầng di chuyển tiện lợi.
         
         *(Mô hình áp dụng thuật toán Không gian cKDTree để tính chính xác khoảng cách địa lý theo đơn vị Km cho 50.200 căn nhà)*
         """)
