@@ -1,12 +1,14 @@
 {
   "Linear Regression": {
-    "MAE": 477916,
-    "RMSE": 648127,
-    "R2": 0.3492
+    "MAE": 1346050,
+    "RMSE": 15511096,
+    "R2": 0.1107,
+    "MAPE": Infinity
   },
   "Random Forest": {
-    "MAE": 393795,
-    "RMSE": 580038,
-    "R2": 0.4788
+    "MAE": 1273928,
+    "RMSE": 15187594,
+    "R2": 0.1474,
+    "MAPE": Infinity
   }
 }
