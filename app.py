@@ -698,15 +698,16 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # ════════════════════════════════════════════════════════════
 # TABS
 # ════════════════════════════════════════════════════════════
-tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "📍  Tổng quan",
     "🏢  Phân tích khu vực",
     "📊  Yếu tố quyết định giá",
-    "Xu hướng & Khuyến nghị đầu tư",
+    "📉 Xu hướng & Khuyến nghị đầu tư",
     "🤖  Dự báo & Mô hình ML",
     "🌊 Lướt sóng & Đầu cơ",
     "💬 Trợ lý AI (Phân tích Data)",
     "🚇 Tiện ích 2024-2025",
+    "🎯 AI Finder (Comps)",
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -1823,3 +1824,128 @@ with tab7:
         
     except Exception as e:
         st.error(f"Chưa có dữ liệu phân tích không gian. Lỗi: {e}")
+
+
+# ════════════════════════════════════════════════════════════
+# TAB 8 — AI FINDER (COMPS)
+# ════════════════════════════════════════════════════════════
+
+@st.cache_data
+def load_comps_data():
+    try:
+        return pd.read_csv('output/recommendation_comps.csv')
+    except Exception:
+        return pd.DataFrame()
+
+with tab8:
+    st.markdown("""
+    <div style='background:linear-gradient(135deg,#db2777,#be185d,#9d174d);border-radius:14px;
+    padding:18px 24px;color:#fff;margin-bottom:22px;
+    box-shadow:0 6px 24px rgba(219,39,119,0.35)'>
+    <b style='font-size:15px;letter-spacing:-0.3px'>🎯 Định vị Bất động sản Tham chiếu (Comparable Properties)</b><br>
+    <span style='font-size:13px;opacity:0.9'>Công cụ tìm kiếm Cụm Zip Code và Căn nhà tham chiếu (Comps) dựa trên ngân sách và tiện ích 1km.</span>
+    </div>""", unsafe_allow_html=True)
+
+    df_comps = load_comps_data()
+    
+    if df_comps.empty:
+        st.warning("Đang chờ dữ liệu Comps...")
+    else:
+        col_filter, col_res = st.columns([1, 2.2])
+        
+        with col_filter:
+            st.markdown("### 🎛️ Bộ Lọc (Smart Filters)")
+            
+            # Budget
+            min_price = 100000
+            max_price = 5000000
+            budget = st.slider("Ngân sách ($)", min_value=min_price, max_value=max_price, value=(300000, 1500000), step=50000)
+            
+            # Borough
+            boroughs = ["Tất cả"] + sorted(df_comps['borough_name'].dropna().unique().tolist())
+            selected_boro = st.selectbox("Quận (Borough)", boroughs)
+            
+            # Type
+            b_types = ["Tất cả"] + sorted(df_comps['building_class_category'].dropna().unique().tolist())
+            selected_type = st.selectbox("Loại Bất động sản", b_types)
+            
+            st.markdown("#### 🌟 Tiện ích < 1km")
+            req_school = st.checkbox("🏫 Có Trường học")
+            req_subway = st.checkbox("🚇 Có Ga Tàu điện ngầm")
+            req_park = st.checkbox("🌳 Có Công viên")
+            
+            do_search = st.button("🔍 Tìm Kiếm Comps", use_container_width=True, type='primary')
+            
+        with col_res:
+            if do_search:
+                with st.spinner("Đang định vị cụm Zip Code phù hợp..."):
+                    filtered = df_comps[
+                        (df_comps['sale_price'] >= budget[0]) & 
+                        (df_comps['sale_price'] <= budget[1])
+                    ]
+                    
+                    if selected_boro != "Tất cả":
+                        filtered = filtered[filtered['borough_name'] == selected_boro]
+                    if selected_type != "Tất cả":
+                        filtered = filtered[filtered['building_class_category'] == selected_type]
+                        
+                    if req_school:
+                        filtered = filtered[filtered['has_school_1km'] == 1]
+                    if req_subway:
+                        filtered = filtered[filtered['has_subway_1km'] == 1]
+                    if req_park:
+                        filtered = filtered[filtered['has_park_1km'] == 1]
+                        
+                    if len(filtered) == 0:
+                        st.error("Không tìm thấy Bất động sản nào thỏa mãn toàn bộ tiêu chí. Vui lòng nới lỏng bộ lọc.")
+                    else:
+                        # Find best Zip Code (by highest mean amenity_score)
+                        zip_stats = filtered.groupby('zip_code').agg({
+                            'amenity_score': 'mean',
+                            'sale_price': 'median',
+                            'address': 'count',
+                            'borough_name': 'first'
+                        }).rename(columns={'address': 'count'}).reset_index()
+                        
+                        # Only consider Zip Codes with at least 5 comps for reliability
+                        zip_stats = zip_stats[zip_stats['count'] >= 3]
+                        
+                        if len(zip_stats) == 0:
+                            best_zip = filtered['zip_code'].mode()[0]
+                            zip_info = filtered[filtered['zip_code'] == best_zip].iloc[0]
+                            best_boro = zip_info['borough_name']
+                            med_price = filtered[filtered['zip_code'] == best_zip]['sale_price'].median()
+                        else:
+                            best_row = zip_stats.sort_values('amenity_score', ascending=False).iloc[0]
+                            best_zip = best_row['zip_code']
+                            best_boro = best_row['borough_name']
+                            med_price = best_row['sale_price']
+                            
+                        st.success(f"### 🎯 ĐỀ XUẤT TỐT NHẤT: Mã Bưu Chính (Zip Code) {int(best_zip)}")
+                        st.markdown(f"**📍 Khu vực:** {best_boro} | **💰 Giá trung vị (Comps):** ")
+                        st.markdown("*Khu vực Zip Code này có mật độ tiện ích cao nhất đáp ứng đủ các tiêu chí bạn chọn. Dưới đây là các Căn nhà tham chiếu (Comps) tiêu biểu đã từng giao dịch:*")
+                        
+                        comps_in_zip = filtered[filtered['zip_code'] == best_zip].sort_values('amenity_score', ascending=False).head(3)
+                        
+                        for idx, row in comps_in_zip.iterrows():
+                            # HTML Card
+                            school_tag = "🏫 Trường học" if row['has_school_1km'] else ""
+                            subway_tag = "🚇 Ga Tàu" if row['has_subway_1km'] else ""
+                            park_tag = "🌳 Công viên" if row['has_park_1km'] else ""
+                            tags = " | ".join(filter(None, [school_tag, subway_tag, park_tag]))
+                            
+                            st.markdown(f"""
+                            <div style='border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #db2777; background: #fafafa;'>
+                                <h4 style='margin-top: 0; color: #1e293b;'>🏠 {row['address']}</h4>
+                                <div style='display: flex; justify-content: space-between; font-size: 14px;'>
+                                    <div><b>Phân khúc:</b> {row['building_class_category']}</div>
+                                    <div style='color: #059669; font-weight: bold;'>💵 </div>
+                                </div>
+                                <div style='font-size: 13px; color: #64748b; margin-top: 8px;'>
+                                    <b>Tiện ích 1km:</b> {tags}
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+            else:
+                st.info("👈 Hãy điều chỉnh thông số bên trái và bấm **Tìm Kiếm Comps**")
+
