@@ -1852,8 +1852,8 @@ with tab8:
         }
         df_fi['Feature_Name'] = df_fi['Feature'].map(feature_names).fillna(df_fi['Feature'])
         
-        df_2024 = df_fi[df_fi['Year'] == '2024'].sort_values('Importance')
-        df_2025 = df_fi[df_fi['Year'] == '2025'].sort_values('Importance')
+        df_2024 = df_fi[df_fi['Year'] == 2024].sort_values('Importance')
+        df_2025 = df_fi[df_fi['Year'] == 2025].sort_values('Importance')
 
         fig_2024 = px.bar(df_2024, x='Importance', y='Feature_Name', orientation='h',
                           title='Mức độ đóng góp Giá Nhà - Năm 2024',
