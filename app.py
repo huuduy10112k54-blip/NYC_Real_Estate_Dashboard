@@ -1878,6 +1878,9 @@ with tab8:
             req_school = st.checkbox("🏫 Có Trường học")
             req_subway = st.checkbox("🚇 Có Ga Tàu điện ngầm")
             req_park = st.checkbox("🌳 Có Công viên")
+            req_supermarket = st.checkbox("🛒 Có Siêu thị/Tạp hóa")
+            req_hospital = st.checkbox("🏥 Có Bệnh viện/Phòng khám")
+            req_gym = st.checkbox("💪 Có Phòng Gym")
             
             do_search = st.button("🔍 Tìm Kiếm Comps", use_container_width=True, type='primary')
             
@@ -1900,6 +1903,12 @@ with tab8:
                         filtered = filtered[filtered['has_subway_1km'] == 1]
                     if req_park:
                         filtered = filtered[filtered['has_park_1km'] == 1]
+                    if req_supermarket:
+                        filtered = filtered[filtered['has_supermarket_1km'] == 1]
+                    if req_hospital:
+                        filtered = filtered[filtered['has_hospital_1km'] == 1]
+                    if req_gym:
+                        filtered = filtered[filtered['has_gym_1km'] == 1]
                         
                     if len(filtered) == 0:
                         st.error("Không tìm thấy Bất động sản nào thỏa mãn toàn bộ tiêu chí. Vui lòng nới lỏng bộ lọc.")
@@ -1937,7 +1946,10 @@ with tab8:
                             school_tag = "🏫 Trường học" if row['has_school_1km'] else ""
                             subway_tag = "🚇 Ga Tàu" if row['has_subway_1km'] else ""
                             park_tag = "🌳 Công viên" if row['has_park_1km'] else ""
-                            tags = " | ".join(filter(None, [school_tag, subway_tag, park_tag]))
+                            market_tag = "🛒 Siêu thị" if row.get('has_supermarket_1km') else ""
+                            hosp_tag = "🏥 Bệnh viện" if row.get('has_hospital_1km') else ""
+                            gym_tag = "💪 Gym" if row.get('has_gym_1km') else ""
+                            tags = " | ".join(filter(None, [school_tag, subway_tag, park_tag, market_tag, hosp_tag, gym_tag]))
                             
                             st.markdown(f"""
                             <div style='border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #db2777; background: #fafafa;'>
