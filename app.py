@@ -1870,9 +1870,7 @@ with tab8:
             boroughs = ["Tất cả"] + sorted(df_comps['borough_name'].dropna().unique().tolist())
             selected_boro = st.selectbox("Quận (Borough)", boroughs)
             
-            # Type
-            b_types = ["Tất cả"] + sorted(df_comps['building_class_category'].dropna().unique().tolist())
-            selected_type = st.selectbox("Loại Bất động sản", b_types)
+
             
             st.markdown("#### 🌟 Tiện ích < 1km")
             req_school = st.checkbox("🏫 Có Trường học")
@@ -1894,8 +1892,7 @@ with tab8:
                     
                     if selected_boro != "Tất cả":
                         filtered = filtered[filtered['borough_name'] == selected_boro]
-                    if selected_type != "Tất cả":
-                        filtered = filtered[filtered['building_class_category'] == selected_type]
+
                         
                     if req_school:
                         filtered = filtered[filtered['has_school_1km'] == 1]
