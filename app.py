@@ -1833,8 +1833,13 @@ with tab7:
 @st.cache_data
 def load_comps_data():
     try:
+        import os
+        if not os.path.exists('output/recommendation_comps.csv'):
+            st.error(f"File không tồn tại. Thư mục hiện tại: {os.getcwd()}, các file: {os.listdir('output') if os.path.exists('output') else 'No output dir'}")
+            return pd.DataFrame()
         return pd.read_csv('output/recommendation_comps.csv')
-    except Exception:
+    except Exception as e:
+        st.error(f"Lỗi đọc data: {e}")
         return pd.DataFrame()
 
 with tab8:
