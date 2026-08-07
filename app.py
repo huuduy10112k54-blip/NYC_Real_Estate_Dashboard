@@ -1796,8 +1796,15 @@ with tab7:
             'dist_to_nearest_supermarket': 'Khoảng cách đến Siêu thị (Mét)',
             'num_supermarket_within_1km': 'Số Siêu thị bán kính 1km'
         }
-        df_fi['Feature_Name'] = df_fi['Feature'].map(feature_names).fillna(df_fi['Feature'])
         
+        # Lọc bỏ các biến cấu trúc (chỉ giữ lại các biến tiện ích không gian)
+        structural_feats = ['building_age', 'residential_units', 'gross_sqft']
+        df_fi = df_fi[~df_fi['Feature'].isin(structural_feats)].copy()
+        
+        # Chuẩn hóa lại tỷ trọng (để tổng các tiện ích = 100%)
+        df_fi['Importance'] = df_fi.groupby('Year')['Importance'].transform(lambda x: x / x.sum())
+        
+        df_fi['Feature_Name'] = df_fi['Feature'].map(feature_names).fillna(df_fi['Feature'])
         df_2024 = df_fi[df_fi['Year'] == 2024].sort_values('Importance')
         df_2025 = df_fi[df_fi['Year'] == 2025].sort_values('Importance')
 
