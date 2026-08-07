@@ -698,7 +698,7 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # ════════════════════════════════════════════════════════════
 # TABS
 # ════════════════════════════════════════════════════════════
-tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📍  Tổng quan",
     "🏢  Phân tích khu vực",
     "📊  Yếu tố quyết định giá",
@@ -706,7 +706,6 @@ tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "🤖  Dự báo & Mô hình ML",
     "🌊 Lướt sóng & Đầu cơ",
     "💬 Trợ lý AI (Phân tích Data)",
-    "🗺️ Bản đồ Nhiệt (Heatmap)",
     "🚇 Tiện ích 2024-2025",
 ])
 
@@ -1756,73 +1755,9 @@ with tab5:
 with tab6:
     st.info("🚧 Tính năng Trợ lý AI đang được bảo trì để tối ưu hóa với bộ dữ liệu 2.1 triệu giao dịch. Vui lòng quay lại sau!")
 
-with tab7:
-    st.markdown("""
-    <div style='background:linear-gradient(135deg,#4338ca,#6366f1,#818cf8);border-radius:14px;
-    padding:18px 24px;color:#fff;margin-bottom:22px;
-    box-shadow:0 6px 24px rgba(99,102,241,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>📍 Trực quan Hóa Tọa độ Bất Động Sản (Geospatial Analysis)</b><br>
-    <span style='font-size:13px;opacity:0.9'>Phân tích giá nhà trung bình và mật độ giao dịch theo Zip Code trên toàn New York City.</span>
-    </div>""", unsafe_allow_html=True)
-    
-    st.markdown("<div class='section-q'>Bản đồ Tương tác 3D</div>", unsafe_allow_html=True)
-    st.markdown("<div class='section-cap'>Các cột biểu diễn số lượng giao dịch hoặc giá trị trung bình theo mã Zip Code. Giữ phím Ctrl/Cmd hoặc click chuột phải để xoay bản đồ 3D!</div>", unsafe_allow_html=True)
-
-    try:
-        # Lấy dữ liệu Heatmap từ DB
-        query_geo = """
-        SELECT l.zip_code, AVG(f.sale_price) as avg_price, COUNT(f.sale_id) as total_sales, z.lat, z.lon
-        FROM fact_sales f
-        JOIN dim_location l ON f.location_id = l.location_id
-        JOIN dim_zipcode z ON l.zip_code = z.zip_code
-        WHERE z.lat IS NOT NULL AND f.sale_price > 10000
-        GROUP BY l.zip_code, z.lat, z.lon
-        """
-        df_geo = load_data(query_geo, zip_mtime=_get_zip_mtime())
-        
-        if df_geo is not None and not df_geo.empty:
-            df_geo['avg_price'] = df_geo['avg_price'].fillna(0).astype(float)
-            df_geo['total_sales'] = df_geo['total_sales'].fillna(0).astype(int)
-            
-            # Chuẩn hóa độ cao (Elevation) để vẽ 3D đẹp hơn
-            df_geo['elevation'] = df_geo['avg_price'] / 1000
-            
-            # Custom Tooltip
-            tooltip = {
-                "html": "<b>Zip Code:</b> {zip_code} <br/> <b>Giá TB:</b>  <br/> <b>Giao dịch:</b> {total_sales}",
-                "style": {"backgroundColor": "#4c1d95", "color": "white"}
-            }
-
-            layer = pdk.Layer(
-                'ColumnLayer',
-                data=df_geo,
-                get_position='[lon, lat]',
-                get_elevation='elevation',
-                elevation_scale=1.5,
-                radius=600,
-                get_fill_color='[255, 140 - (elevation/100), 0, 200]',
-                pickable=True,
-                auto_highlight=True,
-            )
-
-            view_state = pdk.ViewState(
-                latitude=40.7128,
-                longitude=-74.0060,
-                zoom=10,
-                pitch=50,
-            )
-
-            r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip=tooltip, map_style="mapbox://styles/mapbox/dark-v10")
-            st.pydeck_chart(r)
-            
-        else:
-            st.info("Chưa có dữ liệu tọa độ hoặc dữ liệu chưa đủ để vẽ bản đồ.")
-    except Exception as e:
-        st.error(f"Lỗi khi load bản đồ: {e}")
-
 # Cache bust 2
 
-with tab8:
+with tab7:
     st.markdown("""
     ## 🚇 Phân tích Tác động Tiện ích đến Giá nhà (2024 - 2025)
     *Phân tích này sử dụng khoảng cách vật lý chính xác đến từng mét vuông từ **hơn 35.000 căn nhà** (dựa trên tệp dữ liệu không gian PLUTO) đến các tiện ích công cộng.*
