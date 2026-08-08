@@ -714,7 +714,7 @@ tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "🤖  Dự báo & Mô hình ML",
     "🌊 Lướt sóng & Đầu cơ",
     "💬 Trợ lý AI (Phân tích Data)",
-    "🚇 Tiện ích 2024-2025",
+    "📍 Tiện ích 2024-2026",
     "🎯 AI Finder (Comps)",
 ])
 
@@ -1770,7 +1770,7 @@ with tab6:
 
 with tab7:
     st.markdown("""
-    ## 🚇 Phân tích Tác động Tiện ích đến Giá nhà (2024 - 2025)
+    ## 🚇 Phân tích Tác động Tiện ích đến Giá nhà (2024 - 2026)
     *Phân tích này sử dụng khoảng cách vật lý chính xác từ **50.200 căn nhà** (dựa trên dữ liệu OpenStreetMap và Geocoding) đến các tiện ích công cộng.*
     *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
     """)
