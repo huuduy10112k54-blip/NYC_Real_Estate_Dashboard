@@ -706,14 +706,13 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # ════════════════════════════════════════════════════════════
 # TABS
 # ════════════════════════════════════════════════════════════
-tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
-    "📍  Tổng quan",
-    "🏢  Phân tích khu vực",
-    "📊  Yếu tố quyết định giá",
-    "📉 Xu hướng & Khuyến nghị đầu tư",
+tab0, tab1, tab2, tab3, tab4, tab5, tab7, tab8 = st.tabs([
+    "📊  Tổng quan",
+    "🏘️  Phân tích khu vực",
+    "📈  Yếu tố quyết định giá",
+    "💡 Xu hướng & Khuyến nghị đầu tư",
     "🤖  Dự báo & Mô hình ML",
     "🌊 Lướt sóng & Đầu cơ",
-    "💬 Trợ lý AI (Phân tích Data)",
     "📍 Tiện ích 2024-2026",
     "🎯 AI Finder (Comps)",
 ])
@@ -1763,8 +1762,8 @@ with tab5:
         clayout(fig_roi, h=350)
         st.plotly_chart(fig_roi, width='stretch')
 
-with tab6:
-    st.info("🚧 Tính năng Trợ lý AI đang được bảo trì để tối ưu hóa với bộ dữ liệu 2.1 triệu giao dịch. Vui lòng quay lại sau!")
+# with tab6:
+#     st.info("🚧 Tính năng Trợ lý AI đang được bảo trì để tối ưu hóa với bộ dữ liệu 2.1 triệu giao dịch. Vui lòng quay lại sau!")
 
 # Cache bust 2
 
