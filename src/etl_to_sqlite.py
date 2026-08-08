@@ -60,12 +60,11 @@ def load_clean_csv() -> pd.DataFrame:
     df = pd.read_csv(CLEAN_CSV, low_memory=False)
     log(f"  → Tải thành công: {len(df):,} dòng × {len(df.columns)} cột")
     
-    # Lọc dữ liệu năm 2024-2025
-    df['sale_year_temp'] = pd.to_numeric(df['sale_year'], errors='coerce')
-    df = df[df['sale_year_temp'] >= 2024].copy()
-    df.drop(columns=['sale_year_temp'], inplace=True)
-    df.reset_index(drop=True, inplace=True)
-    log(f"  → Đã lọc chỉ lấy giao dịch từ năm 2024 trở đi: {len(df):,} dòng")
+    df['sale_year_temp'] = pd.to_datetime(df['sale_date'], errors='coerce').dt.year
+    df = df[df['sale_year_temp'].notna()].copy()
+    
+    # Do NOT filter by year 2024-2025. Keep all 2.1 million historical records.
+    log(f"  → Đang xử lý toàn bộ dữ liệu lịch sử: {len(df):,} dòng")
     
     return df
 
