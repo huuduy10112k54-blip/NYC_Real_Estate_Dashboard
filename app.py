@@ -706,15 +706,12 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # ════════════════════════════════════════════════════════════
 # TABS
 # ════════════════════════════════════════════════════════════
-tab0, tab1, tab2, tab3, tab4, tab5, tab7, tab8 = st.tabs([
+tab0, tab1, tab2, tab3, tab4 = st.tabs([
     "📊  Tổng quan",
     "🏘️  Phân tích khu vực",
     "📈  Yếu tố quyết định giá",
     "💡 Xu hướng & Khuyến nghị đầu tư",
     "🤖  Dự báo & Mô hình ML",
-    "🌊 Lướt sóng & Đầu cơ",
-    "📍 Tiện ích 2024-2026",
-    "🎯 AI Finder (Comps)",
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -1720,7 +1717,7 @@ with tab4:
 # ????????????????????????????????????????????????????????????
 # TAB 5  L?T SNG & ?U C
 # ????????????????????????????????????????????????????????????
-with tab5:
+if False: # with tab5:
     st.markdown("""
     <div style='background:linear-gradient(135deg,#4338ca,#6366f1,#818cf8);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
@@ -1767,7 +1764,7 @@ with tab5:
 
 # Cache bust 2
 
-with tab7:
+if False: # with tab7:
     st.markdown("""
     ## 🚇 Phân tích Tác động Tiện ích đến Giá nhà (2024 - 2026)
     *Phân tích này sử dụng khoảng cách vật lý chính xác từ **50.200 căn nhà** (dựa trên dữ liệu OpenStreetMap và Geocoding) đến các tiện ích công cộng.*
@@ -1927,7 +1924,7 @@ def load_comps_data():
         return pd.DataFrame()
 
 
-with tab8:
+if False: # with tab8:
     st.markdown("""
     <div style='background:linear-gradient(135deg,#db2777,#be185d,#9d174d);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
