@@ -428,7 +428,7 @@ def load_data(query=None, zip_mtime=None):
 
             
             # Xử lý ngày tháng ngay trong chunk để giải phóng text
-            chunk['sale_date_parsed'] = pd.to_datetime(chunk['sale_date'], dayfirst=True, errors='coerce')
+            chunk['sale_date_parsed'] = pd.to_datetime(chunk['sale_date'], format="%Y-%m-%d", errors='coerce')
             chunk['sale_month']       = chunk['sale_date_parsed'].dt.month.fillna(0).astype('int16')
             
             # Khôi phục building_category và building_type từ building_class_category (bị thiếu trong SQLite)
