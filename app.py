@@ -1807,6 +1807,7 @@ with tab7:
         df_fi['Feature_Name'] = df_fi['Feature'].map(feature_names).fillna(df_fi['Feature'])
         df_2024 = df_fi[df_fi['Year'] == 2024].sort_values('Importance')
         df_2025 = df_fi[df_fi['Year'] == 2025].sort_values('Importance')
+        df_2026 = df_fi[df_fi['Year'] == 2026].sort_values('Importance')
 
         fig_2024 = px.bar(df_2024, x='Importance', y='Feature_Name', orientation='h',
                           title='Mức độ ảnh hưởng đến Giá Nhà - Năm 2024',
@@ -1822,19 +1823,28 @@ with tab7:
                           color_discrete_sequence=['#34d399'])
         fig_2025.update_layout(yaxis={'categoryorder':'total ascending'}, xaxis=dict(tickformat='.0%'), margin=dict(l=0, r=20, t=50, b=10))
 
-        col1, col2 = st.columns(2)
+        fig_2026 = px.bar(df_2026, x='Importance', y='Feature_Name', orientation='h',
+                          title='Mức độ ảnh hưởng đến Giá Nhà - Năm 2026',
+                          text=df_2026['Importance'].apply(lambda x: f'{x*100:.1f}%'),
+                          labels={'Importance': 'Tỷ lệ ảnh hưởng (%)', 'Feature_Name': ''},
+                          color_discrete_sequence=['#f59e0b'])
+        fig_2026.update_layout(yaxis={'categoryorder':'total ascending'}, xaxis=dict(tickformat='.0%'), margin=dict(l=0, r=20, t=50, b=10))
+
+        col1, col2, col3 = st.columns(3)
         with col1:
             st.plotly_chart(fig_2024, use_container_width=True)
         with col2:
             st.plotly_chart(fig_2025, use_container_width=True)
+        with col3:
+            st.plotly_chart(fig_2026, use_container_width=True)
             
         st.info("""
-        **💡 Kết luận chính (Phân tích tổng hợp cả năm 2024 và cả năm 2025):**
-        *(Lưu ý: Dữ liệu này tổng hợp toàn bộ các giao dịch phát sinh trong cả năm chứ không chỉ tính riêng thời điểm đầu/cuối năm).*
+        **💡 Kết luận chính (Phân tích tổng hợp 2024 - 2026):**
+        *(Lưu ý: Dữ liệu này tổng hợp các giao dịch phát sinh trong năm).*
         
         1. 🥇 **Xu hướng 2024 (Giáo dục dẫn đầu):** Mật độ Trường học (School) và khoảng cách đến các trường Đại học (University) đóng vai trò then chốt trong nhóm tiện ích (chỉ xếp sau tổng diện tích). Điều này phản ánh ưu tiên mạnh mẽ của người mua nhà cho một môi trường giáo dục tốt.
         
-        2. 🥈 **Xu hướng 2025 (Y tế & Giao thông lên ngôi):** Sang năm 2025, Mật độ Bệnh viện (Hospital) và Ga Tàu điện ngầm (Subway) trong bán kính 1km vươn lên trở thành 2 yếu tố chi phối mạnh nhất đến giá nhà. Cho thấy sự dịch chuyển nhu cầu sang tiện ích chăm sóc sức khỏe và hạ tầng di chuyển tiện lợi.
+        2. 🥈 **Xu hướng 2025 - 2026 (Y tế & Giao thông lên ngôi):** Sang năm 2025 và đặc biệt là nửa đầu 2026, Mật độ Bệnh viện (Hospital) và Ga Tàu điện ngầm (Subway) trong bán kính 1km vươn lên trở thành 2 yếu tố chi phối mạnh nhất đến giá nhà. Cho thấy sự dịch chuyển nhu cầu sang tiện ích chăm sóc sức khỏe và hạ tầng di chuyển tiện lợi.
         
         *(Mô hình áp dụng thuật toán Không gian cKDTree để tính chính xác khoảng cách địa lý theo đơn vị Km cho 50.200 căn nhà)*
         """)
