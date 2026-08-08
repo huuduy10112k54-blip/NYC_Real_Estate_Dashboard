@@ -1809,16 +1809,18 @@ with tab7:
         df_2025 = df_fi[df_fi['Year'] == 2025].sort_values('Importance')
 
         fig_2024 = px.bar(df_2024, x='Importance', y='Feature_Name', orientation='h',
-                          title='Mức độ đóng góp Giá Nhà - Năm 2024',
-                          labels={'Importance': 'Tỷ trọng', 'Feature_Name': ''},
+                          title='Mức độ ảnh hưởng đến Giá Nhà - Năm 2024',
+                          text=df_2024['Importance'].apply(lambda x: f'{x*100:.1f}%'),
+                          labels={'Importance': 'Tỷ lệ ảnh hưởng (%)', 'Feature_Name': ''},
                           color_discrete_sequence=['#4338ca'])
-        fig_2024.update_layout(yaxis={'categoryorder':'total ascending'}, margin=dict(l=0, r=20, t=50, b=10))
+        fig_2024.update_layout(yaxis={'categoryorder':'total ascending'}, xaxis=dict(tickformat='.0%'), margin=dict(l=0, r=20, t=50, b=10))
 
         fig_2025 = px.bar(df_2025, x='Importance', y='Feature_Name', orientation='h',
-                          title='Mức độ đóng góp Giá Nhà - Năm 2025',
-                          labels={'Importance': 'Tỷ trọng', 'Feature_Name': ''},
+                          title='Mức độ ảnh hưởng đến Giá Nhà - Năm 2025',
+                          text=df_2025['Importance'].apply(lambda x: f'{x*100:.1f}%'),
+                          labels={'Importance': 'Tỷ lệ ảnh hưởng (%)', 'Feature_Name': ''},
                           color_discrete_sequence=['#34d399'])
-        fig_2025.update_layout(yaxis={'categoryorder':'total ascending'}, margin=dict(l=0, r=20, t=50, b=10))
+        fig_2025.update_layout(yaxis={'categoryorder':'total ascending'}, xaxis=dict(tickformat='.0%'), margin=dict(l=0, r=20, t=50, b=10))
 
         col1, col2 = st.columns(2)
         with col1:
