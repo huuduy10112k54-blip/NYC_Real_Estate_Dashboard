@@ -1882,6 +1882,8 @@ def load_comps_data():
                 l.address,
                 l.zip_code,
                 b.borough_name,
+                n.neighborhood_name,
+
                 p.building_class_category,
                 fs.sale_price,
                 -- Khoảng cách (km)
