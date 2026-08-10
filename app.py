@@ -1978,7 +1978,6 @@ with tab8:
             req_school = st.checkbox("🏫 Có Trường học")
             req_subway = st.checkbox("🚇 Có Ga Tàu điện ngầm")
             req_park = st.checkbox("🌳 Có Công viên")
-            req_supermarket = st.checkbox("🛒 Có Siêu thị/Tạp hóa")
             req_hospital = st.checkbox("🏥 Có Bệnh viện/Phòng khám")
             
             do_search = st.button("🔍 Tìm Kiếm Comps", use_container_width=True, type='primary')
@@ -2005,8 +2004,6 @@ with tab8:
                         filtered = filtered[filtered['has_subway_1km'] == 1]
                     if req_park:
                         filtered = filtered[filtered['has_park_1km'] == 1]
-                    if req_supermarket:
-                        filtered = filtered[filtered['has_supermarket_1km'] == 1]
                     if req_hospital:
                         filtered = filtered[filtered['has_hospital_1km'] == 1]
                         
