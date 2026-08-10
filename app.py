@@ -1637,10 +1637,12 @@ with tab3:
                         <p style='color:#94a3b8; font-size:15px;'>Hệ thống sẽ tự động hiển thị biểu đồ lịch sử giá và phân tích rủi ro cho khu vực bạn chọn.</p>
                     </div>
                     """, unsafe_allow_html=True)
-                elif len(selected_rows) == 0 and len(valid_neighs) == 0:
                     st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản (>= 30 giao dịch) trong bộ lọc hiện tại.")
 
-
+        except Exception as e_tab3:
+            import traceback
+            st.error(f'Lỗi nghiêm trọng ở Tab 3: {str(e_tab3)}')
+            st.code(traceback.format_exc())
 
     elif chon_khau_vi == "🌊 Lướt sóng ngắn hạn (Rủi ro cao)":
         st.markdown("""
@@ -1687,10 +1689,6 @@ with tab3:
     # ════════════════════════════════════════════════════════════
     # TAB 4 — DỰ BÁO & MÔ HÌNH ML
     # ════════════════════════════════════════════════════════════
-    except Exception as e_tab3:
-        import traceback
-        st.error(f'Lỗi nghiêm trọng ở Tab 3: {str(e_tab3)}')
-        st.code(traceback.format_exc())
 with tab4:
     st.markdown("""
     <div style='background:linear-gradient(135deg,#0f172a,#1e293b,#334155);border-radius:14px;
