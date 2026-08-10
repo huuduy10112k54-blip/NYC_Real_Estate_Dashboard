@@ -635,6 +635,15 @@ def render_factor_summary_matrix(df_in):
 # LOAD DỮ LIỆU
 # ════════════════════════════════════════════════════════════
 df_raw, load_err = load_data(zip_mtime=_get_zip_mtime())
+
+if df_raw is not None:
+    # Safely filter for 2024-2026 after all data is loaded
+    df_raw['sale_year'] = pd.to_numeric(df_raw['sale_year'], errors='coerce')
+    df_raw = df_raw[df_raw['sale_year'] >= 2024].reset_index(drop=True)
+    if df_raw.empty:
+        df_raw = None
+        load_err = "Không có dữ liệu nào khớp với năm 2024 trở đi."
+
 if df_raw is None:
     st.error(f"⚠️ **Lỗi:** {load_err}")
     st.info("Hãy chạy `main.py` trước.")
