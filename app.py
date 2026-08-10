@@ -411,9 +411,8 @@ def load_data(query=None, zip_mtime=None):
             chunk['sale_price'] = pd.to_numeric(chunk['sale_price'], errors='coerce')
             chunk = chunk[chunk['sale_price'] > 10_000].copy()
             
-            # Chỉ lấy dữ liệu từ năm 2024 trở đi theo đúng giới hạn của đề tài
-            chunk['sale_year'] = pd.to_numeric(chunk['sale_year'], errors='coerce')
-            chunk = chunk[chunk['sale_year'] >= 2024].copy()
+            
+
             
             # Chuẩn hoá số
             for c in num_cols:
@@ -453,12 +452,15 @@ def load_data(query=None, zip_mtime=None):
                 else:
                     chunk[c] = pd.to_numeric(chunk[c], downcast='float')
                     
-            processed_chunks.append(chunk)
+            
+        if not processed_chunks:
+            engine.close()
+            return None, "Không có dữ liệu nào khớp với năm 2024 trở đi."
             
         df = pd.concat(processed_chunks, ignore_index=True)
         engine.close()
     except Exception as e:
-        return None, f"Lỗi đọc SQLite: {e}"
+        return None, f"Lỗi đọc SQLite: {type(e).__name__} - {e}"
 
     missing = [c for c in REQUIRED_COLS if c not in df.columns]
     if missing:
