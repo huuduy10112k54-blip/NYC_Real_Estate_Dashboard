@@ -1966,7 +1966,13 @@ with tab8:
             boroughs = ["Tất cả"] + sorted(df_comps['borough_name'].dropna().unique().tolist())
             selected_boro = st.selectbox("Quận (Borough)", boroughs)
             
-
+            # Neighborhood
+            if selected_boro != "Tất cả":
+                avail_neighs = sorted(df_comps[df_comps['borough_name'] == selected_boro]['neighborhood_name'].dropna().unique().tolist())
+            else:
+                avail_neighs = sorted(df_comps['neighborhood_name'].dropna().unique().tolist())
+            neighs = ["Tất cả"] + avail_neighs
+            selected_neigh = st.selectbox("Khu vực (Neighborhood)", neighs)
             
             st.markdown("#### 🌟 Tiện ích < 1km")
             req_school = st.checkbox("🏫 Có Trường học")
@@ -1985,6 +1991,10 @@ with tab8:
                         (df_comps['sale_price'] <= budget[1])
                     ]
                     
+                    if selected_boro != "Tất cả":
+                        filtered = filtered[filtered['borough_name'] == selected_boro]
+                    if selected_neigh != "Tất cả":
+                        filtered = filtered[filtered['neighborhood_name'] == selected_neigh]
                     if selected_boro != "Tất cả":
                         filtered = filtered[filtered['borough_name'] == selected_boro]
 
