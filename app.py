@@ -452,6 +452,7 @@ def load_data(query=None, zip_mtime=None):
                 else:
                     chunk[c] = pd.to_numeric(chunk[c], downcast='float')
                     
+            processed_chunks.append(chunk)
             
         if not processed_chunks:
             engine.close()
