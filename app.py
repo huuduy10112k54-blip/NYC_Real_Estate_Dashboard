@@ -1882,18 +1882,15 @@ def load_comps_data():
                 l.address,
                 l.zip_code,
                 b.borough_name,
-                n.neighborhood_name,
-
+                n.neighborhood_name AS neighborhood_name,
                 p.building_class_category,
                 fs.sale_price,
-                -- Khoảng cách (km)
                 fa.dist_to_nearest_subway,
                 fa.dist_to_nearest_park,
                 fa.dist_to_nearest_hospital,
                 fa.dist_to_nearest_school,
                 fa.dist_to_nearest_supermarket,
                 fa.dist_to_nearest_university,
-                -- Số lượng trong 1km
                 fa.num_subway_within_1km,
                 fa.num_park_within_1km,
                 fa.num_hospital_within_1km,
@@ -1934,7 +1931,10 @@ def load_comps_data():
         return df
 
     except Exception as e:
-        st.error(f"Lỗi đọc dữ liệu AI Finder: {e}")
+        error_msg = str(e)
+        if len(error_msg) > 500:
+            error_msg = error_msg[:100] + " ... " + error_msg[-300:]
+        st.error(f"Lỗi đọc dữ liệu AI Finder: {type(e).__name__} - {error_msg}")
         return pd.DataFrame()
 
 
