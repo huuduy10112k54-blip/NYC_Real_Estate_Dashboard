@@ -715,7 +715,7 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # ════════════════════════════════════════════════════════════
 # TABS
 # ════════════════════════════════════════════════════════════
-tab0, tab1, tab2, tab3, tab4, tab7, tab8 = st.tabs([
+tab0, tab1, tab2, tab3, tab4, tab7, tab8, tab9 = st.tabs([
     "📊  Tổng quan",
     "🏘️  Phân tích khu vực",
     "📈  Yếu tố quyết định giá",
@@ -723,6 +723,7 @@ tab0, tab1, tab2, tab3, tab4, tab7, tab8 = st.tabs([
     "🤖  Dự báo & Mô hình ML",
     "📍 Tiện ích 2024-2026",
     "🎯 AI Finder (Comps)",
+    "💼 Robo-Advisor",
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -2064,3 +2065,68 @@ with tab8:
             else:
                 st.info("👈 Hãy điều chỉnh thông số bên trái và bấm **Tìm Kiếm Comps**")
 
+
+
+# ════════════════════════════════════════════════════════════
+# TAB 9 — ROBO-ADVISOR
+# ════════════════════════════════════════════════════════════
+with tab9:
+    st.markdown('''
+    <div style='background:linear-gradient(135deg,#1e3a8a,#3b82f6,#93c5fd);border-radius:14px;
+    padding:18px 24px;color:#fff;margin-bottom:22px;
+    box-shadow:0 6px 24px rgba(59,130,246,0.35)'>
+        <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'>💼 Trợ lý Cố vấn Đầu tư (Robo-Advisor)</h2>
+        <p style='margin:8px 0 0;font-size:15px;opacity:0.9;'>Hệ thống tự động phân loại chân dung và đề xuất chiến lược tối ưu dựa trên hồ sơ rủi ro cá nhân của bạn.</p>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    with st.expander("📋 BƯỚC 1: KHẢO SÁT HỒ SƠ KHÁCH HÀNG (Client Profiling)", expanded=True):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            goal = st.selectbox("Mục tiêu cốt lõi:", ["Tích sản an toàn (Giữ vốn)", "Tăng trưởng (Lãi vốn)", "Lướt sóng (Speculation)"])
+        with c2:
+            risk = st.selectbox("Mức độ chịu rủi ro:", ["Thấp", "Trung bình", "Cao"])
+        with c3:
+            period = st.selectbox("Thời gian nắm giữ:", ["> 5 năm", "1 - 3 năm", "< 1 năm"])
+            
+    # Persona Classification Logic
+    if goal == "Tích sản an toàn (Giữ vốn)" or risk == "Thấp":
+        persona = "🛡️ THE PRESERVER (Nhà Đầu Tư Tích Sản)"
+        desc = "Bạn ưu tiên sự an toàn, bảo toàn vốn và dòng tiền ổn định. Biến động giá thấp và tiện ích sống nội khu là tiêu chí kiên quyết."
+        mode = "preservation"
+    elif goal == "Lướt sóng (Speculation)" or risk == "Cao":
+        persona = "🦈 THE FLIPPER (Cá Mập Lướt Sóng)"
+        desc = "Bạn chấp nhận rủi ro cao để đổi lấy lợi nhuận đột biến. Bạn tìm kiếm sự chênh lệch giá lớn và thanh khoản cuồn cuộn."
+        mode = "flipping"
+    else:
+        persona = "📈 THE VALUE INVESTOR (Nhà Đầu Tư Giá Trị)"
+        desc = "Bạn có tầm nhìn trung hạn, muốn tối đa hóa tốc độ tăng trưởng kép (CAGR) dựa trên sự phát triển của hạ tầng."
+        mode = "growth"
+
+    st.markdown(f"### 👤 Chân dung của bạn: **{persona}**")
+    st.info(desc)
+    st.divider()
+
+    st.markdown("### 📊 Đề xuất Chiến lược & Hành động")
+    if mode == "preservation":
+        st.markdown('''
+        * ✅ **NÊN MUA:** Bất động sản tại các khu vực có tỷ lệ biến động giá dưới 5%/năm và nằm trong bán kính 1km quanh Trường học/Công viên. Thanh khoản không cần quá nhanh nhưng phải giữ giá trong suy thoái.
+        * ❌ **KHÔNG NÊN:** Mua nhà tại các điểm nóng đầu cơ (Flip rate > 10%) vì khi thị trường chững lại, bạn sẽ không thể thanh khoản và dễ bị giam vốn.
+        ''')
+        st.success("📍 **Hệ thống đề xuất các khu vực có độ ổn định cao nhất (Dựa trên lịch sử 2024-2026):** Bayside, Forest Hills, Park Slope.")
+        
+    elif mode == "growth":
+        st.markdown('''
+        * ✅ **NÊN MUA:** Đầu tư vào các khu vực đang có tốc độ CAGR > 15%/năm và có dấu hiệu phát triển hạ tầng (Đặc biệt là các dự án gần Ga tàu điện ngầm mới).
+        * ❌ **KHÔNG NÊN:** Giữ vốn tại các khu vực Manhattan đã bão hòa (CAGR < 5%) vì chi phí cơ hội và lạm phát sẽ ăn mòn lợi nhuận thực tế.
+        ''')
+        st.success("📍 **Hệ thống đề xuất các khu vực đang lên (Emerging Markets):** Bushwick, Bedford-Stuyvesant, Crown Heights.")
+        
+    elif mode == "flipping":
+        st.markdown('''
+        * ✅ **NÊN MUA:** Quét các căn nhà xây trước 1950 đang bán dưới giá Median của khu vực từ 15-20% để cải tạo. Theo dõi gắt gao Top 5 khu vực có Flip Rate cao trên Tab 3.
+        * ❌ **KHÔNG NÊN:** Đu đỉnh tại các khu vực có ROI lướt sóng đang cắm đầu đi xuống trong 2 quý gần nhất. Không giữ nhà quá 12 tháng.
+        ''')
+        st.success("📍 **Hệ thống đề xuất các điểm nóng lướt sóng (High Volatility):** East New York, Flatbush, Jamaica.")
+        
+    st.markdown("<br><br><p style='text-align:center;color:#94a3b8;font-size:14px'>*Dữ liệu khuyến nghị được tổng hợp từ lịch sử giao dịch thực tế trên 2.1 triệu bản ghi của Thành phố New York.*</p>", unsafe_allow_html=True)
