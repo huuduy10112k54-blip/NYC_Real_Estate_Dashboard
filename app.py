@@ -1297,12 +1297,12 @@ with tab_evid:
                     elif val < 0: return "color: #DC2626; font-weight: bold;" # Red
                     return "color: #475569; font-weight: bold;" # Slate (0%)
         
-                format_dict = {"Tăng Trưởng (%)": "{:+.1f}%"}
+                format_dict = {"CAGR (%)": "{:+.1f}%"}
                 for col in df_tbl.columns:
                     if "Giá" in col:
                         format_dict[col] = "${:,.0f}"
                 
-                return df_tbl.style.format(format_dict).map(get_text_color, subset=["Tăng Trưởng (%)"])
+                return df_tbl.style.format(format_dict).map(get_text_color, subset=["CAGR (%)"])
 
             with st.expander("🔍 Xem thêm: Dữ liệu Toàn cảnh & Phân hóa cấp Quận", expanded=False):
                 st.markdown("<h4 style='color:#1e293b; margin-top:0px;'>Toàn cảnh thị trường</h4>", unsafe_allow_html=True)
@@ -1348,16 +1348,16 @@ with tab_evid:
                     if len(sub) < 1: continue
                     start_p = sub['sale_price'].iloc[0]
                     end_p = sub['sale_price'].iloc[-1]
-                    pct = (end_p - start_p) / start_p * 100
+                    pct = ((end_p / start_p) ** (12 / 19.0) - 1) * 100
                     boro_stats.append({
                         "Quận": boro,
                         col_start: start_p,
                         col_end: end_p,
-                        "Tăng Trưởng (%)": pct
+                        "CAGR (%)": pct
                     })
         
                 if boro_stats:
-                    df_table = pd.DataFrame(boro_stats).sort_values("Tăng Trưởng (%)", ascending=False)
+                    df_table = pd.DataFrame(boro_stats).sort_values("CAGR (%)", ascending=False)
                     st.dataframe(format_table(df_table), use_container_width=True, hide_index=True)
             
             divider()
@@ -1394,17 +1394,17 @@ with tab_evid:
 
                     neigh_stats.append({
                         "Quận": boro, "Khu Vực": n, col_start: start_p, 
-                        col_end: end_p, "Tăng Trưởng (%)": pct, 
+                        col_end: end_p, "CAGR (%)": pct, 
                         "Slope": coef[0], "R2": r2, "Số tháng": len(sub), "Số GD": n_gd
                     })
         
             if neigh_stats:
                 df_neigh_all = pd.DataFrame(neigh_stats)
-                top_3 = df_neigh_all.sort_values("Tăng Trưởng (%)", ascending=False).head(3).reset_index(drop=True)
-                bot_3 = df_neigh_all.sort_values("Tăng Trưởng (%)", ascending=True).head(3).reset_index(drop=True)
+                top_3 = df_neigh_all.sort_values("CAGR (%)", ascending=False).head(3).reset_index(drop=True)
+                bot_3 = df_neigh_all.sort_values("CAGR (%)", ascending=True).head(3).reset_index(drop=True)
         
-                top_3_disp = top_3[["Khu Vực", col_start, col_end, "Tăng Trưởng (%)"]]
-                bot_3_disp = bot_3[["Khu Vực", col_start, col_end, "Tăng Trưởng (%)"]]
+                top_3_disp = top_3[["Khu Vực", col_start, col_end, "CAGR (%)"]]
+                bot_3_disp = bot_3[["Khu Vực", col_start, col_end, "CAGR (%)"]]
 
                 c1, c2 = st.columns(2)
                 with c1:
@@ -1425,7 +1425,7 @@ with tab_evid:
                     if len(sub_n) > 0:
                         base_n = sub_n["sale_price"].iloc[0]
                         sub_n['growth_pct'] = (sub_n['sale_price'] - base_n) / base_n * 100
-                        final_pct = sub_n['growth_pct'].iloc[-1]
+                        final_pct = ((sub_n['sale_price'].iloc[-1] / base_n) ** (12 / 19.0) - 1) * 100
                     
                         fig.add_trace(go.Scatter(
                             x=sub_n['ym_dt'], y=sub_n['growth_pct'],
@@ -1457,7 +1457,7 @@ with tab_evid:
                         n_gd = n_stats['Số GD']
                         n_thang = n_stats['Số tháng']
                         n_r2 = n_stats['R2']
-                        total_score = min((n_gd/500)*40, 40) + min((n_thang/60)*30, 30) + min(n_r2*30, 30)
+                        total_score = min((n_gd/120)*40, 40) + min((n_thang/19)*30, 30) + min(n_r2*30, 30)
                         if total_score >= 80: rating = "Cực kỳ đáng tin"
                         elif total_score >= 60: rating = "Khá đáng tin"
                         else: rating = "Tin cậy TB"
@@ -1501,15 +1501,15 @@ with tab_evid:
                 st.markdown("<h4 style='color:#1e293b; margin-bottom: 5px;'>Bảng xếp hạng và sàng lọc khu vực</h4>", unsafe_allow_html=True)
                 st.markdown("<p style='color:#64748b; font-size:14px; margin-bottom: 15px;'>Bảng tổng hợp toàn bộ các khu vực an toàn. Bạn có thể <b>bấm vào tiêu đề cột</b> để sắp xếp (VD: Sắp xếp theo Lợi suất để tìm top sinh lời, hoặc Giá hiện tại để tìm giá rẻ).</p>", unsafe_allow_html=True)
         
-                valid_neighs = df_neigh_all[(df_neigh_all['Số GD'] >= 30) & (df_neigh_all['Số tháng'] >= 5)].copy()
+                valid_neighs = df_neigh_all[(df_neigh_all['Số GD'] >= 15) & (df_neigh_all['Số tháng'] >= 4)].copy()
                 if len(valid_neighs) > 0:
                     valid_neighs['Điểm Tin Cậy'] = (
-                        (valid_neighs['Số GD'] / 500 * 40).clip(upper=40) + 
-                        (valid_neighs['Số tháng'] / 60 * 30).clip(upper=30) + 
+                        (valid_neighs['Số GD'] / 120 * 40).clip(upper=40) + 
+                        (valid_neighs['Số tháng'] / 19 * 30).clip(upper=30) + 
                         (valid_neighs['R2'] * 30).clip(upper=30)
                     ).round(0)
             
-                    df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "Tăng Trưởng (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
+                    df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "CAGR (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
             
                     all_options = sorted(df_leaderboard['Khu Vực'].unique())
                     search_query = st.multiselect(
@@ -1530,7 +1530,7 @@ with tab_evid:
                         selection_mode="single-row",
                         column_config={
                             col_end: st.column_config.NumberColumn(col_end, format="$%d"),
-                            "Tăng Trưởng (%)": st.column_config.NumberColumn("Tăng Trưởng (%)", format="%.1f%%"),
+                            "CAGR (%)": st.column_config.NumberColumn("CAGR (%)", format="%.1f%%"),
                             "Điểm Tin Cậy": st.column_config.ProgressColumn("Điểm Tin Cậy (/100)", format="%d", min_value=0, max_value=100)
                         }
                     )
