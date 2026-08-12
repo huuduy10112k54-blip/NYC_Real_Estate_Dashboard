@@ -2073,36 +2073,32 @@ with tab_adv:
     </div>
     """, unsafe_allow_html=True)
 
-    adv_t1, adv_t2, adv_t3 = st.tabs(["🛡️ The Preserver (Tích sản)", "📈 The Value Investor (Tăng trưởng)", "🦈 The Flipper (Lướt sóng)"])
+    adv_t1, adv_t2 = st.tabs(["🛡️ Đầu Tư Bền Vững (Dài hạn)", "🏄 Đầu Cơ Ăn Xổi (Ngắn hạn)"])
 
     with adv_t1:
-        st.markdown("### 🛡️ THE PRESERVER (Nhà Đầu Tư Tích Sản)")
-        st.info("Dành cho khách hàng ưu tiên sự an toàn, bảo toàn vốn và dòng tiền ổn định. Biến động giá thấp và tiện ích sống nội khu là tiêu chí kiên quyết.")
+        st.markdown("### 🛡️ NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)")
+        st.info("Dành cho khách hàng ưu tiên sự an tâm, muốn bảo toàn vốn và nhắm tới sự tăng trưởng kép (CAGR) đều đặn trong tầm nhìn 2-5 năm.")
         st.markdown("""
-        * ✅ **NÊN MUA:** Bất động sản tại các khu vực có tỷ lệ biến động giá dưới 5%/năm và nằm trong bán kính 1km quanh Trường học/Công viên. Thanh khoản không cần quá nhanh nhưng phải giữ giá trong suy thoái.
-        * ❌ **KHÔNG NÊN:** Mua nhà tại các điểm nóng đầu cơ (Flip rate > 10%) vì khi thị trường chững lại, bạn sẽ không thể thanh khoản và dễ bị giam vốn.
+        * ✅ **TIÊU CHÍ LÝ TƯỞNG:** 
+            * Điểm Tin Cậy rất cao (Thanh khoản tốt, dữ liệu minh bạch).
+            * CAGR ổn định và vượt trội so với mặt bằng chung toàn thị trường.
+            * Bất động sản nằm gần cụm tiện ích lõi như Ga Tàu điện ngầm (Subway), Bệnh viện và Trường học (những yếu tố giữ giá vững chắc nhất).
+        * ❌ **NÊN TRÁNH:** Giữ vốn tại các khu vực Manhattan đã bão hòa (CAGR < 5%) hoặc lao vào các điểm nóng đầu cơ có biên độ giá giật cục.
         """)
-        st.success("📍 **Khu vực Đề xuất:** Bayside, Forest Hills, Park Slope.")
-        st.markdown("👉 *Chuyển sang Tab 2 (Minh chứng) và chọn Khẩu vị Đầu tư dài hạn để xem số liệu.*")
+        st.success("🎯 **Khu vực đề xuất:** Bayside, Forest Hills, Park Slope, Bedford-Stuyvesant.")
+        st.markdown("💡 *Chuyển sang Tab 2 (Minh chứng Dữ liệu) và kiểm tra Bảng xếp hạng để đối chiếu.*")
 
     with adv_t2:
-        st.markdown("### 📈 THE VALUE INVESTOR (Nhà Đầu Tư Giá Trị)")
-        st.info("Dành cho khách hàng có tầm nhìn trung hạn, muốn tối đa hóa tốc độ tăng trưởng kép (CAGR) dựa trên sự phát triển của hạ tầng.")
+        st.markdown("### 🏄 NHÀ ĐẦU CƠ LƯỚT SÓNG (Ăn xổi)")
+        st.info("Dành cho khách hàng thích '\u0111ánh nhanh rút gọn', chấp nhận rủi ro cao để đổi lấy lợi nhuận đột biến. Dựa vào sóng thị trường và tâm lý Fomo.")
         st.markdown("""
-        * ✅ **NÊN MUA:** Đầu tư vào các khu vực đang có tốc độ CAGR > 15%/năm và có dấu hiệu phát triển hạ tầng (Đặc biệt là các dự án gần Ga tàu điện ngầm mới).
-        * ❌ **KHÔNG NÊN:** Giữ vốn tại các khu vực Manhattan đã bão hòa (CAGR < 5%) vì chi phí cơ hội và lạm phát sẽ ăn mòn lợi nhuận thực tế.
+        * ✅ **TIÊU CHÍ LÝ TƯỞNG:** 
+            * Tốc độ tăng trưởng cực đại (CAGR cao đột biến hoặc dốc ngược trong thời gian ngắn).
+            * Khối lượng giao dịch nổ vol bất thường (chứng tỏ dòng tiền đầu cơ đang đổ dồn về).
+            * Chấp nhận Điểm Tin Cậy thấp (vì biến động rủi ro lớn).
+        * ❌ **NÊN TRÁNH:** Đu đỉnh tại các khu vực có đường xu hướng giá đang cắm đầu đi xuống trong 2-3 tháng gần nhất. Không giữ nhà lâu dài.
         """)
-        st.success("📍 **Khu vực Đề xuất (Emerging Markets):** Bushwick, Bedford-Stuyvesant, Crown Heights.")
-        st.markdown("👉 *Chuyển sang Tab 2 (Minh chứng) và chọn Khẩu vị Đầu tư dài hạn để xem số liệu.*")
-
-    with adv_t3:
-        st.markdown("### 🦈 THE FLIPPER (Cá Mập Lướt Sóng)")
-        st.info("Dành cho khách hàng chấp nhận rủi ro cao để đổi lấy lợi nhuận đột biến. Tìm kiếm sự chênh lệch giá lớn và thanh khoản cuồn cuộn.")
-        st.markdown("""
-        * ✅ **NÊN MUA:** Quét các căn nhà xây trước 1950 đang bán dưới giá Median của khu vực từ 15-20% để cải tạo. Theo dõi gắt gao Top 5 khu vực có Flip Rate cao.
-        * ❌ **KHÔNG NÊN:** Đu đỉnh tại các khu vực có ROI lướt sóng đang cắm đầu đi xuống trong 2 quý gần nhất. Không giữ nhà quá 12 tháng.
-        """)
-        st.success("📍 **Khu vực Đề xuất (High Volatility):** East New York, Flatbush, Jamaica.")
-        st.markdown("👉 *Chuyển sang Tab 2 (Minh chứng) và chọn Khẩu vị Lướt sóng ngắn hạn để xem số liệu.*")
+        st.success("🎯 **Khu vực đề xuất:** East New York, Flatbush, Jamaica.")
+        st.markdown("💡 *Chuyển sang Tab 2 (Minh chứng Dữ liệu) và kiểm tra Bảng xếp hạng để đối chiếu.*")
         
-    st.markdown("<br><p style='text-align:center;color:#94a3b8;font-size:14px'>*Dữ liệu khuyến nghị được tổng hợp từ lịch sử giao dịch thực tế trên 2.1 triệu bản ghi của Thành phố New York.*</p>", unsafe_allow_html=True)
+    st.markdown("<br><p style='text-align:center;color:#94a3b8;font-size:14px'>*Dữ liệu khuyến nghị được tinh chỉnh đặc biệt cho giai đoạn thị trường 2025 - 2026 tại New York.*</p>", unsafe_allow_html=True)
