@@ -637,12 +637,12 @@ def render_factor_summary_matrix(df_in):
 df_raw, load_err = load_data(zip_mtime=_get_zip_mtime())
 
 if df_raw is not None:
-    # Safely filter for 2024-2026 after all data is loaded
+    # Safely filter for 2025-2026 after all data is loaded
     df_raw['sale_year'] = pd.to_numeric(df_raw['sale_year'], errors='coerce')
-    df_raw = df_raw[df_raw['sale_year'] >= 2024].reset_index(drop=True)
+    df_raw = df_raw[df_raw['sale_year'] >= 2025].reset_index(drop=True)
     if df_raw.empty:
         df_raw = None
-        load_err = "Không có dữ liệu nào khớp với năm 2024 trở đi."
+        load_err = "Không có dữ liệu nào khớp với năm 2025 trở đi."
 
 if df_raw is None:
     st.error(f"⚠️ **Lỗi:** {load_err}")
@@ -720,7 +720,7 @@ tab0, tab1, tab2, tab4, tab7, tab_adv, tab_evid, tab_search = st.tabs([
     "🏘️  Phân tích khu vực",
     "📈  Yếu tố quyết định giá",
     "🤖  Dự báo & Mô hình ML",
-    "📍 Tiện ích 2024-2026",
+    "📍 Tiện ích 2025-2026",
     "💡 1. Đề xuất Chiến lược",
     "📊 2. Minh chứng Dữ liệu",
     "🎯 3. Tìm kiếm BĐS (Comps)",
@@ -1782,7 +1782,7 @@ with tab4:
 
 with tab7:
     st.markdown("""
-    ## 🚇 Phân tích Tác động Tiện ích đến Giá nhà (2024 - 2026)
+    ## 🚇 Phân tích Tác động Tiện ích đến Giá nhà (2025 - 2026)
     *Phân tích này sử dụng khoảng cách vật lý chính xác từ **50.200 căn nhà** (dựa trên dữ liệu OpenStreetMap và Geocoding) đến các tiện ích công cộng.*
     *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
     """)
@@ -1817,17 +1817,10 @@ with tab7:
         df_fi['Importance'] = df_fi.groupby('Year')['Importance'].transform(lambda x: x / x.sum())
         
         df_fi['Feature_Name'] = df_fi['Feature'].map(feature_names).fillna(df_fi['Feature'])
-        df_2024 = df_fi[df_fi['Year'] == 2024].sort_values('Importance')
         df_2025 = df_fi[df_fi['Year'] == 2025].sort_values('Importance')
         df_2026 = df_fi[df_fi['Year'] == 2026].sort_values('Importance')
 
-        fig_2024 = px.bar(df_2024, x='Importance', y='Feature_Name', orientation='h',
-                          title='Mức độ ảnh hưởng đến Giá Nhà - Năm 2024',
-                          text=df_2024['Importance'].apply(lambda x: f'{x*100:.1f}%'),
-                          labels={'Importance': 'Tỷ lệ ảnh hưởng (%)', 'Feature_Name': ''},
-                          color_discrete_sequence=['#4338ca'])
-        fig_2024.update_layout(yaxis={'categoryorder':'total ascending'}, xaxis=dict(tickformat='.0%'), margin=dict(l=0, r=20, t=50, b=10))
-
+        
         fig_2025 = px.bar(df_2025, x='Importance', y='Feature_Name', orientation='h',
                           title='Mức độ ảnh hưởng đến Giá Nhà - Năm 2025',
                           text=df_2025['Importance'].apply(lambda x: f'{x*100:.1f}%'),
@@ -1842,21 +1835,19 @@ with tab7:
                           color_discrete_sequence=['#f59e0b'])
         fig_2026.update_layout(yaxis={'categoryorder':'total ascending'}, xaxis=dict(tickformat='.0%'), margin=dict(l=0, r=20, t=50, b=10))
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
-            st.plotly_chart(fig_2024, use_container_width=True)
-        with col2:
             st.plotly_chart(fig_2025, use_container_width=True)
-        with col3:
+        with col2:
             st.plotly_chart(fig_2026, use_container_width=True)
             
         st.info("""
-        **💡 Kết luận chính (Phân tích tổng hợp 2024 - 2026):**
+        **💡 Kết luận chính (Phân tích tổng hợp 2025 - 2026):**
         *(Lưu ý: Dữ liệu này tổng hợp các giao dịch phát sinh trong năm).*
         
-        1. 🥇 **Xu hướng 2024 (Giáo dục dẫn đầu):** Mật độ Trường học (School) và khoảng cách đến các trường Đại học (University) đóng vai trò then chốt trong nhóm tiện ích (chỉ xếp sau tổng diện tích). Điều này phản ánh ưu tiên mạnh mẽ của người mua nhà cho một môi trường giáo dục tốt.
+        1. 🥇 **Năm 2025 (Chuyển dịch nhu cầu):** Mật độ Bệnh viện (Hospital) và Ga Tàu điện ngầm (Subway) trong bán kính 1km bắt đầu cho thấy sự chi phối mạnh mẽ, vượt qua các yếu tố về không gian.
         
-        2. 🥈 **Xu hướng 2025 - 2026 (Y tế & Giao thông lên ngôi):** Sang năm 2025 và đặc biệt là nửa đầu 2026, Mật độ Bệnh viện (Hospital) và Ga Tàu điện ngầm (Subway) trong bán kính 1km vươn lên trở thành 2 yếu tố chi phối mạnh nhất đến giá nhà. Cho thấy sự dịch chuyển nhu cầu sang tiện ích chăm sóc sức khỏe và hạ tầng di chuyển tiện lợi.
+        2. 🥈 **Năm 2026 (Y tế & Giao thông lên ngôi):** Xu hướng này tiếp tục được củng cố trong năm 2026. Ga Tàu điện ngầm và Bệnh viện trở thành 2 tiện ích quan trọng nhất quyết định giá nhà. Điều này phản ánh sự dịch chuyển vĩnh viễn của người mua nhà tại NYC sang ưu tiên sức khỏe và hạ tầng di chuyển tiện lợi.
         
         *(Mô hình áp dụng thuật toán Không gian cKDTree để tính chính xác khoảng cách địa lý theo đơn vị Km cho 50.200 căn nhà)*
         """)
