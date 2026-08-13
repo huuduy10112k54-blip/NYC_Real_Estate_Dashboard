@@ -1576,81 +1576,7 @@ with tab4:
 # Cache bust 2
 
 with tab7:
-    st.markdown(f"""
-    ##  Phân tích Tác động Tiện ích đến Giá nhà (2025 - 2026)
-    *Phân tích này trích xuất từ **{len(df):,} giao dịch**, trong đó sử dụng tọa độ địa lý của **hơn 51.000 giao dịch** hợp lệ trên hệ thống OpenStreetMap để đo lường khoảng cách vật lý chính xác đến các tiện ích công cộng.*
-    *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
-    """)
-    st.warning("⚠️ **LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
-    
-    if st.button("🤖 Chạy lại thuật toán AI cho bộ lọc hiện tại (Mất ~5 giây)", type="primary", use_container_width=True):
-        with st.spinner("Đang truy xuất CSDL và chạy Random Forest Regressor trên tập dữ liệu đã lọc..."):
-            import sqlite3
-            from sklearn.ensemble import RandomForestRegressor
-            import os
-            
-            b_list = "', '".join(selected_boroughs)
-            query = f"""
-            SELECT 
-                f.sale_price,
-                f.sale_year,
-                p.building_age,
-                p.residential_units,
-                p.gross_sqft,
-                a.dist_to_nearest_subway,
-                a.num_subway_within_1km,
-                a.dist_to_nearest_park,
-                a.num_park_within_1km,
-                a.dist_to_nearest_hospital,
-                a.num_hospital_within_1km,
-                a.dist_to_nearest_school,
-                a.num_school_within_1km
-            FROM fact_sales f
-            JOIN dim_property p ON f.property_id = p.property_id
-            JOIN fact_property_amenities a ON f.location_id = a.location_id
-            JOIN dim_location l ON f.location_id = l.location_id
-            JOIN dim_neighborhood n ON l.neighborhood_id = n.neighborhood_id
-            JOIN dim_borough b ON n.borough_id = b.borough_id
-            WHERE f.sale_year BETWEEN {year_range[0]} AND {year_range[1]}
-            AND f.sale_price BETWEEN {price_range[0]} AND {price_range[1]}
-            AND b.borough_name IN ('{b_list}')
-            """
-            db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.db')
-            conn = sqlite3.connect(db_path)
-            df_ml = pd.read_sql(query, conn)
-            conn.close()
-            
-            features = [
-                'dist_to_nearest_subway', 'num_subway_within_1km',
-                'dist_to_nearest_park', 'num_park_within_1km',
-                'dist_to_nearest_hospital', 'num_hospital_within_1km',
-                'dist_to_nearest_school', 'num_school_within_1km',
-                'building_age', 'residential_units', 'gross_sqft'
-            ]
-            
-            # Xử lý khuyết thiếu
-            for col in features:
-                if df_ml[col].notna().any():
-                    df_ml[col] = df_ml[col].fillna(df_ml[col].median())
-                else:
-                    df_ml[col] = df_ml[col].fillna(0)
-            df_ml = df_ml.dropna(subset=['sale_price'])
-            
-            results = []
-            for year in df_ml['sale_year'].unique():
-                df_y = df_ml[df_ml['sale_year'] == year]
-                if len(df_y) < 50: continue
-                rf = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
-                rf.fit(df_y[features], df_y['sale_price'])
-                for feat, imp in zip(features, rf.feature_importances_):
-                    results.append({'Feature': feat, 'Importance': imp, 'Year': year})
-                    
-            if results:
-                df_new = pd.DataFrame(results)
-                df_new.to_csv('output/spatial_feature_importance.csv', index=False)
-                st.rerun()
-            else:
-                st.error("Không đủ dữ liệu để chạy mô hình cho bộ lọc này!")
+    st.markdown("##  Phân tích Tác động Tiện ích đến Giá nhà (2025 - 2026)")
 
     try:
         df_fi = pd.read_csv('output/spatial_feature_importance.csv')
@@ -1709,16 +1635,81 @@ with tab7:
         with col2:
             st.plotly_chart(fig_2026, use_container_width=True)
             
-        st.info("""
-        ** Kết luận chính (Phân tích tổng hợp 2025 - 2026):**
-        *(Lưu ý: Dữ liệu này tổng hợp các giao dịch phát sinh trong năm).*
-        
-        1.  **Năm 2025 (Chuyển dịch nhu cầu):** Mật độ Bệnh viện (Hospital) và Ga Tàu điện ngầm (Subway) trong bán kính 1km bắt đầu cho thấy sự chi phối mạnh mẽ, vượt qua các yếu tố về không gian.
-        
-        2.  **Năm 2026 (Y tế & Giao thông lên ngôi):** Xu hướng này tiếp tục được củng cố trong năm 2026. Ga Tàu điện ngầm và Bệnh viện trở thành 2 tiện ích quan trọng nhất quyết định giá nhà. Điều này phản ánh sự dịch chuyển vĩnh viễn của người mua nhà tại NYC sang ưu tiên sức khỏe và hạ tầng di chuyển tiện lợi.
-        
-        *(Mô hình áp dụng thuật toán Không gian cKDTree để tính chính xác khoảng cách địa lý theo đơn vị Km cho toàn bộ hệ thống nhà ở đang khảo sát)*
+        st.write("---")
+        st.markdown(f"""
+        *Phân tích này trích xuất từ **{len(df):,} giao dịch**, trong đó sử dụng tọa độ địa lý của **hơn 51.000 giao dịch** hợp lệ trên hệ thống OpenStreetMap để đo lường khoảng cách vật lý chính xác đến các tiện ích công cộng.*
+        *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
         """)
+        st.warning("⚠️ **LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
+        
+        if st.button("🤖 Chạy lại thuật toán AI cho bộ lọc hiện tại (Mất ~5 giây)", type="primary", use_container_width=True):
+            with st.spinner("Đang truy xuất CSDL và chạy Random Forest Regressor trên tập dữ liệu đã lọc..."):
+                import sqlite3
+                from sklearn.ensemble import RandomForestRegressor
+                import os
+                
+                b_list = "', '".join(selected_boroughs)
+                query = f"""
+                SELECT 
+                    f.sale_price,
+                    f.sale_year,
+                    p.building_age,
+                    p.residential_units,
+                    p.gross_sqft,
+                    a.dist_to_nearest_subway,
+                    a.num_subway_within_1km,
+                    a.dist_to_nearest_park,
+                    a.num_park_within_1km,
+                    a.dist_to_nearest_hospital,
+                    a.num_hospital_within_1km,
+                    a.dist_to_nearest_school,
+                    a.num_school_within_1km
+                FROM fact_sales f
+                JOIN dim_property p ON f.property_id = p.property_id
+                JOIN fact_property_amenities a ON f.location_id = a.location_id
+                JOIN dim_location l ON f.location_id = l.location_id
+                JOIN dim_neighborhood n ON l.neighborhood_id = n.neighborhood_id
+                JOIN dim_borough b ON n.borough_id = b.borough_id
+                WHERE f.sale_year BETWEEN {year_range[0]} AND {year_range[1]}
+                AND f.sale_price BETWEEN {price_range[0]} AND {price_range[1]}
+                AND b.borough_name IN ('{b_list}')
+                """
+                db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.db')
+                conn = sqlite3.connect(db_path)
+                df_ml = pd.read_sql(query, conn)
+                conn.close()
+                
+                features = [
+                    'dist_to_nearest_subway', 'num_subway_within_1km',
+                    'dist_to_nearest_park', 'num_park_within_1km',
+                    'dist_to_nearest_hospital', 'num_hospital_within_1km',
+                    'dist_to_nearest_school', 'num_school_within_1km',
+                    'building_age', 'residential_units', 'gross_sqft'
+                ]
+                
+                # Xử lý khuyết thiếu
+                for col in features:
+                    if df_ml[col].notna().any():
+                        df_ml[col] = df_ml[col].fillna(df_ml[col].median())
+                    else:
+                        df_ml[col] = df_ml[col].fillna(0)
+                df_ml = df_ml.dropna(subset=['sale_price'])
+                
+                results = []
+                for year in df_ml['sale_year'].unique():
+                    df_y = df_ml[df_ml['sale_year'] == year]
+                    if len(df_y) < 50: continue
+                    rf = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
+                    rf.fit(df_y[features], df_y['sale_price'])
+                    for feat, imp in zip(features, rf.feature_importances_):
+                        results.append({'Feature': feat, 'Importance': imp, 'Year': year})
+                        
+                if results:
+                    df_new = pd.DataFrame(results)
+                    df_new.to_csv('output/spatial_feature_importance.csv', index=False)
+                    st.rerun()
+                else:
+                    st.error("Không đủ dữ liệu để chạy mô hình cho bộ lọc này!")
         
     except Exception as e:
         st.error(f"Chưa có dữ liệu phân tích không gian. Lỗi: {e}")
