@@ -1403,7 +1403,6 @@ with tab_adv:
     top_3_luot_song_names = []
 
     st.markdown("<h3 style='color:#064e3b; border-bottom: 2px solid #10b981; padding-bottom: 5px;'> CHIẾN LƯỢC ĐẦU TƯ DÀI HẠN (An Toàn & Ổn Định)</h3>", unsafe_allow_html=True)
-    st.info("Phân tích các khu vực có tỷ lệ thanh khoản tốt và mức độ tăng giá ổn định, phù hợp với định hướng đầu tư nắm giữ dài hạn.")
     
     if len(valid_neighs) > 0:
         # Sắp xếp để lấy Top 3
@@ -1444,7 +1443,6 @@ with tab_adv:
     st.divider()
 
     st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px;'> CHIẾN LƯỢC ĐẦU TƯ NGẮN HẠN (Lợi Nhuận Giao Dịch)</h3>", unsafe_allow_html=True)
-    st.info("Khảo sát các khu vực có tỷ suất sinh lời nổi bật từ các giao dịch mua đi bán lại trong thời gian ngắn, đại diện cho tính thanh khoản cao.")
     
     with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
         df_flip, flip_stats, long_term = get_flipping_stats(df)
