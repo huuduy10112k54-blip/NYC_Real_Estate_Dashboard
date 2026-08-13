@@ -731,7 +731,6 @@ with tab_macro:
 
 with tab_micro:
     st.markdown("### 🏡 Tra cứu Bất động sản")
-    st.info("Bước 2: Tìm kiếm các bất động sản cụ thể đang rao bán trong khu vực và đánh giá tác động của các tiện ích xung quanh (Trường học, Ga tàu...).")
     tab_search, tab7 = st.tabs(["🔍 Tìm kiếm Bất động sản", "📊 Phân tích Tiện ích"])
 
 
@@ -1793,7 +1792,7 @@ def load_comps_data():
 
 
 with tab_search:
-    st.info(" **HƯỚNG DẪN:** Sau khi đã xem qua Đề xuất và Minh chứng, hãy dùng công cụ này để tìm kiếm đích danh các căn nhà đang rao bán tại khu vực bạn nhắm tới.")
+    st.info(" **MỤC ĐÍCH:** Hệ thống sử dụng dữ liệu lịch sử để **đề xuất các mẫu bất động sản** có đặc tính tương đồng với tiêu chí của bạn (không phải danh sách nhà đang rao bán). Người dùng có thể mượn tọa độ của các căn nhà mẫu này để chủ động khám phá không gian và tiện ích thực tế xung quanh chúng.")
     st.markdown("""
     <div style='background:linear-gradient(135deg,#db2777,#be185d,#9d174d);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
