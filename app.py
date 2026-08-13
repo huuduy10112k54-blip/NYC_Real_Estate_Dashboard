@@ -1454,7 +1454,6 @@ with tab_adv:
         st.warning("Không tìm thấy đủ dữ liệu giao dịch lướt sóng trong bộ lọc hiện tại.")
     else:
         top_roi = flip_stats.sort_values('avg_roi', ascending=False).head(5)
-        top_roi = top_roi.rename(columns={'count': 'so_luot_luot'})
         top_3_roi = top_roi.head(3)
         top_3_luot_song_names = top_3_roi['neighborhood'].tolist()
         
@@ -1470,7 +1469,7 @@ with tab_adv:
                     <div style='display: flex; justify-content: space-around; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fdba74;'>
                         <div>
                             <div style='font-size: 11px; color: #9a3412;'>Số Lượt Lướt</div>
-                            <div style='font-size: 16px; font-weight: bold; color: #c2410c;'>{row.so_luot_luot}</div>
+                            <div style='font-size: 16px; font-weight: bold; color: #c2410c;'>{row.num_flips}</div>
                         </div>
                         <div>
                             <div style='font-size: 11px; color: #9a3412;'>Lợi nhuận TB</div>
