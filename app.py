@@ -1391,69 +1391,68 @@ with tab_adv:
     </div>
     """, unsafe_allow_html=True)
 
-    adv_t1, adv_t2 = st.tabs(["️ Đầu Tư Bền Vững (Dài hạn)", " Đầu Cơ Ăn Xổi (Ngắn hạn)"])
-
     top_3_tich_san_names = []
     top_3_luot_song_names = []
 
-    with adv_t1:
-        st.markdown("### ️ NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)")
-        st.info("Dành cho khách hàng ưu tiên sự an tâm, muốn bảo toàn vốn và nhắm tới sự tăng trưởng đều đặn trong tầm nhìn 2-5 năm.")
+    st.markdown("###  NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)")
+    st.info("Dành cho khách hàng ưu tiên sự an tâm, muốn bảo toàn vốn và nhắm tới sự tăng trưởng đều đặn trong tầm nhìn 2-5 năm.")
+    
+    if len(valid_neighs) > 0:
+        # Sắp xếp để lấy Top 3
+        df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "CAGR (%)", "Điểm Tin Cậy"]].copy()
+        df_leaderboard.rename(columns={"CAGR (%)": "Tăng trưởng (%)"}, inplace=True)
+        df_leaderboard = df_leaderboard.sort_values("Điểm Tin Cậy", ascending=False)
+        top_3_tich_san_names = df_leaderboard.head(3)['Khu Vực'].tolist()
         
-        if len(valid_neighs) > 0:
-            # Sắp xếp để lấy Top 3
-            df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "CAGR (%)", "Điểm Tin Cậy"]].copy()
-            df_leaderboard.rename(columns={"CAGR (%)": "Tăng trưởng (%)"}, inplace=True)
-            df_leaderboard = df_leaderboard.sort_values("Điểm Tin Cậy", ascending=False)
-            top_3_tich_san_names = df_leaderboard.head(3)['Khu Vực'].tolist()
-            
-            st.success(f" **Hệ thống đề xuất 3 khu vực an toàn nhất:** {', '.join(top_3_tich_san_names)}")
-            st.markdown(" *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để xem biểu đồ chứng minh cho đề xuất này.*")
-            
-            st.markdown("<br><h4 style='color:#1e293b; margin-bottom: 5px;'>Bảng xếp hạng Khu vực Tích sản</h4>", unsafe_allow_html=True)
-            st.markdown("<p style='color:#64748b; font-size:14px; margin-bottom: 15px;'>Bảng tổng hợp toàn bộ các khu vực an toàn. Bạn có thể <b>bấm vào tiêu đề cột</b> để sắp xếp.</p>", unsafe_allow_html=True)
-            
-            all_options = sorted(df_leaderboard['Khu Vực'].unique())
-            search_query = st.multiselect(
-                "Nhập hoặc chọn khu vực để lọc bảng:", 
-                options=all_options, 
-                placeholder="Ví dụ: Gõ 'Astoria' để xem gợi ý...",
-                label_visibility="collapsed"
-            )
-            if search_query:
-                df_leaderboard = df_leaderboard[df_leaderboard['Khu Vực'].isin(search_query)]
-            
-            event = st.dataframe(
-                df_leaderboard,
-                use_container_width=True,
-                height=300,
-                hide_index=True,
-                on_select="rerun",
-                selection_mode="single-row",
-                column_config={
-                    col_end: st.column_config.NumberColumn(col_end, format="$%d"),
-                    "Tăng trưởng (%)": st.column_config.NumberColumn("Tăng trưởng (%)", format="%.1f%%"),
-                    "Điểm Tin Cậy": st.column_config.ProgressColumn("Điểm Tin Cậy (/100)", format="%d", min_value=0, max_value=100)
-                }
-            )
-        else:
-            st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản trong bộ lọc hiện tại.")
+        st.success(f" **Hệ thống đề xuất 3 khu vực an toàn nhất:** {', '.join(top_3_tich_san_names)}")
+        st.markdown(" *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để xem biểu đồ chứng minh cho đề xuất này.*")
+        
+        st.markdown("<br><h4 style='color:#1e293b; margin-bottom: 5px;'>Bảng xếp hạng Khu vực Tích sản</h4>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748b; font-size:14px; margin-bottom: 15px;'>Bảng tổng hợp toàn bộ các khu vực an toàn. Bạn có thể <b>bấm vào tiêu đề cột</b> để sắp xếp.</p>", unsafe_allow_html=True)
+        
+        all_options = sorted(df_leaderboard['Khu Vực'].unique())
+        search_query = st.multiselect(
+            "Nhập hoặc chọn khu vực để lọc bảng:", 
+            options=all_options, 
+            placeholder="Ví dụ: Gõ 'Astoria' để xem gợi ý...",
+            label_visibility="collapsed"
+        )
+        if search_query:
+            df_leaderboard = df_leaderboard[df_leaderboard['Khu Vực'].isin(search_query)]
+        
+        event = st.dataframe(
+            df_leaderboard,
+            use_container_width=True,
+            height=300,
+            hide_index=True,
+            on_select="rerun",
+            selection_mode="single-row",
+            column_config={
+                col_end: st.column_config.NumberColumn(col_end, format="$%d"),
+                "Tăng trưởng (%)": st.column_config.NumberColumn("Tăng trưởng (%)", format="%.1f%%"),
+                "Điểm Tin Cậy": st.column_config.ProgressColumn("Điểm Tin Cậy (/100)", format="%d", min_value=0, max_value=100)
+            }
+        )
+    else:
+        st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản trong bộ lọc hiện tại.")
 
-    with adv_t2:
-        st.markdown("###  NHÀ ĐẦU CƠ LƯỚT SÓNG (Ăn xổi)")
-        st.info("Dành cho khách hàng thích 'đánh nhanh rút gọn', chấp nhận rủi ro cao để đổi lấy lợi nhuận đột biến. Dựa vào sóng thị trường và tâm lý Fomo.")
+    st.divider()
+
+    st.markdown("###  NHÀ ĐẦU CƠ LƯỚT SÓNG (Ăn xổi)")
+    st.info("Dành cho khách hàng thích 'đánh nhanh rút gọn', chấp nhận rủi ro cao để đổi lấy lợi nhuận đột biến. Dựa vào sóng thị trường và tâm lý Fomo.")
+    
+    with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
+        df_flip, flip_stats, long_term = get_flipping_stats(df)
+    
+    if flip_stats is None or len(flip_stats) == 0:
+        st.warning("Không tìm thấy đủ dữ liệu giao dịch lướt sóng trong bộ lọc hiện tại.")
+    else:
+        top_roi = flip_stats.sort_values('avg_roi', ascending=False).head(5)
+        top_3_luot_song_names = top_roi.head(3)['neighborhood'].tolist()
         
-        with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
-            df_flip, flip_stats, long_term = get_flipping_stats(df)
-        
-        if flip_stats is None or len(flip_stats) == 0:
-            st.warning("Không tìm thấy đủ dữ liệu giao dịch lướt sóng trong bộ lọc hiện tại.")
-        else:
-            top_roi = flip_stats.sort_values('avg_roi', ascending=False).head(5)
-            top_3_luot_song_names = top_roi.head(3)['neighborhood'].tolist()
-            
-            st.success(f" **Hệ thống đề xuất 3 điểm nóng lướt sóng:** {', '.join(top_3_luot_song_names)}")
-            st.markdown(" *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để đối chiếu.*")
+        st.success(f" **Hệ thống đề xuất 3 điểm nóng lướt sóng:** {', '.join(top_3_luot_song_names)}")
+        st.markdown(" *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để đối chiếu.*")
+
 
 
     # ════════════════════════════════════════════════════════════
