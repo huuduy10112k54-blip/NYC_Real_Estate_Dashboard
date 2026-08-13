@@ -720,7 +720,7 @@ tab0, tab1, tab2, tab4, tab_macro, tab_micro = st.tabs([
     "️  Phân tích khu vực",
     "  Yếu tố quyết định giá",
     "  Dự báo & Mô hình ML",
-    "  Phân tích Tiềm năng (Khu vực)",
+    "  Phân tích Đầu tư BĐS",
     "  Tra cứu BĐS & Tiện ích"
 ])
 
@@ -1394,7 +1394,7 @@ with tab_adv:
     <div style='background:linear-gradient(135deg,#1e3a8a,#3b82f6,#93c5fd);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(59,130,246,0.35)'>
-        <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'> Đề xuất Chiến lược Đầu tư</h2>
+        <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'> Đề xuất Đầu tư Bất động sản</h2>
         <p style='margin:8px 0 0;font-size:15px;opacity:0.9;'>Dưới đây là 2 chiến lược thiết kế riêng cho 2 chân dung khách hàng phổ biến nhất trong giới đầu tư Bất động sản.</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1402,7 +1402,7 @@ with tab_adv:
     top_3_tich_san_names = []
     top_3_luot_song_names = []
 
-    st.markdown("<h3 style='color:#064e3b; border-bottom: 2px solid #10b981; padding-bottom: 5px;'> CHIẾN LƯỢC ĐẦU TƯ DÀI HẠN (An Toàn & Ổn Định)</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#064e3b; border-bottom: 2px solid #10b981; padding-bottom: 5px;'> ĐỀ XUẤT DÀI HẠN (An Toàn & Ổn Định)</h3>", unsafe_allow_html=True)
     
     if len(valid_neighs) > 0:
         # Sắp xếp để lấy Top 3
@@ -1442,7 +1442,7 @@ with tab_adv:
     st.markdown("<br>", unsafe_allow_html=True)
     st.divider()
 
-    st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px;'> CHIẾN LƯỢC ĐẦU TƯ NGẮN HẠN (Lợi Nhuận Giao Dịch)</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px;'> ĐỀ XUẤT NGẮN HẠN (Lợi Nhuận Giao Dịch)</h3>", unsafe_allow_html=True)
     
     with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
         df_flip, flip_stats, long_term = get_flipping_stats(df)
@@ -1943,7 +1943,7 @@ with tab_evid:
 
     
     if len(top_3_luot_song_names) > 0:
-        st.markdown(f"####  Dao động giá của Top 3 Điểm Nóng: {', '.join(top_3_luot_song_names)}")
+        st.markdown(f"####  Tăng trưởng Giá của Top 3 Điểm Nóng: {', '.join(top_3_luot_song_names)}")
         cols_top2 = st.columns(3)
         for i, neigh_name in enumerate(top_3_luot_song_names):
             boro_name = ""
