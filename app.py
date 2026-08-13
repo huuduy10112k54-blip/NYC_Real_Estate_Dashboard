@@ -1406,33 +1406,6 @@ with tab_adv:
         
         st.success(f" **Hệ thống đề xuất 3 khu vực an toàn nhất:** {', '.join(top_3_tich_san_names)}")
         st.markdown(" *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để xem biểu đồ chứng minh cho đề xuất này.*")
-        
-        st.markdown("<br><h4 style='color:#1e293b; margin-bottom: 5px;'>Bảng xếp hạng Khu vực Tích sản</h4>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#64748b; font-size:14px; margin-bottom: 15px;'>Bảng tổng hợp toàn bộ các khu vực an toàn. Bạn có thể <b>bấm vào tiêu đề cột</b> để sắp xếp.</p>", unsafe_allow_html=True)
-        
-        all_options = sorted(df_leaderboard['Khu Vực'].unique())
-        search_query = st.multiselect(
-            "Nhập hoặc chọn khu vực để lọc bảng:", 
-            options=all_options, 
-            placeholder="Ví dụ: Gõ 'Astoria' để xem gợi ý...",
-            label_visibility="collapsed"
-        )
-        if search_query:
-            df_leaderboard = df_leaderboard[df_leaderboard['Khu Vực'].isin(search_query)]
-        
-        event = st.dataframe(
-            df_leaderboard,
-            use_container_width=True,
-            height=300,
-            hide_index=True,
-            on_select="rerun",
-            selection_mode="single-row",
-            column_config={
-                col_end: st.column_config.NumberColumn(col_end, format="$%d"),
-                "Tăng trưởng (%)": st.column_config.NumberColumn("Tăng trưởng (%)", format="%.1f%%"),
-                "Điểm Tin Cậy": st.column_config.ProgressColumn("Điểm Tin Cậy (/100)", format="%d", min_value=0, max_value=100)
-            }
-        )
     else:
         st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản trong bộ lọc hiện tại.")
 
