@@ -715,16 +715,25 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # ════════════════════════════════════════════════════════════
 # TABS
 # ════════════════════════════════════════════════════════════
-tab0, tab1, tab2, tab4, tab7, tab_adv, tab_evid, tab_search = st.tabs([
+tab0, tab1, tab2, tab4, tab_macro, tab_micro = st.tabs([
     "  Tổng quan",
     "️  Phân tích khu vực",
     "  Yếu tố quyết định giá",
     "  Dự báo & Mô hình ML",
-    " Tiện ích 2025-2026",
-    " 1. Đề xuất Chiến lược",
-    " 2. Minh chứng Dữ liệu",
-    " 3. Tìm kiếm BĐS",
+    "  Chiến lược Khu vực (Macro)",
+    "  Săn tìm BĐS (Micro)"
 ])
+
+with tab_macro:
+    st.markdown("### 🏛️ Hệ sinh thái Chiến lược Đầu tư (Cấp độ Vĩ mô)")
+    st.info("Bước 1 của Phễu Đầu Tư: Nhận diện các khu vực tiềm năng nhất dựa trên phân tích vĩ mô và thuật toán AI, đồng thời kiểm chứng bằng dữ liệu lịch sử.")
+    tab_adv, tab_evid = st.tabs(["🎯 Đề xuất Chiến lược", "📊 Minh chứng Lịch sử"])
+
+with tab_micro:
+    st.markdown("### 🏡 Săn tìm Bất động sản (Cấp độ Vi mô)")
+    st.info("Bước 2 của Phễu Đầu Tư: Tìm kiếm các bất động sản cụ thể đang rao bán trong khu vực mục tiêu, và đánh giá tiện ích xung quanh (Trường học, Siêu thị...).")
+    tab_search, tab7 = st.tabs(["🔍 Bộ lọc & Tìm kiếm BĐS", "📍 Soi Tiện ích Tương lai"])
+
 
 # ════════════════════════════════════════════════════════════
 # TAB 0 — TỔNG QUAN
@@ -1428,7 +1437,7 @@ with tab_adv:
                 </div>
                 """, unsafe_allow_html=True)
                 
-        st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Chuyển sang Tab 7 (Minh chứng Dữ liệu) để xem biểu đồ tăng trưởng thực tế của 3 khu vực này.</i></p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Vui lòng chọn mục **[Minh chứng Lịch sử]** để xem biểu đồ tăng trưởng thực tế của 3 khu vực này.</i></p>", unsafe_allow_html=True)
     else:
         st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản trong bộ lọc hiện tại.")
 
@@ -1470,7 +1479,7 @@ with tab_adv:
                 </div>
                 """, unsafe_allow_html=True)
                 
-        st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Chuyển sang Tab 7 (Minh chứng Dữ liệu) để đối chiếu lịch sử dao động giá của các khu vực này.</i></p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Vui lòng chọn mục **[Minh chứng Lịch sử]** để đối chiếu lịch sử dao động giá của các khu vực này.</i></p>", unsafe_allow_html=True)
 
 
 
@@ -1842,7 +1851,7 @@ with tab_search:
                             </div>
                             """, unsafe_allow_html=True)
             else:
-                st.info(" Hãy điều chỉnh thông số bên trái và bấm **Tìm Kiếm Comps**")
+                st.info(" Công cụ này giúp tra cứu các bất động sản cụ thể thỏa mãn chiến lược bạn vừa xem ở bước 1. Hãy điều chỉnh bộ lọc và bấm **Tìm Kiếm Comps**")
 
 
 
