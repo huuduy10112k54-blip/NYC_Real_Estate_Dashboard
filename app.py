@@ -1473,7 +1473,7 @@ with tab_adv:
                         </div>
                         <div>
                             <div style='font-size: 11px; color: #9a3412;'>Lợi nhuận TB</div>
-                            <div style='font-size: 16px; font-weight: bold; color: #b91c1c;'>+{row.avg_roi:.1f}%</div>
+                            <div style='font-size: 16px; font-weight: bold; color: #b91c1c;'>+{row.avg_roi * 100:.1f}%</div>
                         </div>
                     </div>
                 </div>
