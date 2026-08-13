@@ -1916,70 +1916,83 @@ with tab_evid:
         st.markdown("<p style='color:#64748b; font-size:14px; margin-bottom: 15px;'>Nếu bạn chọn 1 khu vực bất kỳ ở Bảng xếp hạng bên Tab Đề Xuất, nó sẽ hiện ở đây.</p>", unsafe_allow_html=True)
         
         try:
-            selected_rows = []
+            all_valid_options = valid_neighs['Khu Vực'].tolist() if len(valid_neighs) > 0 else []
+            default_idx = 0
+            
+            # Nếu người dùng có click chọn bên Tab 1, lấy ra làm giá trị mặc định
             if 'event' in locals() and hasattr(event, 'selection') and hasattr(event.selection, 'rows'):
                 selected_rows = event.selection.rows
+                if len(selected_rows) > 0 and len(valid_neighs) > 0:
+                    selected_idx_tab1 = selected_rows[0]
+                    if selected_idx_tab1 < len(df_leaderboard):
+                        selected_n_tab1 = df_leaderboard.iloc[selected_idx_tab1]['Khu Vực']
+                        if selected_n_tab1 in all_valid_options:
+                            default_idx = all_valid_options.index(selected_n_tab1)
             elif 'event' in locals() and isinstance(event, dict) and 'selection' in event:
                 selected_rows = event['selection'].get('rows', [])
-            
-            if len(selected_rows) > 0 and len(valid_neighs) > 0:
-                selected_idx = selected_rows[0]
-                if selected_idx < len(df_leaderboard):
-                    selected_n = df_leaderboard.iloc[selected_idx]['Khu Vực']
-            
-                    st.markdown(f"""
-                    <div id='target-explorer' style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:10px 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:5px; margin-bottom: 5px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
-                        <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 4px; font-size: 18px;'>🔎 Hồ sơ Phân tích: {selected_n}</h4>
-                        <p style='color:#94A3B8; font-size:13px; margin-bottom: 0px;'>Chi tiết lịch sử giá và chỉ số rủi ro của khu vực bạn vừa chọn trên bảng xếp hạng.</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-            
-                    n_stats = valid_neighs[valid_neighs['Khu Vực'] == selected_n].iloc[0]
-                    boro_of_n = n_stats['Quận']
-                    n_gd = n_stats['Số GD']
-                    n_thang = n_stats['Số tháng']
-                    n_r2 = n_stats['R2']
-            
-                    vol_score = min((n_gd / 500) * 40, 40)
-                    time_score = min((n_thang / 60) * 30, 30)
-                    trend_score = min(n_r2 * 30, 30)
-                    total_score = vol_score + time_score + trend_score
-            
-                    if total_score >= 80:
-                        rating, stars = "🟢 Cực kỳ đáng tin", "🌟🌟🌟🌟🌟"
-                    elif total_score >= 60:
-                        rating, stars = "🟡 Khá đáng tin", "🌟🌟🌟🌟"
-                    else:
-                        rating, stars = "🟠 Độ tin cậy trung bình", "🌟🌟🌟"
+                if len(selected_rows) > 0 and len(valid_neighs) > 0:
+                    selected_idx_tab1 = selected_rows[0]
+                    if selected_idx_tab1 < len(df_leaderboard):
+                        selected_n_tab1 = df_leaderboard.iloc[selected_idx_tab1]['Khu Vực']
+                        if selected_n_tab1 in all_valid_options:
+                            default_idx = all_valid_options.index(selected_n_tab1)
+                            
+            if len(all_valid_options) > 0:
+                selected_n = st.selectbox("Lựa chọn khu vực để phân tích chi tiết:", options=all_valid_options, index=default_idx)
                 
-                    fig_explore, pct_explore = plot_single_neighborhood(boro_of_n, selected_n, f"Lịch sử giá chi tiết: {selected_n}", C_BLUE, height=220)
-                    st.plotly_chart(fig_explore, width='stretch')
-                    
-                    st.markdown(f"""
-                    <div style='background-color:rgba(15, 23, 42, 0.04); border-left:4px solid #3B82F6; padding:10px 15px; border-radius:8px; margin-bottom: 8px; margin-top: -15px;'>
-                        <div style='display:flex; justify-content:space-between; align-items:center;'>
-                            <div>
-                                <span style='font-size:12px; color:#64748b; font-weight:bold; text-transform:uppercase;'>📊 Chỉ số Tin cậy Dữ liệu</span>
-                                <span style='font-size:20px; font-weight:800; color:#0f172a; margin-left:8px;'>{total_score:.0f}/100</span>
-                                <span style='font-size:13px; margin-left:6px; font-weight:600;'>{rating}</span>
-                            </div>
-                            <div style='font-size:16px;'>{stars}</div>
+                st.markdown(f"""
+                <div id='target-explorer' style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:10px 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:5px; margin-bottom: 5px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
+                    <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 4px; font-size: 18px;'>🔎 Hồ sơ Phân tích: {selected_n}</h4>
+                    <p style='color:#94A3B8; font-size:13px; margin-bottom: 0px;'>Chi tiết lịch sử giá và chỉ số rủi ro của khu vực bạn vừa chọn.</p>
+                </div>
+                """, unsafe_allow_html=True)
+        
+                n_stats = valid_neighs[valid_neighs['Khu Vực'] == selected_n].iloc[0]
+                boro_of_n = n_stats['Quận']
+                n_gd = n_stats['Số GD']
+                n_thang = n_stats['Số tháng']
+                n_r2 = n_stats['R2']
+        
+                vol_score = min((n_gd / 500) * 40, 40)
+                time_score = min((n_thang / 60) * 30, 30)
+                trend_score = min(n_r2 * 30, 30)
+                total_score = vol_score + time_score + trend_score
+        
+                if total_score >= 80:
+                    rating, stars = "🟢 Cực kỳ đáng tin", "🌟🌟🌟🌟🌟"
+                elif total_score >= 60:
+                    rating, stars = "🟡 Khá đáng tin", "🌟🌟🌟🌟"
+                else:
+                    rating, stars = "🟠 Độ tin cậy trung bình", "🌟🌟🌟"
+            
+                fig_explore, pct_explore = plot_single_neighborhood(boro_of_n, selected_n, f"Lịch sử giá chi tiết: {selected_n}", C_BLUE, height=220)
+                st.plotly_chart(fig_explore, width='stretch')
+                
+                st.markdown(f"""
+                <div style='background-color:rgba(15, 23, 42, 0.04); border-left:4px solid #3B82F6; padding:10px 15px; border-radius:8px; margin-bottom: 8px; margin-top: -15px;'>
+                    <div style='display:flex; justify-content:space-between; align-items:center;'>
+                        <div>
+                            <span style='font-size:12px; color:#64748b; font-weight:bold; text-transform:uppercase;'>📊 Chỉ số Tin cậy Dữ liệu</span>
+                            <span style='font-size:20px; font-weight:800; color:#0f172a; margin-left:8px;'>{total_score:.0f}/100</span>
+                            <span style='font-size:13px; margin-left:6px; font-weight:600;'>{rating}</span>
                         </div>
-                        <div style='margin-top:4px; font-size:13px; color:#475569;'>
-                            Dựa trên <b>{n_gd} giao dịch</b> rải đều trong <b>{n_thang} tháng</b> với mức độ ổn định xu hướng đạt <b>{n_r2*100:.0f}%</b>.
-                        </div>
+                        <div style='font-size:16px;'>{stars}</div>
                     </div>
-                    """, unsafe_allow_html=True)
-                    st.info(f"Dựa trên xu hướng lịch sử, khu vực **{selected_n}** (thuộc {boro_of_n}) có tỷ suất sinh lời lũy kế là **{pct_explore:+.1f}%**.")
+                    <div style='margin-top:4px; font-size:13px; color:#475569;'>
+                        Dựa trên <b>{n_gd} giao dịch</b> rải đều trong <b>{n_thang} tháng</b> với mức độ ổn định xu hướng đạt <b>{n_r2*100:.0f}%</b>.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                st.info(f"Dựa trên xu hướng lịch sử, khu vực **{selected_n}** (thuộc {boro_of_n}) có tỷ suất sinh lời lũy kế là **{pct_explore:+.1f}%**.")
             else:
                  st.markdown("""
                     <div style='text-align:center; padding: 40px 20px; border: 2px dashed #cbd5e1; border-radius: 12px; margin-top: 20px;'>
-                        <div style='color:#64748b; font-size:18px; font-weight:bold; margin-bottom:10px;'>Hãy chọn 1 khu vực bên Bảng xếp hạng</div>
-                        <p style='color:#94a3b8; font-size:15px;'>Và chuyển sang Tab Minh Chứng, biểu đồ khu vực đó sẽ hiện ở đây.</p>
+                        <div style='color:#64748b; font-size:18px; font-weight:bold; margin-bottom:10px;'>Không đủ dữ liệu</div>
+                        <p style='color:#94a3b8; font-size:15px;'>Hệ thống không tìm thấy khu vực nào đủ điều kiện trong bộ lọc hiện tại.</p>
                     </div>
                     """, unsafe_allow_html=True)
         except Exception as e:
-            st.warning(f"Chưa chọn khu vực. {e}")
+            st.warning(f"Lỗi khi tải biểu đồ khu vực: {e}")
 
     elif chon_khau_vi == "🌊 Lướt sóng ngắn hạn (Rủi ro cao)":
         st.markdown("""
