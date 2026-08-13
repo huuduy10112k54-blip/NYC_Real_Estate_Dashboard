@@ -2014,7 +2014,7 @@ with tab_evid:
                     <div style='font-size:16px;'>{stars}</div>
                 </div>
                 <div style='margin-top:4px; font-size:13px; color:#475569;'>
-                    Dựa trên <b>{n_gd} giao dịch</b> rải đều trong <b>{n_thang} tháng</b> (Độ bám sát xu hướng R² = {max(0, n_r2):.2f}).
+                    Dựa trên <b>{n_gd} giao dịch</b> rải đều trong <b>{n_thang} tháng</b>.
                 </div>
             </div>
             """, unsafe_allow_html=True)
