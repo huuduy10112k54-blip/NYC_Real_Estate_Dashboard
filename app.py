@@ -1581,6 +1581,7 @@ with tab7:
     *Phân tích này sử dụng khoảng cách vật lý chính xác từ **50.200 căn nhà** (dựa trên dữ liệu OpenStreetMap và Geocoding) đến các tiện ích công cộng.*
     *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
     """)
+    st.warning("⚠️ **LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
     
     try:
         df_fi = pd.read_csv('output/spatial_feature_importance.csv')
@@ -1617,16 +1618,16 @@ with tab7:
 
         
         fig_2025 = px.bar(df_2025, x='Importance', y='Feature_Name', orientation='h',
-                          title='Mức độ ảnh hưởng đến Giá Nhà - Năm 2025',
+                          title='Tỷ trọng Đóng góp vào Định giá - 2025',
                           text=df_2025['Importance'].apply(lambda x: f'{x*100:.1f}%'),
-                          labels={'Importance': 'Tỷ lệ ảnh hưởng (%)', 'Feature_Name': ''},
+                          labels={'Importance': 'Tỷ trọng đóng góp (%)', 'Feature_Name': ''},
                           color_discrete_sequence=['#34d399'])
         fig_2025.update_layout(yaxis={'categoryorder':'total ascending'}, xaxis=dict(tickformat='.0%'), margin=dict(l=0, r=20, t=50, b=10))
 
         fig_2026 = px.bar(df_2026, x='Importance', y='Feature_Name', orientation='h',
-                          title='Mức độ ảnh hưởng đến Giá Nhà - Năm 2026',
+                          title='Tỷ trọng Đóng góp vào Định giá - 2026',
                           text=df_2026['Importance'].apply(lambda x: f'{x*100:.1f}%'),
-                          labels={'Importance': 'Tỷ lệ ảnh hưởng (%)', 'Feature_Name': ''},
+                          labels={'Importance': 'Tỷ trọng đóng góp (%)', 'Feature_Name': ''},
                           color_discrete_sequence=['#f59e0b'])
         fig_2026.update_layout(yaxis={'categoryorder':'total ascending'}, xaxis=dict(tickformat='.0%'), margin=dict(l=0, r=20, t=50, b=10))
 
