@@ -723,7 +723,7 @@ tab0, tab1, tab2, tab4, tab7, tab_adv, tab_evid, tab_search = st.tabs([
     "📍 Tiện ích 2025-2026",
     "💡 1. Đề xuất Chiến lược",
     "📊 2. Minh chứng Dữ liệu",
-    "🎯 3. Tìm kiếm BĐS (Comps)",
+    "🎯 3. Tìm kiếm BĐS",
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -1398,11 +1398,13 @@ with tab_adv:
 
     with adv_t1:
         st.markdown("### 🛡️ NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)")
-        st.info("Dành cho khách hàng ưu tiên sự an tâm, muốn bảo toàn vốn và nhắm tới sự tăng trưởng kép (CAGR) đều đặn trong tầm nhìn 2-5 năm.")
+        st.info("Dành cho khách hàng ưu tiên sự an tâm, muốn bảo toàn vốn và nhắm tới sự tăng trưởng đều đặn trong tầm nhìn 2-5 năm.")
         
         if len(valid_neighs) > 0:
             # Sắp xếp để lấy Top 3
-            df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "CAGR (%)", "Điểm Tin Cậy"]].sort_values("Điểm Tin Cậy", ascending=False)
+            df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "CAGR (%)", "Điểm Tin Cậy"]].copy()
+            df_leaderboard.rename(columns={"CAGR (%)": "Tăng trưởng (%)"}, inplace=True)
+            df_leaderboard = df_leaderboard.sort_values("Điểm Tin Cậy", ascending=False)
             top_3_tich_san_names = df_leaderboard.head(3)['Khu Vực'].tolist()
             
             st.success(f"🎯 **Hệ thống đề xuất 3 khu vực an toàn nhất:** {', '.join(top_3_tich_san_names)}")
@@ -1430,7 +1432,7 @@ with tab_adv:
                 selection_mode="single-row",
                 column_config={
                     col_end: st.column_config.NumberColumn(col_end, format="$%d"),
-                    "CAGR (%)": st.column_config.NumberColumn("CAGR (%)", format="%.1f%%"),
+                    "Tăng trưởng (%)": st.column_config.NumberColumn("Tăng trưởng (%)", format="%.1f%%"),
                     "Điểm Tin Cậy": st.column_config.ProgressColumn("Điểm Tin Cậy (/100)", format="%d", min_value=0, max_value=100)
                 }
             )
@@ -1441,7 +1443,7 @@ with tab_adv:
         st.markdown("### 🏄 NHÀ ĐẦU CƠ LƯỚT SÓNG (Ăn xổi)")
         st.info("Dành cho khách hàng thích 'đánh nhanh rút gọn', chấp nhận rủi ro cao để đổi lấy lợi nhuận đột biến. Dựa vào sóng thị trường và tâm lý Fomo.")
         
-        with st.spinner("Đang phân tích lịch sử giao dịch BBL..."):
+        with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
             df_flip, flip_stats, long_term = get_flipping_stats(df)
         
         if flip_stats is None or len(flip_stats) == 0:
@@ -1456,7 +1458,7 @@ with tab_adv:
             divider()
             c1, c2 = st.columns(2)
             with c1:
-                st.markdown("##### 🔥 Khốc liệt nhất (Vol cao)")
+                st.markdown("##### 🔥 Sôi động nhất (Giao dịch nhiều)")
                 top_active = long_term.sort_values('flip_rate', ascending=False).head(5)
                 fig_act = px.bar(top_active, x='flip_rate', y='neighborhood', orientation='h',
                                  color='avg_profit', color_continuous_scale='RdYlGn',
@@ -1465,12 +1467,12 @@ with tab_adv:
                 clayout(fig_act, h=250)
                 st.plotly_chart(fig_act, use_container_width=True)
             with c2:
-                st.markdown("##### 💰 Siêu lợi nhuận (ROI cao)")
+                st.markdown("##### 💰 Siêu lợi nhuận (Sinh lời cao)")
                 top_roi_disp = top_roi.copy()
                 top_roi_disp['roi_pct'] = top_roi_disp['avg_roi'] * 100
                 fig_roi = px.bar(top_roi_disp, x='roi_pct', y='neighborhood', orientation='h',
                                  color='roi_pct', color_continuous_scale='Sunsetdark',
-                                 labels={'roi_pct': 'ROI TB (%)', 'neighborhood': ''})
+                                 labels={'roi_pct': 'Tỷ suất sinh lời TB (%)', 'neighborhood': ''})
                 fig_roi.update_layout(yaxis={'categoryorder':'total ascending'}, margin=dict(l=0, r=0, t=10, b=10))
                 clayout(fig_roi, h=250)
                 st.plotly_chart(fig_roi, use_container_width=True)
@@ -1727,19 +1729,19 @@ with tab_search:
     <div style='background:linear-gradient(135deg,#db2777,#be185d,#9d174d);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(219,39,119,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>🎯 Định vị Bất động sản Tham chiếu (Comparable Properties)</b><br>
-    <span style='font-size:13px;opacity:0.9'>Công cụ tìm kiếm Cụm Zip Code và Căn nhà tham chiếu (Comps) dựa trên ngân sách và tiện ích 1km.</span>
+    <b style='font-size:15px;letter-spacing:-0.3px'>🎯 Định vị Bất động sản Tham chiếu</b><br>
+    <span style='font-size:13px;opacity:0.9'>Công cụ tìm kiếm Mã vùng và Căn nhà tham chiếu dựa trên ngân sách và tiện ích 1km.</span>
     </div>""", unsafe_allow_html=True)
 
     df_comps = load_comps_data()
     
     if df_comps.empty:
-        st.warning("Đang chờ dữ liệu Comps...")
+        st.warning("Đang chờ dữ liệu...")
     else:
         col_filter, col_res = st.columns([1, 2.2])
         
         with col_filter:
-            st.markdown("### 🎛️ Bộ Lọc (Smart Filters)")
+            st.markdown("### 🎛️ Bộ Lọc Thông Minh")
             
             # Budget
             min_price = 100000
