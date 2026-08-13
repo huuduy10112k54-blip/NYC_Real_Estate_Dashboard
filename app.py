@@ -1943,7 +1943,7 @@ with tab_evid:
 
     
     if len(top_3_luot_song_names) > 0:
-        st.markdown(f"####  Tăng trưởng Giá của Top 3 Điểm Nóng: {', '.join(top_3_luot_song_names)}")
+        st.markdown(f"####  Lịch sử Tăng trưởng của Top 3 Điểm Nóng: {', '.join(top_3_luot_song_names)}")
         cols_top2 = st.columns(3)
         for i, neigh_name in enumerate(top_3_luot_song_names):
             boro_name = ""
