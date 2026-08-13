@@ -1833,44 +1833,8 @@ with tab_search:
 # ════════════════════════════════════════════════════════════
 with tab_evid:
     st.info("💡 **HƯỚNG DẪN:** Dưới đây là các biểu đồ thực tế chứng minh cho những đề xuất vừa được AI đưa ra ở Tab Đề xuất Chiến lược.")
-    chon_khau_vi = st.radio("Chọn Khẩu vị Đầu tư:", ["🛡️ Đầu tư dài hạn (An toàn)", "🌊 Lướt sóng ngắn hạn (Rủi ro cao)"], horizontal=True)
     st.divider()
 
-    if chon_khau_vi == "🛡️ Đầu tư dài hạn (An toàn)":
-        st.markdown("""
-        <div style='background:linear-gradient(135deg,#b45309,#d97706,#fbbf24);border-radius:14px;
-        padding:18px 24px;color:#fff;margin-bottom:22px;
-        box-shadow:0 6px 24px rgba(245,158,11,0.35)'>
-        <b style='font-size:15px;letter-spacing:-0.3px'>Minh chứng cho Đề xuất Tích sản</b><br>
-        <span style='font-size:12px;opacity:0.9'>Biểu đồ tăng trưởng thực tế của các khu vực vừa được hệ thống khuyên đầu tư.</span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # In các khu vực top 3 tích sản
-        if len(top_3_tich_san_names) > 0:
-            st.markdown(f"#### 📈 Lịch sử Tăng trưởng của Top 3 Đề xuất: {', '.join(top_3_tich_san_names)}")
-            cols_top = st.columns(3)
-            for i, neigh_name in enumerate(top_3_tich_san_names):
-                boro_name = valid_neighs[valid_neighs['Khu Vực'] == neigh_name].iloc[0]['Quận']
-                with cols_top[i]:
-                    fig_top, pct_top = plot_single_neighborhood(boro_name, neigh_name, f"{neigh_name}", C_RED, height=250)
-                    st.plotly_chart(fig_top, use_container_width=True)
-                    render_mini_confidence(neigh_name)
-        else:
-            st.warning("Không có khu vực đề xuất tích sản nào để minh chứng.")
-
-        divider()
-        st.markdown("<h4 style='color:#1e293b; margin-top:0px;'>🌍 Toàn cảnh thị trường (Để đối chiếu)</h4>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#64748b; font-size:14px;'>Sử dụng đường xu hướng của toàn thị trường để thấy các khu vực được đề xuất đã vượt trội như thế nào.</p>", unsafe_allow_html=True)
-        mts_all = df_t3.groupby('ym_dt')['sale_price'].median().reset_index().sort_values('ym_dt')
-        if len(mts_all) > 0:
-            base_price_all = mts_all['sale_price'].iloc[0]
-            mts_all['growth_pct'] = (mts_all['sale_price'] - base_price_all) / base_price_all * 100
-
-            fig_all = go.Figure()
-            fig_all.add_trace(go.Scatter(
-                x=mts_all['ym_dt'], y=mts_all['growth_pct'], mode='lines',
-                name='Thị trường chung', line=dict(color=C_BLUE, width=4),
                 customdata=mts_all['sale_price'],
                 hovertemplate='<b>Thị trường chung</b><br>%{x|%m/%Y}<br>Tăng trưởng: <b>%{y:+.1f}%</b><br>Giá: $%{customdata:,.0f}<extra></extra>'
             ))
