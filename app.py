@@ -1891,7 +1891,7 @@ with tab_evid:
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(99,102,241,0.35)'>
         <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Lướt sóng)</b><br>
-        <span style='font-size:12px;opacity:0.9'>Phân tích hiệu suất biên độ giá mua đi bán lại của các khu vực "nóng" vừa được gợi ý.</span>
+        <span style='font-size:12px;opacity:0.9'>Mức lợi nhuận thực tế từ các giao dịch mua đi bán lại tại những khu vực vừa được gợi ý.</span>
     </div>
     """, unsafe_allow_html=True)
     
