@@ -1578,7 +1578,7 @@ with tab4:
 with tab7:
     st.markdown(f"""
     ##  Phân tích Tác động Tiện ích đến Giá nhà (2025 - 2026)
-    *Phân tích này trích xuất từ **{len(df):,} giao dịch**, trong đó có **hơn 51.000 căn nhà** có tọa độ địa lý (GPS) hợp lệ trên hệ thống OpenStreetMap để đo lường khoảng cách vật lý chính xác đến các tiện ích công cộng.*
+    *Phân tích này trích xuất từ **{len(df):,} giao dịch**, trong đó sử dụng tọa độ địa lý của **hơn 51.000 giao dịch** hợp lệ trên hệ thống OpenStreetMap để đo lường khoảng cách vật lý chính xác đến các tiện ích công cộng.*
     *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
     """)
     st.warning("⚠️ **LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
