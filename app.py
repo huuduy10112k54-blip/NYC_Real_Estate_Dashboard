@@ -731,8 +731,8 @@ with tab_macro:
 
 with tab_micro:
     st.markdown("### 🏡 Tra cứu Bất động sản")
-    st.info("Bước 2: Tìm kiếm các bất động sản cụ thể đang rao bán trong khu vực và đánh giá bản đồ tiện ích xung quanh (Trường học, Ga tàu...).")
-    tab_search, tab7 = st.tabs(["🔍 Tìm kiếm Bất động sản", "📍 Bản đồ Tiện ích"])
+    st.info("Bước 2: Tìm kiếm các bất động sản cụ thể đang rao bán trong khu vực và đánh giá tác động của các tiện ích xung quanh (Trường học, Ga tàu...).")
+    tab_search, tab7 = st.tabs(["🔍 Tìm kiếm Bất động sản", "📊 Phân tích Tiện ích"])
 
 
 # ════════════════════════════════════════════════════════════
