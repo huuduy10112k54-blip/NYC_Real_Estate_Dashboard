@@ -1576,9 +1576,9 @@ with tab4:
 # Cache bust 2
 
 with tab7:
-    st.markdown("""
+    st.markdown(f"""
     ##  Phân tích Tác động Tiện ích đến Giá nhà (2025 - 2026)
-    *Phân tích này sử dụng khoảng cách vật lý chính xác từ **50.200 căn nhà** (dựa trên dữ liệu OpenStreetMap và Geocoding) đến các tiện ích công cộng.*
+    *Phân tích này sử dụng khoảng cách vật lý chính xác từ **hơn {len(df):,} căn nhà** (dựa trên dữ liệu OpenStreetMap và Geocoding) đến các tiện ích công cộng.*
     *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
     """)
     st.warning("⚠️ **LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
@@ -1645,7 +1645,7 @@ with tab7:
         
         2.  **Năm 2026 (Y tế & Giao thông lên ngôi):** Xu hướng này tiếp tục được củng cố trong năm 2026. Ga Tàu điện ngầm và Bệnh viện trở thành 2 tiện ích quan trọng nhất quyết định giá nhà. Điều này phản ánh sự dịch chuyển vĩnh viễn của người mua nhà tại NYC sang ưu tiên sức khỏe và hạ tầng di chuyển tiện lợi.
         
-        *(Mô hình áp dụng thuật toán Không gian cKDTree để tính chính xác khoảng cách địa lý theo đơn vị Km cho 50.200 căn nhà)*
+        *(Mô hình áp dụng thuật toán Không gian cKDTree để tính chính xác khoảng cách địa lý theo đơn vị Km cho toàn bộ hệ thống nhà ở đang khảo sát)*
         """)
         
     except Exception as e:
