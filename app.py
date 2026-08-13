@@ -726,7 +726,7 @@ tab0, tab1, tab2, tab4, tab_macro, tab_micro = st.tabs([
 
 with tab_macro:
     st.markdown("### 🏛️ Đánh giá Tiềm năng Khu vực")
-    st.info("Bước 1: Dựa vào thuật toán và dữ liệu lịch sử để lọc ra các khu vực (Neighborhoods) có tiềm năng tăng trưởng hoặc thanh khoản cao nhất.")
+    st.info("Hệ thống dựa vào thuật toán và dữ liệu lịch sử để phân tích các khu vực (Neighborhoods) có đặc tính tăng trưởng hoặc thanh khoản cao nhất.")
     tab_adv, tab_evid = st.tabs(["🎯 Gợi ý Đầu tư", "📊 Dữ liệu Lịch sử"])
 
 with tab_micro:
@@ -1402,8 +1402,8 @@ with tab_adv:
     top_3_tich_san_names = []
     top_3_luot_song_names = []
 
-    st.markdown("<h3 style='color:#064e3b; border-bottom: 2px solid #10b981; padding-bottom: 5px;'> NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)</h3>", unsafe_allow_html=True)
-    st.info("Dành cho khách hàng ưu tiên sự an tâm, muốn bảo toàn vốn và nhắm tới sự tăng trưởng đều đặn trong tầm nhìn 2-5 năm.")
+    st.markdown("<h3 style='color:#064e3b; border-bottom: 2px solid #10b981; padding-bottom: 5px;'> CHIẾN LƯỢC ĐẦU TƯ DÀI HẠN (An Toàn & Ổn Định)</h3>", unsafe_allow_html=True)
+    st.info("Phân tích các khu vực có tỷ lệ thanh khoản tốt và mức độ tăng giá ổn định, phù hợp với định hướng đầu tư nắm giữ dài hạn.")
     
     if len(valid_neighs) > 0:
         # Sắp xếp để lấy Top 3
@@ -1443,8 +1443,8 @@ with tab_adv:
     st.markdown("<br>", unsafe_allow_html=True)
     st.divider()
 
-    st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px;'> NHÀ ĐẦU CƠ LƯỚT SÓNG (Ăn xổi)</h3>", unsafe_allow_html=True)
-    st.info("Dành cho khách hàng thích 'đánh nhanh rút gọn', chấp nhận rủi ro cao để đổi lấy lợi nhuận đột biến. Dựa vào sóng thị trường và tâm lý Fomo.")
+    st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px;'> CHIẾN LƯỢC ĐẦU TƯ NGẮN HẠN (Lợi Nhuận Giao Dịch)</h3>", unsafe_allow_html=True)
+    st.info("Khảo sát các khu vực có tỷ suất sinh lời nổi bật từ các giao dịch mua đi bán lại trong thời gian ngắn, đại diện cho tính thanh khoản cao.")
     
     with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
         df_flip, flip_stats, long_term = get_flipping_stats(df)
@@ -1929,7 +1929,7 @@ with tab_evid:
     <div style='background:linear-gradient(135deg,#047857,#10b981,#34d399);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(16,185,129,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Tích sản)</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Dài hạn)</b><br>
     <span style='font-size:12px;opacity:0.9'>Biểu đồ tăng trưởng thực tế của các khu vực vừa được hệ thống khuyên đầu tư.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -1953,7 +1953,7 @@ with tab_evid:
     <div style='background:linear-gradient(135deg,#c2410c,#ea580c,#f97316);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(234,88,12,0.35)'>
-        <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Lướt sóng)</b><br>
+        <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Ngắn hạn)</b><br>
         <span style='font-size:12px;opacity:0.9'>Mức lợi nhuận thực tế từ các giao dịch mua đi bán lại tại những khu vực vừa được gợi ý.</span>
     </div>
     """, unsafe_allow_html=True)
