@@ -1923,14 +1923,7 @@ with tab_evid:
     st.info(" **HƯỚNG DẪN:** Dưới đây là các biểu đồ thực tế chứng minh cho những đề xuất vừa được AI đưa ra ở Tab Đề xuất Chiến lược.")
     st.divider()
 
-    st.markdown("""
-    <div style='background:linear-gradient(135deg,#047857,#10b981,#34d399);border-radius:14px;
-    padding:18px 24px;color:#fff;margin-bottom:22px;
-    box-shadow:0 6px 24px rgba(16,185,129,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Dài hạn)</b><br>
-    <span style='font-size:12px;opacity:0.9'>Biểu đồ tăng trưởng thực tế của các khu vực vừa được hệ thống khuyên đầu tư.</span>
-    </div>
-    """, unsafe_allow_html=True)
+
     
     # In các khu vực top 3 tích sản
     if len(top_3_tich_san_names) > 0:
@@ -1947,14 +1940,7 @@ with tab_evid:
 
     divider()
 
-    st.markdown("""
-    <div style='background:linear-gradient(135deg,#c2410c,#ea580c,#f97316);border-radius:14px;
-    padding:18px 24px;color:#fff;margin-bottom:22px;
-    box-shadow:0 6px 24px rgba(234,88,12,0.35)'>
-        <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Ngắn hạn)</b><br>
-        <span style='font-size:12px;opacity:0.9'>Mức lợi nhuận thực tế từ các giao dịch mua đi bán lại tại những khu vực vừa được gợi ý.</span>
-    </div>
-    """, unsafe_allow_html=True)
+
     
     if len(top_3_luot_song_names) > 0:
         st.markdown(f"####  Dao động giá của Top 3 Điểm Nóng: {', '.join(top_3_luot_song_names)}")
@@ -2003,7 +1989,7 @@ with tab_evid:
         fig_all.update_layout(
             title_text="",
             hovermode='x unified',
-            yaxis=dict(ticksuffix='%', title="Tỷ suất Sinh lời (%)", zeroline=False))
+            yaxis=dict(ticksuffix='%', title="Tăng trưởng Giá (%)", zeroline=False))
         st.plotly_chart(fig_all, width='stretch')
         
     # --- NỘI SOI KHU VỰC ĐỘNG ---
