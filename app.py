@@ -1394,8 +1394,8 @@ with tab_adv:
     <div style='background:linear-gradient(135deg,#1e3a8a,#3b82f6,#93c5fd);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(59,130,246,0.35)'>
-        <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'> Đề xuất Chiến lược Đầu tư (Robo-Advisor)</h2>
-        <p style='margin:8px 0 0;font-size:15px;opacity:0.9;'>Dưới đây là 3 chiến lược thiết kế riêng cho 3 chân dung khách hàng phổ biến nhất trong giới đầu tư Bất động sản.</p>
+        <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'> Đề xuất Chiến lược Đầu tư</h2>
+        <p style='margin:8px 0 0;font-size:15px;opacity:0.9;'>Dưới đây là 2 chiến lược thiết kế riêng cho 2 chân dung khách hàng phổ biến nhất trong giới đầu tư Bất động sản.</p>
     </div>
     """, unsafe_allow_html=True)
 
