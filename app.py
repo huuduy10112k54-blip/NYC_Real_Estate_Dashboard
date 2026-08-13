@@ -1394,7 +1394,7 @@ with tab_adv:
     top_3_tich_san_names = []
     top_3_luot_song_names = []
 
-    st.markdown("###  NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)")
+    st.markdown("<h3 style='color:#1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;'> NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)</h3>", unsafe_allow_html=True)
     st.info("Dành cho khách hàng ưu tiên sự an tâm, muốn bảo toàn vốn và nhắm tới sự tăng trưởng đều đặn trong tầm nhìn 2-5 năm.")
     
     if len(valid_neighs) > 0:
@@ -1402,16 +1402,40 @@ with tab_adv:
         df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "CAGR (%)", "Điểm Tin Cậy"]].copy()
         df_leaderboard.rename(columns={"CAGR (%)": "Tăng trưởng (%)"}, inplace=True)
         df_leaderboard = df_leaderboard.sort_values("Điểm Tin Cậy", ascending=False)
-        top_3_tich_san_names = df_leaderboard.head(3)['Khu Vực'].tolist()
+        top_3_df = df_leaderboard.head(3)
+        top_3_tich_san_names = top_3_df['Khu Vực'].tolist()
         
-        st.success(f" **Hệ thống đề xuất 3 khu vực an toàn nhất:** {', '.join(top_3_tich_san_names)}")
-        st.markdown(" *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để xem biểu đồ chứng minh cho đề xuất này.*")
+        st.markdown("<h5 style='color:#334155; margin-top: 15px;'>Top 3 Khu Vực An Toàn Nhất (Dựa trên Thanh khoản & Ổn định):</h5>", unsafe_allow_html=True)
+        cols = st.columns(3)
+        
+        for i, row in enumerate(top_3_df.itertuples()):
+            with cols[i]:
+                st.markdown(f"""
+                <div style='background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-top: 4px solid #10b981; transition: transform 0.2s;'>
+                    <div style='color: #64748b; font-size: 12px; font-weight: bold; text-transform: uppercase;'>Hạng {i+1}</div>
+                    <div style='color: #0f172a; font-size: 20px; font-weight: 800; margin: 8px 0;'>{row._2}</div>
+                    <div style='font-size: 13px; color: #475569; margin-bottom: 4px;'>Quận: <b>{row.Quận}</b></div>
+                    <div style='display: flex; justify-content: space-around; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1;'>
+                        <div>
+                            <div style='font-size: 11px; color: #64748b;'>Độ Tin Cậy</div>
+                            <div style='font-size: 16px; font-weight: bold; color: #059669;'>{row._5}/100</div>
+                        </div>
+                        <div>
+                            <div style='font-size: 11px; color: #64748b;'>Tăng trưởng</div>
+                            <div style='font-size: 16px; font-weight: bold; color: #2563eb;'>+{row._4:.1f}%</div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+        st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Chuyển sang Tab 7 (Minh chứng Dữ liệu) để xem biểu đồ tăng trưởng thực tế của 3 khu vực này.</i></p>", unsafe_allow_html=True)
     else:
         st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản trong bộ lọc hiện tại.")
 
+    st.markdown("<br>", unsafe_allow_html=True)
     st.divider()
 
-    st.markdown("###  NHÀ ĐẦU CƠ LƯỚT SÓNG (Ăn xổi)")
+    st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px;'> NHÀ ĐẦU CƠ LƯỚT SÓNG (Ăn xổi)</h3>", unsafe_allow_html=True)
     st.info("Dành cho khách hàng thích 'đánh nhanh rút gọn', chấp nhận rủi ro cao để đổi lấy lợi nhuận đột biến. Dựa vào sóng thị trường và tâm lý Fomo.")
     
     with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
@@ -1421,10 +1445,32 @@ with tab_adv:
         st.warning("Không tìm thấy đủ dữ liệu giao dịch lướt sóng trong bộ lọc hiện tại.")
     else:
         top_roi = flip_stats.sort_values('avg_roi', ascending=False).head(5)
-        top_3_luot_song_names = top_roi.head(3)['neighborhood'].tolist()
+        top_3_roi = top_roi.head(3)
+        top_3_luot_song_names = top_3_roi['neighborhood'].tolist()
         
-        st.success(f" **Hệ thống đề xuất 3 điểm nóng lướt sóng:** {', '.join(top_3_luot_song_names)}")
-        st.markdown(" *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để đối chiếu.*")
+        st.markdown("<h5 style='color:#334155; margin-top: 15px;'>Top 3 Điểm Nóng Mua Đi Bán Lại (Biên độ lợi nhuận cao nhất):</h5>", unsafe_allow_html=True)
+        cols_flip = st.columns(3)
+        
+        for i, row in enumerate(top_3_roi.itertuples()):
+            with cols_flip[i]:
+                st.markdown(f"""
+                <div style='background-color: #fffaf5; border: 1px solid #ffedd5; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-top: 4px solid #f97316; transition: transform 0.2s;'>
+                    <div style='color: #ea580c; font-size: 12px; font-weight: bold; text-transform: uppercase;'>Mục tiêu {i+1}</div>
+                    <div style='color: #431407; font-size: 20px; font-weight: 800; margin: 8px 0;'>{row.neighborhood}</div>
+                    <div style='display: flex; justify-content: space-around; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fdba74;'>
+                        <div>
+                            <div style='font-size: 11px; color: #9a3412;'>Số Lượt Lướt</div>
+                            <div style='font-size: 16px; font-weight: bold; color: #c2410c;'>{row.count}</div>
+                        </div>
+                        <div>
+                            <div style='font-size: 11px; color: #9a3412;'>Lợi nhuận TB</div>
+                            <div style='font-size: 16px; font-weight: bold; color: #b91c1c;'>+{row.avg_roi:.1f}%</div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+        st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Chuyển sang Tab 7 (Minh chứng Dữ liệu) để đối chiếu lịch sử dao động giá của các khu vực này.</i></p>", unsafe_allow_html=True)
 
 
 
