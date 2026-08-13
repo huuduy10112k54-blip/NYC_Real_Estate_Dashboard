@@ -1403,7 +1403,7 @@ with tab_adv:
     top_3_tich_san_names = []
     top_3_luot_song_names = []
 
-    st.markdown("<h3 style='color:#1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 5px;'> NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#064e3b; border-bottom: 2px solid #10b981; padding-bottom: 5px;'> NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)</h3>", unsafe_allow_html=True)
     st.info("Dành cho khách hàng ưu tiên sự an tâm, muốn bảo toàn vốn và nhắm tới sự tăng trưởng đều đặn trong tầm nhìn 2-5 năm.")
     
     if len(valid_neighs) > 0:
@@ -1863,9 +1863,9 @@ with tab_evid:
     st.divider()
 
     st.markdown("""
-    <div style='background:linear-gradient(135deg,#b45309,#d97706,#fbbf24);border-radius:14px;
+    <div style='background:linear-gradient(135deg,#047857,#10b981,#34d399);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
-    box-shadow:0 6px 24px rgba(245,158,11,0.35)'>
+    box-shadow:0 6px 24px rgba(16,185,129,0.35)'>
     <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Tích sản)</b><br>
     <span style='font-size:12px;opacity:0.9'>Biểu đồ tăng trưởng thực tế của các khu vực vừa được hệ thống khuyên đầu tư.</span>
     </div>
@@ -1878,7 +1878,7 @@ with tab_evid:
         for i, neigh_name in enumerate(top_3_tich_san_names):
             boro_name = valid_neighs[valid_neighs['Khu Vực'] == neigh_name].iloc[0]['Quận']
             with cols_top[i]:
-                fig_top, pct_top = plot_single_neighborhood(boro_name, neigh_name, f"{neigh_name}", C_RED, height=250)
+                fig_top, pct_top = plot_single_neighborhood(boro_name, neigh_name, f"{neigh_name}", C_GREEN, height=250)
                 st.plotly_chart(fig_top, use_container_width=True)
                 render_mini_confidence(neigh_name)
     else:
@@ -1887,9 +1887,9 @@ with tab_evid:
     divider()
 
     st.markdown("""
-    <div style='background:linear-gradient(135deg,#4338ca,#6366f1,#818cf8);border-radius:14px;
+    <div style='background:linear-gradient(135deg,#c2410c,#ea580c,#f97316);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
-    box-shadow:0 6px 24px rgba(99,102,241,0.35)'>
+    box-shadow:0 6px 24px rgba(234,88,12,0.35)'>
         <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Lướt sóng)</b><br>
         <span style='font-size:12px;opacity:0.9'>Mức lợi nhuận thực tế từ các giao dịch mua đi bán lại tại những khu vực vừa được gợi ý.</span>
     </div>
@@ -1907,7 +1907,7 @@ with tab_evid:
             
             with cols_top2[i]:
                 if boro_name:
-                    fig_top2, _ = plot_single_neighborhood(boro_name, neigh_name, f"{neigh_name}", C_ORANGE, height=250)
+                    fig_top2, _ = plot_single_neighborhood(boro_name, neigh_name, f"{neigh_name}", C_RED, height=250)
                     st.plotly_chart(fig_top2, use_container_width=True)
                 else:
                     st.info(f"Đang tính toán {neigh_name}...")
