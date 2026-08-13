@@ -2014,11 +2014,10 @@ with tab_evid:
                     <div style='font-size:16px;'>{stars}</div>
                 </div>
                 <div style='margin-top:4px; font-size:13px; color:#475569;'>
-                    Dựa trên <b>{n_gd} giao dịch</b> rải đều trong <b>{n_thang} tháng</b> với mức độ ổn định xu hướng đạt <b>{n_r2*100:.0f}%</b>.
+                    Dựa trên <b>{n_gd} giao dịch</b> rải đều trong <b>{n_thang} tháng</b> (Độ bám sát xu hướng R² = {max(0, n_r2):.2f}).
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            st.info(f"Dựa trên xu hướng lịch sử, khu vực **{selected_n}** (thuộc {boro_of_n}) có tỷ suất sinh lời lũy kế là **{pct_explore:+.1f}%**.")
         else:
              st.markdown("""
                 <div style='text-align:center; padding: 40px 20px; border: 2px dashed #cbd5e1; border-radius: 12px; margin-top: 20px;'>
