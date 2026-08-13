@@ -1914,7 +1914,7 @@ with tab_search:
                             </div>
                             """, unsafe_allow_html=True)
             else:
-                st.info(" Công cụ này giúp tra cứu các bất động sản cụ thể thoả mãn các gợi ý ở bước 1. Hãy điều chỉnh bộ lọc và bấm **Tìm Kiếm Comps**")
+                st.info(" Hãy điều chỉnh bộ lọc và bấm **Tìm Kiếm Comps**")
 
 
 
