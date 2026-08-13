@@ -1609,6 +1609,9 @@ with tab7:
         structural_feats = ['building_age', 'residential_units', 'gross_sqft']
         df_fi = df_fi[~df_fi['Feature'].isin(structural_feats)].copy()
         
+        # Loại bỏ các tiện ích không có dữ liệu (Trọng số = 0) để biểu đồ không bị khoảng trống
+        df_fi = df_fi[df_fi['Importance'] > 0].copy()
+        
         # Chuẩn hóa lại tỷ trọng (để tổng các tiện ích = 100%)
         df_fi['Importance'] = df_fi.groupby('Year')['Importance'].transform(lambda x: x / x.sum())
         
