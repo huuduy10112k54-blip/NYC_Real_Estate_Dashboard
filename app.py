@@ -1461,9 +1461,9 @@ with tab_adv:
                 st.markdown("##### 🔥 Sôi động nhất (Giao dịch nhiều)")
                 top_active = long_term.sort_values('flip_rate', ascending=False).head(5)
                 fig_act = px.bar(top_active, x='flip_rate', y='neighborhood', orientation='h',
-                                 color='avg_profit', color_continuous_scale='RdYlGn',
-                                 labels={'flip_rate': 'Tỷ lệ lướt sóng (%)', 'neighborhood': ''})
-                fig_act.update_layout(yaxis={'categoryorder':'total ascending'}, margin=dict(l=0, r=0, t=10, b=10))
+                                 color='avg_profit', color_continuous_scale='RdYlGn', title='',
+                                 labels={'flip_rate': 'Tỷ lệ lướt sóng (%)', 'neighborhood': '', 'avg_profit': 'Lợi nhuận TB'})
+                fig_act.update_layout(yaxis={'categoryorder':'total ascending'}, margin=dict(l=0, r=0, t=20, b=10))
                 clayout(fig_act, h=250)
                 st.plotly_chart(fig_act, use_container_width=True)
             with c2:
@@ -1471,9 +1471,9 @@ with tab_adv:
                 top_roi_disp = top_roi.copy()
                 top_roi_disp['roi_pct'] = top_roi_disp['avg_roi'] * 100
                 fig_roi = px.bar(top_roi_disp, x='roi_pct', y='neighborhood', orientation='h',
-                                 color='roi_pct', color_continuous_scale='Sunsetdark',
+                                 color='roi_pct', color_continuous_scale='Sunsetdark', title='',
                                  labels={'roi_pct': 'Tỷ suất sinh lời TB (%)', 'neighborhood': ''})
-                fig_roi.update_layout(yaxis={'categoryorder':'total ascending'}, margin=dict(l=0, r=0, t=10, b=10))
+                fig_roi.update_layout(yaxis={'categoryorder':'total ascending'}, margin=dict(l=0, r=0, t=20, b=10))
                 clayout(fig_roi, h=250)
                 st.plotly_chart(fig_roi, use_container_width=True)
 
