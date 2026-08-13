@@ -1866,7 +1866,7 @@ with tab_evid:
     <div style='background:linear-gradient(135deg,#b45309,#d97706,#fbbf24);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(245,158,11,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>Minh chứng cho Đề xuất Tích sản</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Tích sản)</b><br>
     <span style='font-size:12px;opacity:0.9'>Biểu đồ tăng trưởng thực tế của các khu vực vừa được hệ thống khuyên đầu tư.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -1890,8 +1890,8 @@ with tab_evid:
     <div style='background:linear-gradient(135deg,#4338ca,#6366f1,#818cf8);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(99,102,241,0.35)'>
-        <b style='font-size:15px;letter-spacing:-0.3px'>Minh chứng cho Đề xuất Lướt sóng</b><br>
-        <span style='font-size:12px;opacity:0.9'>Phân tích hiệu suất biên độ giá mua đi bán lại của các khu vực "nóng" vừa được AI gợi ý.</span>
+        <b style='font-size:15px;letter-spacing:-0.3px'>Dữ liệu Lịch sử (Lướt sóng)</b><br>
+        <span style='font-size:12px;opacity:0.9'>Phân tích hiệu suất biên độ giá mua đi bán lại của các khu vực "nóng" vừa được gợi ý.</span>
     </div>
     """, unsafe_allow_html=True)
     
