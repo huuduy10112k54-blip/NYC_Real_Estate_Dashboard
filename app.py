@@ -18,7 +18,7 @@ load_dotenv()
 st.set_page_config(
     page_title="[PostgreSQL] Báo cáo Phân tích Thị trường Bất động sản NYC 2025 - 2026",
     layout="wide",
-    page_icon="🗄️",
+    page_icon="️",
     initial_sidebar_state="expanded",
 )
 
@@ -580,13 +580,13 @@ def render_factor_summary_matrix(df_in):
                 r = valid['sale_price'].corr(valid[col])
                 abs_r = abs(r)
                 if abs_r >= 0.50:
-                    level = "🚀 RẤT MẠNH"
+                    level = " RẤT MẠNH"
                 elif abs_r >= 0.35:
-                    level = "📈 MẠNH"
+                    level = " MẠNH"
                 elif abs_r >= 0.15:
-                    level = "⚖️ TRUNG BÌNH"
+                    level = "️ TRUNG BÌNH"
                 else:
-                    level = "📉 YẾU"
+                    level = " YẾU"
                 
                 direction = "Thuận (+)" if r > 0 else "Nghịch (-)"
                 rows.append({
@@ -645,7 +645,7 @@ if df_raw is not None:
         load_err = "Không có dữ liệu nào khớp với năm 2025 trở đi."
 
 if df_raw is None:
-    st.error(f"⚠️ **Lỗi:** {load_err}")
+    st.error(f"️ **Lỗi:** {load_err}")
     st.info("Hãy chạy `main.py` trước.")
     st.stop()
 
@@ -655,26 +655,26 @@ if df_raw is None:
 with st.sidebar:
     st.markdown("""
     <div style='text-align:center;padding:20px 0 10px'>
-        <div style='font-size:36px'>🏙️</div>
+        <div style='font-size:36px'>️</div>
         <div style='font-size:14px;font-weight:700;color:#f1f5f9;margin-top:6px'>Bộ lọc dữ liệu</div>
         <div style='font-size:11px;color:#64748b;margin-top:2px'>NYC Real Estate Analytics</div>
     </div>
     <hr style='border-color:#1e3a5f;margin:0 0 14px'>
     """, unsafe_allow_html=True)
     all_b = [b for b in BOROUGH_ORDER if b in df_raw['borough_name'].dropna().unique()]
-    selected_boroughs = st.multiselect("📍 Quận (Borough)", options=all_b, default=all_b)
+    selected_boroughs = st.multiselect(" Quận (Borough)", options=all_b, default=all_b)
     avail_years = sorted(df_raw['sale_year'].dropna().astype(int).unique().tolist())
-    year_range  = st.select_slider("📅 Năm giao dịch", options=avail_years,
+    year_range  = st.select_slider(" Năm giao dịch", options=avail_years,
                                    value=(min(avail_years), max(avail_years)))
     p5  = float(df_raw['sale_price'].quantile(0.05))
     p95 = float(df_raw['sale_price'].quantile(0.95))
-    price_range = st.slider("💰 Khoảng giá ($)",
+    price_range = st.slider(" Khoảng giá ($)",
                             min_value=float(df_raw['sale_price'].min()),
                             max_value=float(df_raw['sale_price'].max()),
                             value=(p5, p95), format="$%.0f",
                             help="Mặc định p5–p95 để loại bỏ outlier.")
     st.markdown('<hr style="border-color:#1e3a5f;margin:14px 0 10px">', unsafe_allow_html=True)
-    if st.button("🔄 Đặt lại bộ lọc", width='stretch'):
+    if st.button(" Đặt lại bộ lọc", width='stretch'):
         st.rerun()
     st.markdown(f"""
     <div style='text-align:center;margin-top:10px;color:#475569;font-size:11px'>
@@ -685,11 +685,11 @@ with st.sidebar:
 # ÁP DỤNG BỘ LỌC
 # ════════════════════════════════════════════════════════════
 if not selected_boroughs:
-    st.warning("⚠️ Chưa chọn quận nào. Hãy chọn ít nhất một quận trong bộ lọc bên trái.")
+    st.warning("️ Chưa chọn quận nào. Hãy chọn ít nhất một quận trong bộ lọc bên trái.")
     st.stop()
 df = apply_filters(df_raw, selected_boroughs, year_range, price_range)
 if len(df) == 0:
-    st.warning("⚠⚠️ **Không có dữ liệu phù hợp.** Hãy mở rộng bộ lọc hoặc nhấn Đặt lại.")
+    st.warning("️ **Không có dữ liệu phù hợp.** Hãy mở rộng bộ lọc hoặc nhấn Đặt lại.")
     st.stop()
 
 df_sample = df.sample(n=min(3000, len(df)), random_state=42)
@@ -702,12 +702,12 @@ h1, h2 = st.columns([4, 1])
 with h1:
     st.markdown("""
     <h1 style='font-size:24px;font-weight:800;color:#0f172a;margin:0'>
-    🏙️ BÁO CÁO PHÂN TÍCH THỊ TRƯỜNG BẤT ĐỘNG SẢN NEW YORK GIAI ĐOẠN 2025 - 2026
+    ️ BÁO CÁO PHÂN TÍCH THỊ TRƯỜNG BẤT ĐỘNG SẢN NEW YORK GIAI ĐOẠN 2025 - 2026
     </h1>""", unsafe_allow_html=True)
 with h2:
     st.markdown(f"""
     <div style='text-align:right;padding-top:6px'>
-        <span class="badge">✓ {len(df):,} giao dịch</span><br>
+        <span class="badge"> {len(df):,} giao dịch</span><br>
         <span style='font-size:11px;color:#94a3b8'>{len(selected_boroughs)} quận · {year_range[0]}–{year_range[1]}</span>
     </div>""", unsafe_allow_html=True)
 st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
@@ -716,14 +716,14 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # TABS
 # ════════════════════════════════════════════════════════════
 tab0, tab1, tab2, tab4, tab7, tab_adv, tab_evid, tab_search = st.tabs([
-    "📊  Tổng quan",
-    "🏘️  Phân tích khu vực",
-    "📈  Yếu tố quyết định giá",
-    "🤖  Dự báo & Mô hình ML",
-    "📍 Tiện ích 2025-2026",
-    "💡 1. Đề xuất Chiến lược",
-    "📊 2. Minh chứng Dữ liệu",
-    "🎯 3. Tìm kiếm BĐS",
+    "  Tổng quan",
+    "️  Phân tích khu vực",
+    "  Yếu tố quyết định giá",
+    "  Dự báo & Mô hình ML",
+    " Tiện ích 2025-2026",
+    " 1. Đề xuất Chiến lược",
+    " 2. Minh chứng Dữ liệu",
+    " 3. Tìm kiếm BĐS",
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -734,7 +734,7 @@ with tab0:
     <div style='background:linear-gradient(135deg,#4338ca,#6366f1,#818cf8);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(99,102,241,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>🏙️ Thị trường đang ở đâu và quy mô như thế nào?</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'>️ Thị trường đang ở đâu và quy mô như thế nào?</b><br>
     <span style='font-size:12px;opacity:0.88'>Tổng quan về quy mô, mặt bằng giá và cơ cấu thị trường bất động sản NYC trong bộ lọc hiện tại.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -898,7 +898,7 @@ with tab0:
     borough_risk['Rủi ro biến động'] = pd.cut(
         borough_risk['CV (%)'],
         bins=[0, 80, 120, float('inf')],
-        labels=['🟢 Thấp', '🟡 Trung bình', '🔴 Cao']
+        labels=['Thấp', 'Trung bình', ' Cao']
     )
     borough_risk = borough_risk.sort_values('CV (%)')
 
@@ -916,7 +916,7 @@ with tab1:
     <div style='background:linear-gradient(135deg,#0f766e,#0d9488,#34d399);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(16,185,129,0.3)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>🗺️ Bản đồ Nhiệt Khu vực & Phân tích Điểm nóng (NYC Hotspot Map)</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'>️ Bản đồ Nhiệt Khu vực & Phân tích Điểm nóng (NYC Hotspot Map)</b><br>
     <span style='font-size:12px;opacity:0.88'>Nhận diện điểm nóng giá bán, định giá đơn vị $/sqft và mật độ thanh khoản trên bản đồ tương quan không gian thực.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -957,7 +957,7 @@ with tab1:
     with mc1:
         map_metric = st.radio(
             "Hiển thị điểm nóng theo:",
-            options=["🔥 Giá trung vị ($)", "📐 Giá/sqft trung vị ($)", "📊 Mật độ giao dịch (Số căn)"],
+            options=[" Giá trung vị ($)", " Giá/sqft trung vị ($)", " Mật độ giao dịch (Số căn)"],
             horizontal=True
         )
     with mc2:
@@ -965,11 +965,11 @@ with tab1:
     with mc3:
         zoom_val = st.slider("Độ phóng đại (Zoom)", 9, 13, 10)
 
-    if map_metric == "🔥 Giá trung vị ($)":
+    if map_metric == " Giá trung vị ($)":
         target_z = 'med_price'
         color_scale = "Plasma"
         z_title = "Giá trung vị ($)"
-    elif map_metric == "📐 Giá/sqft trung vị ($)":
+    elif map_metric == " Giá/sqft trung vị ($)":
         target_z = 'med_ppsf_clean'
         color_scale = "Inferno"
         z_title = "Giá/sqft ($)"
@@ -1102,7 +1102,7 @@ with tab2:
     <div style='background:linear-gradient(135deg,#5b21b6,#7c3aed,#a78bfa);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(124,58,237,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>📐 Phân tích Ma trận Yếu tố & Các Biến số Quyết định Giá</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'> Phân tích Ma trận Yếu tố & Các Biến số Quyết định Giá</b><br>
     <span style='font-size:12px;opacity:0.88'>Tóm tắt các yếu tố ảnh hưởng mạnh/yếu, ma trận tương quan và giải thích ý nghĩa chiều tác động của các biến số chính đến giá bán thực tế.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -1151,12 +1151,12 @@ with tab2:
     # ── PHÂN TÍCH CHI TIẾT 3 BIẾN SỐ CHÍNH THEO YÊU CẦU ──
     st.markdown("""
     <div style='font-size:18px;font-weight:800;color:#1e1b4b;margin-bottom:16px'>
-    🔍 PHÂN TÍCH CHI TIẾT 3 BIẾN SỐ CHỦ ĐẠO TÁC ĐỘNG ĐẾN GIÁ BÁN
+     PHÂN TÍCH CHI TIẾT 3 BIẾN SỐ CHỦ ĐẠO TÁC ĐỘNG ĐẾN GIÁ BÁN
     </div>
     """, unsafe_allow_html=True)
 
     # 1. BIẾN SỐ 1: DIỆN TÍCH (gross_sqft)
-    section_q("1. Biến số DIỆN TÍCH CÔNG TRÌNH (gross_sqft) — Mức độ tác động: 🚀 RẤT MẠNH",
+    section_q("1. Biến số DIỆN TÍCH CÔNG TRÌNH (gross_sqft) — Mức độ tác động:  RẤT MẠNH",
               "Phân tích mối quan hệ giữa quy mô diện tích sàn sử dụng và tổng giá bán bất động sản.")
     
     mask = df['gross_sqft'].notna() & df['gross_sqft'].between(100, 4000)
@@ -1191,7 +1191,7 @@ with tab2:
     divider()
 
     # 2. BIẾN SỐ 2: THU NHẬP KHU VỰC (avg_income)
-    section_q("2. Biến số THU NHẬP BÌNH QUÂN KHU VỰC (avg_income) — Mức độ tác động: 📈 MẠNH",
+    section_q("2. Biến số THU NHẬP BÌNH QUÂN KHU VỰC (avg_income) — Mức độ tác động:  MẠNH",
               "Phân tích tác động của sức mua và mức độ đắt đỏ của dân cư sinh sống tại khu vực đến mặt bằng giá nhà.")
 
     df_inc = df.loc[df['avg_income'].notna(), ['avg_income', 'sale_price', 'price_per_sqft', 'borough_name']].copy()
@@ -1224,7 +1224,7 @@ with tab2:
     divider()
 
     # 3. BIẾN SỐ 3: TUỔI BẤT ĐỘNG SẢN (building_age)
-    section_q("3. Biến số TUỔI CÔNG TRÌNH (building_age) — Mức độ tác động: 📉 YẾU / ÂM",
+    section_q("3. Biến số TUỔI CÔNG TRÌNH (building_age) — Mức độ tác động:  YẾU / ÂM",
               "Phân tích tác động của thời gian vận hành công trình đến giá bán (khấu hao vật lý vs giá trị vị trí).")
 
     df_age = df.loc[df['building_age'].notna() & df['building_age'].between(0, 120), ['building_age', 'sale_price']].copy()
@@ -1386,18 +1386,18 @@ with tab_adv:
     <div style='background:linear-gradient(135deg,#1e3a8a,#3b82f6,#93c5fd);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(59,130,246,0.35)'>
-        <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'>💡 Đề xuất Chiến lược Đầu tư (Robo-Advisor)</h2>
+        <h2 style='margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;'> Đề xuất Chiến lược Đầu tư (Robo-Advisor)</h2>
         <p style='margin:8px 0 0;font-size:15px;opacity:0.9;'>Dưới đây là 3 chiến lược thiết kế riêng cho 3 chân dung khách hàng phổ biến nhất trong giới đầu tư Bất động sản.</p>
     </div>
     """, unsafe_allow_html=True)
 
-    adv_t1, adv_t2 = st.tabs(["🛡️ Đầu Tư Bền Vững (Dài hạn)", "🏄 Đầu Cơ Ăn Xổi (Ngắn hạn)"])
+    adv_t1, adv_t2 = st.tabs(["️ Đầu Tư Bền Vững (Dài hạn)", " Đầu Cơ Ăn Xổi (Ngắn hạn)"])
 
     top_3_tich_san_names = []
     top_3_luot_song_names = []
 
     with adv_t1:
-        st.markdown("### 🛡️ NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)")
+        st.markdown("### ️ NHÀ ĐẦU TƯ BỀN VỮNG (Tích Sản & Tăng Trưởng)")
         st.info("Dành cho khách hàng ưu tiên sự an tâm, muốn bảo toàn vốn và nhắm tới sự tăng trưởng đều đặn trong tầm nhìn 2-5 năm.")
         
         if len(valid_neighs) > 0:
@@ -1407,8 +1407,8 @@ with tab_adv:
             df_leaderboard = df_leaderboard.sort_values("Điểm Tin Cậy", ascending=False)
             top_3_tich_san_names = df_leaderboard.head(3)['Khu Vực'].tolist()
             
-            st.success(f"🎯 **Hệ thống đề xuất 3 khu vực an toàn nhất:** {', '.join(top_3_tich_san_names)}")
-            st.markdown("💡 *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để xem biểu đồ chứng minh cho đề xuất này.*")
+            st.success(f" **Hệ thống đề xuất 3 khu vực an toàn nhất:** {', '.join(top_3_tich_san_names)}")
+            st.markdown(" *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để xem biểu đồ chứng minh cho đề xuất này.*")
             
             st.markdown("<br><h4 style='color:#1e293b; margin-bottom: 5px;'>Bảng xếp hạng Khu vực Tích sản</h4>", unsafe_allow_html=True)
             st.markdown("<p style='color:#64748b; font-size:14px; margin-bottom: 15px;'>Bảng tổng hợp toàn bộ các khu vực an toàn. Bạn có thể <b>bấm vào tiêu đề cột</b> để sắp xếp.</p>", unsafe_allow_html=True)
@@ -1440,7 +1440,7 @@ with tab_adv:
             st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản trong bộ lọc hiện tại.")
 
     with adv_t2:
-        st.markdown("### 🏄 NHÀ ĐẦU CƠ LƯỚT SÓNG (Ăn xổi)")
+        st.markdown("###  NHÀ ĐẦU CƠ LƯỚT SÓNG (Ăn xổi)")
         st.info("Dành cho khách hàng thích 'đánh nhanh rút gọn', chấp nhận rủi ro cao để đổi lấy lợi nhuận đột biến. Dựa vào sóng thị trường và tâm lý Fomo.")
         
         with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
@@ -1452,8 +1452,8 @@ with tab_adv:
             top_roi = flip_stats.sort_values('avg_roi', ascending=False).head(5)
             top_3_luot_song_names = top_roi.head(3)['neighborhood'].tolist()
             
-            st.success(f"🎯 **Hệ thống đề xuất 3 điểm nóng lướt sóng:** {', '.join(top_3_luot_song_names)}")
-            st.markdown("💡 *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để đối chiếu.*")
+            st.success(f" **Hệ thống đề xuất 3 điểm nóng lướt sóng:** {', '.join(top_3_luot_song_names)}")
+            st.markdown(" *Chuyển sang Tab 7 (Minh chứng Dữ liệu) để đối chiếu.*")
 
 
     # ════════════════════════════════════════════════════════════
@@ -1464,7 +1464,7 @@ with tab4:
     <div style='background:linear-gradient(135deg,#0f172a,#1e293b,#334155);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.07)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>🤖 Mô hình Machine Learning dự báo giá như thế nào?</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'> Mô hình Machine Learning dự báo giá như thế nào?</b><br>
     <span style='font-size:12px;opacity:0.75'>So sánh hiệu suất mô hình, yếu tố quan trọng và công cụ ước tính giá tương tác.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -1472,7 +1472,7 @@ with tab4:
     df_pred, df_imp, ml_metrics = load_ml_data(mtime=_get_zip_mtime())
 
     if not ml_metrics:
-        st.warning("⚠️ Chưa có kết quả ML. Hãy chạy `main.py` trước.")
+        st.warning("️ Chưa có kết quả ML. Hãy chạy `main.py` trước.")
     else:
         rf4 = ml_metrics.get('Random Forest', {}); lr4 = ml_metrics.get('Linear Regression', {})
         m1,m2,m3,m4 = st.columns(4)
@@ -1492,7 +1492,7 @@ with tab4:
                    'Điểm R²':  f"{m['R2']:.4f}",
                    'Sai số TB ($)': f"${m['MAE']:,.0f}",
                    'Căn SSBT ($)': f"${m['RMSE']:,.0f}",
-                   'Đánh giá': '✅ Tốt hơn' if n == 'Random Forest' else '📊 Tham khảo'}
+                   'Đánh giá': ' Tốt hơn' if n == 'Random Forest' else ' Tham khảo'}
                  for n, m in ml_metrics.items()]
         st.dataframe(pd.DataFrame(rows4).set_index('Mô hình'), width='stretch')
 
@@ -1544,13 +1544,13 @@ with tab4:
 # TAB 5  L?T SNG & ?U C
 # ????????????????????????????????????????????????????????????
 # with tab6:
-#     st.info("🚧 Tính năng Trợ lý AI đang được bảo trì để tối ưu hóa với bộ dữ liệu 2.1 triệu giao dịch. Vui lòng quay lại sau!")
+#     st.info(" Tính năng Trợ lý AI đang được bảo trì để tối ưu hóa với bộ dữ liệu 2.1 triệu giao dịch. Vui lòng quay lại sau!")
 
 # Cache bust 2
 
 with tab7:
     st.markdown("""
-    ## 🚇 Phân tích Tác động Tiện ích đến Giá nhà (2025 - 2026)
+    ##  Phân tích Tác động Tiện ích đến Giá nhà (2025 - 2026)
     *Phân tích này sử dụng khoảng cách vật lý chính xác từ **50.200 căn nhà** (dựa trên dữ liệu OpenStreetMap và Geocoding) đến các tiện ích công cộng.*
     *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
     """)
@@ -1610,12 +1610,12 @@ with tab7:
             st.plotly_chart(fig_2026, use_container_width=True)
             
         st.info("""
-        **💡 Kết luận chính (Phân tích tổng hợp 2025 - 2026):**
+        ** Kết luận chính (Phân tích tổng hợp 2025 - 2026):**
         *(Lưu ý: Dữ liệu này tổng hợp các giao dịch phát sinh trong năm).*
         
-        1. 🥇 **Năm 2025 (Chuyển dịch nhu cầu):** Mật độ Bệnh viện (Hospital) và Ga Tàu điện ngầm (Subway) trong bán kính 1km bắt đầu cho thấy sự chi phối mạnh mẽ, vượt qua các yếu tố về không gian.
+        1.  **Năm 2025 (Chuyển dịch nhu cầu):** Mật độ Bệnh viện (Hospital) và Ga Tàu điện ngầm (Subway) trong bán kính 1km bắt đầu cho thấy sự chi phối mạnh mẽ, vượt qua các yếu tố về không gian.
         
-        2. 🥈 **Năm 2026 (Y tế & Giao thông lên ngôi):** Xu hướng này tiếp tục được củng cố trong năm 2026. Ga Tàu điện ngầm và Bệnh viện trở thành 2 tiện ích quan trọng nhất quyết định giá nhà. Điều này phản ánh sự dịch chuyển vĩnh viễn của người mua nhà tại NYC sang ưu tiên sức khỏe và hạ tầng di chuyển tiện lợi.
+        2.  **Năm 2026 (Y tế & Giao thông lên ngôi):** Xu hướng này tiếp tục được củng cố trong năm 2026. Ga Tàu điện ngầm và Bệnh viện trở thành 2 tiện ích quan trọng nhất quyết định giá nhà. Điều này phản ánh sự dịch chuyển vĩnh viễn của người mua nhà tại NYC sang ưu tiên sức khỏe và hạ tầng di chuyển tiện lợi.
         
         *(Mô hình áp dụng thuật toán Không gian cKDTree để tính chính xác khoảng cách địa lý theo đơn vị Km cho 50.200 căn nhà)*
         """)
@@ -1702,12 +1702,12 @@ def load_comps_data():
 
 
 with tab_search:
-    st.info("💡 **HƯỚNG DẪN:** Sau khi đã xem qua Đề xuất và Minh chứng, hãy dùng công cụ này để tìm kiếm đích danh các căn nhà đang rao bán tại khu vực bạn nhắm tới.")
+    st.info(" **HƯỚNG DẪN:** Sau khi đã xem qua Đề xuất và Minh chứng, hãy dùng công cụ này để tìm kiếm đích danh các căn nhà đang rao bán tại khu vực bạn nhắm tới.")
     st.markdown("""
     <div style='background:linear-gradient(135deg,#db2777,#be185d,#9d174d);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(219,39,119,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>🎯 Định vị Bất động sản Tham chiếu</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'> Định vị Bất động sản Tham chiếu</b><br>
     <span style='font-size:13px;opacity:0.9'>Công cụ tìm kiếm Mã vùng và Căn nhà tham chiếu dựa trên ngân sách và tiện ích 1km.</span>
     </div>""", unsafe_allow_html=True)
 
@@ -1719,7 +1719,7 @@ with tab_search:
         col_filter, col_res = st.columns([1, 2.2])
         
         with col_filter:
-            st.markdown("### 🎛️ Bộ Lọc Thông Minh")
+            st.markdown("### ️ Bộ Lọc Thông Minh")
             
             # Budget
             min_price = 100000
@@ -1738,13 +1738,13 @@ with tab_search:
             neighs = ["Tất cả"] + avail_neighs
             selected_neigh = st.selectbox("Khu vực (Neighborhood)", neighs)
             
-            st.markdown("#### 🌟 Tiện ích < 1km")
-            req_school = st.checkbox("🏫 Có Trường học")
-            req_subway = st.checkbox("🚇 Có Ga Tàu điện ngầm")
-            req_park = st.checkbox("🌳 Có Công viên")
-            req_hospital = st.checkbox("🏥 Có Bệnh viện/Phòng khám")
+            st.markdown("####  Tiện ích < 1km")
+            req_school = st.checkbox(" Có Trường học")
+            req_subway = st.checkbox(" Có Ga Tàu điện ngầm")
+            req_park = st.checkbox(" Có Công viên")
+            req_hospital = st.checkbox(" Có Bệnh viện/Phòng khám")
             
-            do_search = st.button("🔍 Tìm Kiếm Comps", use_container_width=True, type='primary')
+            do_search = st.button(" Tìm Kiếm Comps", use_container_width=True, type='primary')
             
         with col_res:
             if do_search:
@@ -1796,27 +1796,27 @@ with tab_search:
                             best_boro = best_row['borough_name']
                             med_price = best_row['sale_price']
                             
-                        st.success(f"### 🎯 ĐỀ XUẤT TỐT NHẤT: Mã Bưu Chính (Zip Code) {best_zip}")
-                        st.markdown(f"**📍 Khu vực:** {best_boro} | **💰 Giá trung vị (Comps):** ${med_price:,.0f}")
+                        st.success(f"###  ĐỀ XUẤT TỐT NHẤT: Mã Bưu Chính (Zip Code) {best_zip}")
+                        st.markdown(f"** Khu vực:** {best_boro} | ** Giá trung vị (Comps):** ${med_price:,.0f}")
                         st.markdown("*Khu vực Zip Code này có mật độ tiện ích cao nhất đáp ứng đủ các tiêu chí bạn chọn. Dưới đây là các Căn nhà tham chiếu (Comps) tiêu biểu đã từng giao dịch:*")
                         
                         comps_in_zip = filtered[filtered['zip_code'] == best_zip].sort_values('amenity_score', ascending=False).head(3)
                         
                         for idx, row in comps_in_zip.iterrows():
                             # HTML Card
-                            school_tag = "🏫 Trường học" if row['has_school_1km'] else ""
-                            subway_tag = "🚇 Ga Tàu" if row['has_subway_1km'] else ""
-                            park_tag = "🌳 Công viên" if row['has_park_1km'] else ""
-                            market_tag = "🛒 Siêu thị" if row.get('has_supermarket_1km') else ""
-                            hosp_tag = "🏥 Bệnh viện" if row.get('has_hospital_1km') else ""
+                            school_tag = " Trường học" if row['has_school_1km'] else ""
+                            subway_tag = " Ga Tàu" if row['has_subway_1km'] else ""
+                            park_tag = " Công viên" if row['has_park_1km'] else ""
+                            market_tag = " Siêu thị" if row.get('has_supermarket_1km') else ""
+                            hosp_tag = " Bệnh viện" if row.get('has_hospital_1km') else ""
                             tags = " | ".join(filter(None, [school_tag, subway_tag, park_tag, market_tag, hosp_tag]))
                             
                             st.markdown(f"""
                             <div style='border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #db2777; background: #fafafa;'>
-                                <h4 style='margin-top: 0; color: #1e293b;'>🏠 {row['address']}</h4>
+                                <h4 style='margin-top: 0; color: #1e293b;'> {row['address']}</h4>
                                 <div style='display: flex; justify-content: space-between; font-size: 14px;'>
                                     <div><b>Phân khúc:</b> {row['building_class_category']}</div>
-                                    <div style='color: #059669; font-weight: bold;'>💵 ${row['sale_price']:,.0f}</div>
+                                    <div style='color: #059669; font-weight: bold;'> ${row['sale_price']:,.0f}</div>
                                 </div>
                                 <div style='font-size: 13px; color: #64748b; margin-top: 8px;'>
                                     <b>Tiện ích 1km:</b> {tags}
@@ -1824,7 +1824,7 @@ with tab_search:
                             </div>
                             """, unsafe_allow_html=True)
             else:
-                st.info("👈 Hãy điều chỉnh thông số bên trái và bấm **Tìm Kiếm Comps**")
+                st.info(" Hãy điều chỉnh thông số bên trái và bấm **Tìm Kiếm Comps**")
 
 
 
@@ -1832,7 +1832,7 @@ with tab_search:
 # TAB 7 — MINH CHỨNG DỮ LIỆU
 # ════════════════════════════════════════════════════════════
 with tab_evid:
-    st.info("💡 **HƯỚNG DẪN:** Dưới đây là các biểu đồ thực tế chứng minh cho những đề xuất vừa được AI đưa ra ở Tab Đề xuất Chiến lược.")
+    st.info(" **HƯỚNG DẪN:** Dưới đây là các biểu đồ thực tế chứng minh cho những đề xuất vừa được AI đưa ra ở Tab Đề xuất Chiến lược.")
     st.divider()
 
     st.markdown("""
@@ -1846,7 +1846,7 @@ with tab_evid:
     
     # In các khu vực top 3 tích sản
     if len(top_3_tich_san_names) > 0:
-        st.markdown(f"#### 📈 Lịch sử Tăng trưởng của Top 3 Đề xuất: {', '.join(top_3_tich_san_names)}")
+        st.markdown(f"####  Lịch sử Tăng trưởng của Top 3 Đề xuất: {', '.join(top_3_tich_san_names)}")
         cols_top = st.columns(3)
         for i, neigh_name in enumerate(top_3_tich_san_names):
             boro_name = valid_neighs[valid_neighs['Khu Vực'] == neigh_name].iloc[0]['Quận']
@@ -1869,7 +1869,7 @@ with tab_evid:
     """, unsafe_allow_html=True)
     
     if len(top_3_luot_song_names) > 0:
-        st.markdown(f"#### 🌊 Dao động giá của Top 3 Điểm Nóng: {', '.join(top_3_luot_song_names)}")
+        st.markdown(f"####  Dao động giá của Top 3 Điểm Nóng: {', '.join(top_3_luot_song_names)}")
         cols_top2 = st.columns(3)
         for i, neigh_name in enumerate(top_3_luot_song_names):
             boro_name = ""
@@ -1888,7 +1888,7 @@ with tab_evid:
         st.warning("Không có điểm nóng lướt sóng nào để hiển thị.")
 
     divider()
-    st.markdown("<h4 style='color:#1e293b; margin-top:0px;'>🌍 Toàn cảnh thị trường (Để đối chiếu)</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color:#1e293b; margin-top:0px;'> Toàn cảnh thị trường (Để đối chiếu)</h4>", unsafe_allow_html=True)
     st.markdown("<p style='color:#64748b; font-size:14px;'>Sử dụng đường xu hướng của toàn thị trường để thấy các khu vực được đề xuất đã vượt trội như thế nào.</p>", unsafe_allow_html=True)
     mts_all = df_t3.groupby('ym_dt')['sale_price'].median().reset_index().sort_values('ym_dt')
     if len(mts_all) > 0:
@@ -1920,7 +1920,7 @@ with tab_evid:
         
     # --- NỘI SOI KHU VỰC ĐỘNG ---
     divider()
-    st.markdown("<h4 style='color:#1e293b; margin-bottom: 5px;'>🔍 Nội soi khu vực (Kiểm chứng tự do)</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color:#1e293b; margin-bottom: 5px;'> Nội soi khu vực (Kiểm chứng tự do)</h4>", unsafe_allow_html=True)
     st.markdown("<p style='color:#64748b; font-size:14px; margin-bottom: 15px;'>Nếu bạn chọn 1 khu vực bất kỳ ở Bảng xếp hạng bên Tab Đề Xuất, nó sẽ hiện ở đây.</p>", unsafe_allow_html=True)
     
     try:
@@ -1950,7 +1950,7 @@ with tab_evid:
             
             st.markdown(f"""
             <div id='target-explorer' style='background:linear-gradient(135deg, #0f172a, #1e293b, #334155); padding:10px 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-top:5px; margin-bottom: 5px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
-                <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 4px; font-size: 18px;'>🔎 Hồ sơ Phân tích: {selected_n}</h4>
+                <h4 style='margin-top:0px; color:#F8FAFC; margin-bottom: 4px; font-size: 18px;'> Hồ sơ Phân tích: {selected_n}</h4>
                 <p style='color:#94A3B8; font-size:13px; margin-bottom: 0px;'>Chi tiết lịch sử giá và chỉ số rủi ro của khu vực bạn vừa chọn.</p>
             </div>
             """, unsafe_allow_html=True)
@@ -1967,11 +1967,11 @@ with tab_evid:
             total_score = vol_score + time_score + trend_score
     
             if total_score >= 80:
-                rating, stars = "🟢 Cực kỳ đáng tin", "🌟🌟🌟🌟🌟"
+                rating, stars = "Cực kỳ đáng tin", ""
             elif total_score >= 60:
-                rating, stars = "🟡 Khá đáng tin", "🌟🌟🌟🌟"
+                rating, stars = "Khá đáng tin", ""
             else:
-                rating, stars = "🟠 Độ tin cậy trung bình", "🌟🌟🌟"
+                rating, stars = "Độ tin cậy trung bình", ""
         
             fig_explore, pct_explore = plot_single_neighborhood(boro_of_n, selected_n, f"Lịch sử giá chi tiết: {selected_n}", C_BLUE, height=220)
             st.plotly_chart(fig_explore, width='stretch')
@@ -1980,7 +1980,7 @@ with tab_evid:
             <div style='background-color:rgba(15, 23, 42, 0.04); border-left:4px solid #3B82F6; padding:10px 15px; border-radius:8px; margin-bottom: 8px; margin-top: -15px;'>
                 <div style='display:flex; justify-content:space-between; align-items:center;'>
                     <div>
-                        <span style='font-size:12px; color:#64748b; font-weight:bold; text-transform:uppercase;'>📊 Chỉ số Tin cậy Dữ liệu</span>
+                        <span style='font-size:12px; color:#64748b; font-weight:bold; text-transform:uppercase;'> Chỉ số Tin cậy Dữ liệu</span>
                         <span style='font-size:20px; font-weight:800; color:#0f172a; margin-left:8px;'>{total_score:.0f}/100</span>
                         <span style='font-size:13px; margin-left:6px; font-weight:600;'>{rating}</span>
                     </div>
