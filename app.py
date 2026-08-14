@@ -390,17 +390,17 @@ def load_data(query=None, zip_mtime=None):
                 f.sale_month,
                 f.tax_class_sale,
                 f.building_class_sale,
-                s.pop_density,
-                s.avg_income,
-                s.gdp_local,
-                s.dist_center,
+                b.pop_density,
+                b.avg_income,
+                b.gdp_local,
+                b.dist_center,
                 n.amenity_score
             FROM fact_sales f
             JOIN dim_location       l ON f.location_id    = l.location_id
             JOIN dim_neighborhood   n ON l.neighborhood_id = n.neighborhood_id
             JOIN dim_borough        b ON n.borough_id      = b.borough_id
             JOIN dim_property       p ON f.property_id     = p.property_id
-            JOIN dim_social_metrics s ON f.social_id       = s.social_id
+
         """, engine, chunksize=50000)
         
         processed_chunks = []
