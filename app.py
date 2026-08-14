@@ -676,6 +676,10 @@ with st.sidebar:
     st.markdown('<hr style="border-color:#1e3a5f;margin:14px 0 10px">', unsafe_allow_html=True)
     if st.button(" Đặt lại bộ lọc", width='stretch'):
         st.rerun()
+    st.markdown(f"""
+    <div style='text-align:center;margin-top:10px;color:#475569;font-size:11px'>
+        Tổng: {len(df_raw):,} giao dịch<br>Nguồn: NYC Property Sales
+    </div>""", unsafe_allow_html=True)
 
 
 # ════════════════════════════════════════════════════════════
