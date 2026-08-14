@@ -678,7 +678,7 @@ with st.sidebar:
         st.rerun()
     st.markdown(f"""
     <div style='text-align:center;margin-top:10px;color:#475569;font-size:11px'>
-        Tổng: {len(df_raw):,} giao dịch<br>Nguồn: NYC Property Sales
+        Nguồn: NYC Property Sales
     </div>""", unsafe_allow_html=True)
 
 
