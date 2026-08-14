@@ -662,19 +662,23 @@ with st.sidebar:
     <hr style='border-color:#1e3a5f;margin:0 0 14px'>
     """, unsafe_allow_html=True)
     all_b = [b for b in BOROUGH_ORDER if b in df_raw['borough_name'].dropna().unique()]
-    selected_boroughs = st.multiselect(" Quận (Borough)", options=all_b, default=all_b)
+    selected_boroughs = st.multiselect(" Quận (Borough)", options=all_b, default=all_b, key="filter_boroughs")
     avail_years = sorted(df_raw['sale_year'].dropna().astype(int).unique().tolist())
     year_range  = st.select_slider(" Năm giao dịch", options=avail_years,
-                                   value=(min(avail_years), max(avail_years)))
+                                   value=(min(avail_years), max(avail_years)), key="filter_years")
     p5  = float(df_raw['sale_price'].quantile(0.05))
     p95 = float(df_raw['sale_price'].quantile(0.95))
     price_range = st.slider(" Khoảng giá ($)",
                             min_value=float(df_raw['sale_price'].min()),
                             max_value=float(df_raw['sale_price'].max()),
                             value=(p5, p95), format="$%.0f",
-                            help="Mặc định p5–p95 để loại bỏ outlier.")
+                            help="Mặc định p5–p95 để loại bỏ outlier.",
+                            key="filter_price")
     st.markdown('<hr style="border-color:#1e3a5f;margin:14px 0 10px">', unsafe_allow_html=True)
     if st.button(" Đặt lại bộ lọc", width='stretch'):
+        for key in ["filter_boroughs", "filter_years", "filter_price"]:
+            if key in st.session_state:
+                del st.session_state[key]
         st.rerun()
     st.markdown(f"""
     <div style='text-align:center;margin-top:10px;color:#475569;font-size:11px'>
