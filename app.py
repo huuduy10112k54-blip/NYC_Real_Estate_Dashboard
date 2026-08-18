@@ -862,7 +862,7 @@ with tab0:
         labels=['① Mua ở thực (1 căn)', '② Đầu tư nhỏ (2-10)', '③ Tổ chức (>10)']
     )
     seg_cnt  = df['_segment'].value_counts().sort_index()
-    seg_med  = df.groupby('_segment', observed=True)['sale_price'].median()
+    seg_med  = df.groupby('_segment', observed=False)['sale_price'].median()
     seg_df   = pd.DataFrame({'Phân khúc': seg_cnt.index,
                               'Số GD': seg_cnt.values,
                               'Giá trung vị': seg_med.values})
