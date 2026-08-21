@@ -57,9 +57,9 @@ def init_database():
 init_database()
 
 
-# â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
+# ============================================================
 # CẤU HÌNH TRANG
-# â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
+# ============================================================
 st.set_page_config(
     page_title="Báo cáo Phân tích Thị trường Bất động sản NYC 2025 - 2026",
     layout="wide",
@@ -215,7 +215,7 @@ MONTH_FULL  = {1:'Tháng 1',2:'Tháng 2',3:'Tháng 3',4:'Tháng 4',
                9:'Tháng 9',10:'Tháng 10',11:'Tháng 11',12:'Tháng 12'}
 FEATURE_LABELS = {
     'gross_sqft':'Diện tích tổng (sqft)', 'building_age':'Tuổi công trình (năm)',
-    'land_sqft':'Diện tích đất (sqft)',   'pop_density':'Mật độ dân số (/kmÂ²)',
+    'land_sqft':'Diện tích đất (sqft)',   'pop_density':'Mật độ dân số (/km²)',
     'total_units':'Số căn trong tòa',
     'gdp_local':'GDP địa phương (%)',      'avg_income':'Thu nhập bình quân ($)',
     'dist_center':'KC đến trung tâm (km)',
@@ -346,7 +346,7 @@ def get_neighborhood_coords(neighborhood, borough_name):
 # HÀM DỮ LIỆU
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 def _get_cache_mtime():
-    """Lấy modification time của DB và DATA.csv để làm cache-key. Khi nạp dữ liệu mới â†’ cache tự động làm mới."""
+    """Lấy modification time của DB và DATA.csv để làm cache-key. Khi nạp dữ liệu mới -> cache tự động làm mới."""
     try:
         db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.db')
         data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'data clean', 'DATA.csv')
@@ -730,7 +730,7 @@ with st.sidebar:
                             min_value=float(df_raw['sale_price'].min()),
                             max_value=float(df_raw['sale_price'].max()),
                             value=(p5, p95), format="$%.0f",
-                            help="Mặc định p5â€“p95 để loại bỏ outlier.")
+                            help="Mặc định p5-p95 để loại bỏ outlier.")
     st.markdown('<hr style="border-color:#1e3a5f;margin:14px 0 10px">', unsafe_allow_html=True)
     if st.button(" Đặt lại bộ lọc", width='stretch'):
         st.rerun()
@@ -766,7 +766,7 @@ with h2:
     st.markdown(f"""
     <div style='text-align:right;padding-top:6px'>
         <span class="badge"> {len(df):,} giao dịch</span><br>
-        <span style='font-size:11px;color:#94a3b8'>{len(selected_boroughs)} quận Â· {year_range[0]}â€“{year_range[1]}</span>
+        <span style='font-size:11px;color:#94a3b8'>{len(selected_boroughs)} quận · {year_range[0]}-{year_range[1]}</span>
     </div>""", unsafe_allow_html=True)
 st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 
@@ -783,17 +783,17 @@ tab0, tab1, tab2, tab4, tab_macro, tab_micro = st.tabs([
 ])
 
 with tab_macro:
-    st.markdown("### đŸ›ï¸ Đánh giá Tiềm năng Khu vực")
+    st.markdown("### ›ï¸ Đánh giá Tiềm năng Khu vực")
     st.info("Hệ thống dựa vào thuật toán và dữ liệu lịch sử để phân tích các khu vực (Neighborhoods) có đặc tính tăng trưởng hoặc thanh khoản cao nhất.")
-    tab_adv, tab_evid = st.tabs(["đŸ¯ Gợi ý Đầu tư", "đŸ“ Dữ liệu Lịch sử"])
+    tab_adv, tab_evid = st.tabs(["¯ Gợi ý Đầu tư", " Dữ liệu Lịch sử"])
 
 with tab_micro:
-    st.markdown("### đŸ¡ Tra cứu Bất động sản")
-    tab_search, tab7 = st.tabs(["đŸ” Tìm kiếm Bất động sản", "đŸ“ Phân tích Tiện ích"])
+    st.markdown("### ¡ Tra cứu Bất động sản")
+    tab_search, tab7 = st.tabs(["” Tìm kiếm Bất động sản", " Phân tích Tiện ích"])
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 0 â€” TỔNG QUAN
+# TAB 0 - TỔNG QUAN
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with tab0:
     st.markdown("""
@@ -815,7 +815,7 @@ with tab0:
         yoy_d0 = (yoy_med0[yrs0[-1]]/yoy_med0[yrs0[-2]]-1)*100
         yoy_s0 = f"{yoy_d0:+.1f}%"
     else:
-        yoy_d0, yoy_s0 = 0.0, "â€”"
+        yoy_d0, yoy_s0 = 0.0, "-"
 
     k1,k2,k3,k4,k5,k6 = st.columns(6)
     k1.metric("Tổng giao dịch", f"{len(df):,}")
@@ -823,12 +823,12 @@ with tab0:
     k3.metric("Giá/sqft (TV)",  f"${med_ppsf:,.0f}")
     k4.metric("Tổng giá trị",   f"${total_val/1e9:.1f}B")
     k5.metric("Tăng giá YoY",   yoy_s0, delta=f"{yoy_d0:.1f}%" if yoy_d0 else None)
-    k6.metric("Giao dịch â‰¥$1M", f"{pct_1m:.1f}%")
+    k6.metric("Giao dịch >=$1M", f"{pct_1m:.1f}%")
 
     st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
     section_q(
-        "Borough nào chiếm ưu thế â€” về thanh khoản và mặt bằng giá?",
+        "Borough nào chiếm ưu thế - về thanh khoản và mặt bằng giá?",
         "Số giao dịch = thanh khoản. Giá trung vị ít bị ảnh hưởng bởi outlier hơn giá trung bình."
     )
 
@@ -904,15 +904,15 @@ with tab0:
     top_bt0= df['building_type'].value_counts().index[0]
     pct_bt0= df['building_type'].value_counts().iloc[0] / len(df) * 100
 
-    # â”€â”€ Phân khúc khách hàng â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # - Phân khúc khách hàng -----------------
     divider()
     section_q("Thị trường đang phục vụ nhóm khách hàng nào?",
-              "Phân loại theo số căn trong tòa nhà â€” proxy cho mục đích mua (ở thực vs đầu tư).")
+              "Phân loại theo số căn trong tòa nhà - proxy cho mục đích mua (ở thực vs đầu tư).")
 
     df['_segment'] = pd.cut(
         df['total_units'],
         bins=[-1, 1, 10, float('inf')],
-        labels=['â‘  Mua ở thực (1 căn)', 'â‘¡ Đầu tư nhỏ (2-10)', 'â‘¢ Tổ chức (>10)']
+        labels=['â‘  Mua ở thực (1 căn)', '2 Đầu tư nhỏ (2-10)', '3 Tổ chức (>10)']
     )
     seg_cnt  = df['_segment'].value_counts().sort_index()
     seg_med  = df.groupby('_segment', observed=False)['sale_price'].median()
@@ -949,7 +949,7 @@ with tab0:
                                title_font=dict(size=13, color='#374151'))
         st.plotly_chart(fig_sp, width='stretch')
 
-    # â”€â”€ Nhận diện rủi ro đầu tư â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # - Nhận diện rủi ro đầu tư ----------------
     divider()
     section_q("Khu vực nào có rủi ro giá cao nhất?",
               "Rủi ro = biến động giá cao (CV cao) hoặc thanh khoản thấp. "
@@ -975,7 +975,7 @@ with tab0:
     st.dataframe(risk_display.set_index('Quận'), width='stretch')
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 1 â€” PHÂN TÍCH KHU VỰC & BẢN ĐỒ HEATMAP
+# TAB 1 - PHÂN TÍCH KHU VỰC & BẢN ĐỒ HEATMAP
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with tab1:
     st.markdown("""
@@ -1000,7 +1000,7 @@ with tab1:
     kd.metric("Quận giá trung vị cao nhất",  top_bor_p)
     st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
-    # â”€â”€ YÊU CẦU VỀ BẢN ĐỒ (MAP): BẢN ĐỒ TÔ MÀU KHU VỰC (HEATMAP) â”€â”€
+    # - YÊU CẦU VỀ BẢN ĐỒ (MAP): BẢN ĐỒ TÔ MÀU KHU VỰC (HEATMAP) -
     with st.container(border=True):
         st.markdown("<h4 style='margin-top:0'>Bộ lọc Bản đồ Nhiệt</h4>", unsafe_allow_html=True)
         col_f1, col_f2, col_f3 = st.columns(3)
@@ -1041,9 +1041,9 @@ with tab1:
         kpi4.metric("Giá/sqft trung vị", f"${hm_ppsf.median():,.0f}" if len(hm_ppsf) > 0 else "N/A")
 
         # Tiêu đề động
-        title_map = "Bản đồ Nhiệt Khu vực â€“ Toàn bộ NYC"
+        title_map = "Bản đồ Nhiệt Khu vực - Toàn bộ NYC"
         if hm_boroughs:
-            title_map = f"Bản đồ Nhiệt Khu vực â€“ {', '.join(hm_boroughs)}"
+            title_map = f"Bản đồ Nhiệt Khu vực - {', '.join(hm_boroughs)}"
             
         section_q(title_map, "Tô màu khu vực thể hiện trực quan điểm nóng (hotspots) về Giá trung vị, Giá/sqft hoặc Mật độ thanh khoản giao dịch.")
 
@@ -1129,7 +1129,7 @@ with tab1:
 
     divider()
     section_q("Giá bán phân bố như thế nào trong từng quận?",
-              "Đường giữa = trung vị. Hộp = khoảng tứ phân vị (25%â€“75%). Nhãn giá trung vị được ghi trực tiếp.")
+              "Đường giữa = trung vị. Hộp = khoảng tứ phân vị (25%-75%). Nhãn giá trung vị được ghi trực tiếp.")
 
     bor_ord1 = df.groupby('borough_name')['sale_price'].median().sort_values(ascending=False).index.tolist()
     df_box_sample = df.sample(n=min(10000, len(df)), random_state=42)
@@ -1204,7 +1204,7 @@ with tab1:
             st.info("Không đủ dữ liệu giá/sqft.")
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 2 â€” YẾU TỐ QUYẾT ĐỊNH GIÁ & PHÂN TÍCH TƯƠNG QUAN
+# TAB 2 - YẾU TỐ QUYẾT ĐỊNH GIÁ & PHÂN TÍCH TƯƠNG QUAN
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with tab2:
     st.markdown("""
@@ -1216,7 +1216,7 @@ with tab2:
     </div>
     """, unsafe_allow_html=True)
 
-    # â”€â”€ NGUYÊN TẮC TRỰC QUAN: BẢNG TÓM TẮT YẾU TỐ TÁC ĐỘNG GIÁ â”€â”€
+    # - NGUYÊN TẮC TRỰC QUAN: BẢNG TÓM TẮT YẾU TỐ TÁC ĐỘNG GIÁ -
     section_q(
         "Bảng tóm tắt các yếu tố ảnh hưởng đến giá bất động sản",
         "Tóm tắt toàn bộ các biến số đo lường, phân loại rõ yếu tố nào ảnh hưởng mạnh hay yếu đến giá bán thực tế."
@@ -1225,7 +1225,7 @@ with tab2:
 
     divider()
 
-    # â”€â”€ MA TRẬN TƯƠNG QUAN TỔNG THỂ â”€â”€
+    # - MA TRẬN TƯƠNG QUAN TỔNG THỂ -
     section_q(
         "Ma trận tương quan tổng thể giữa các yếu tố với Giá bán",
         "Đọc bản đồ nhiệt: ô màu đỏ = tương quan thuận (+); ô màu xanh = tương quan nghịch (-). Số trong ô là hệ số tương quan r."
@@ -1257,7 +1257,7 @@ with tab2:
 
     divider()
 
-    # â”€â”€ PHÂN TÍCH CHI TIẾT 3 BIẾN SỐ CHÍNH THEO YÊU CẦU â”€â”€
+    # - PHÂN TÍCH CHI TIẾT 3 BIẾN SỐ CHÍNH THEO YÊU CẦU -
     st.markdown("""
     <div style='font-size:18px;font-weight:800;color:#1e1b4b;margin-bottom:16px'>
      PHÂN TÍCH CHI TIẾT 3 BIẾN SỐ CHỦ ĐẠO TÁC ĐỘNG ĐẾN GIÁ BÁN
@@ -1265,7 +1265,7 @@ with tab2:
     """, unsafe_allow_html=True)
 
     # 1. BIẾN SỐ 1: DIỆN TÍCH (gross_sqft)
-    section_q("1. Biến số DIỆN TÍCH CÔNG TRÌNH (gross_sqft) â€” Mức độ tác động:  RẤT MẠNH",
+    section_q("1. Biến số DIỆN TÍCH CÔNG TRÌNH (gross_sqft) - Mức độ tác động:  RẤT MẠNH",
               "Phân tích mối quan hệ giữa quy mô diện tích sàn sử dụng và tổng giá bán bất động sản.")
     
     mask = df['gross_sqft'].notna() & df['gross_sqft'].between(100, 4000)
@@ -1275,7 +1275,7 @@ with tab2:
 
     if len(df_sq) >= 50:
         df_sq['bin'] = pd.cut(df_sq['gross_sqft'], bins=range(100,4200,200),
-                              labels=[f"{i}â€“{i+200}" for i in range(100,4000,200)])
+                              labels=[f"{i}-{i+200}" for i in range(100,4000,200)])
         ba = (df_sq.groupby('bin', observed=False)
               .agg(med_price=('sale_price','median'), cnt=('sale_price','count'),
                    sqft_mid=('gross_sqft','median')).reset_index())
@@ -1300,7 +1300,7 @@ with tab2:
     divider()
 
     # 2. BIẾN SỐ 2: THU NHẬP KHU VỰC (avg_income)
-    section_q("2. Biến số THU NHẬP BÌNH QUÂN KHU VỰC (avg_income) â€” Mức độ tác động:  MẠNH",
+    section_q("2. Biến số THU NHẬP BÌNH QUÂN KHU VỰC (avg_income) - Mức độ tác động:  MẠNH",
               "Phân tích tác động của sức mua và mức độ đắt đỏ của dân cư sinh sống tại khu vực đến mặt bằng giá nhà.")
 
     df_inc = df.loc[df['avg_income'].notna(), ['avg_income', 'sale_price', 'price_per_sqft', 'borough_name']].copy()
@@ -1333,7 +1333,7 @@ with tab2:
     divider()
 
     # 3. BIẾN SỐ 3: TUỔI BẤT ĐỘNG SẢN (building_age)
-    section_q("3. Biến số TUỔI CÔNG TRÌNH (building_age) â€” Mức độ tác động:  YẾU / ÂM",
+    section_q("3. Biến số TUỔI CÔNG TRÌNH (building_age) - Mức độ tác động:  YẾU / ÂM",
               "Phân tích tác động của thời gian vận hành công trình đến giá bán (khấu hao vật lý vs giá trị vị trí).")
 
     df_age = df.loc[df['building_age'].notna() & df['building_age'].between(0, 120), ['building_age', 'sale_price']].copy()
@@ -1342,7 +1342,7 @@ with tab2:
     df_age['age_group'] = pd.cut(
         df_age['building_age'],
         bins=[-1, 15, 35, 65, 120],
-        labels=['Mới (<15 năm)', 'Trung bình (15â€“35 năm)', 'Cũ (35â€“65 năm)', 'Rất cũ (>65 năm)']
+        labels=['Mới (<15 năm)', 'Trung bình (15-35 năm)', 'Cũ (35-65 năm)', 'Rất cũ (>65 năm)']
     )
     age_sum = df_age.groupby('age_group', observed=False)['sale_price'].median().reset_index()
 
@@ -1488,7 +1488,7 @@ def render_mini_confidence(neigh_name):
     except: pass
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 6 â€” ĐỀ XUẤT CHIẾN LƯỢC
+# TAB 6 - ĐỀ XUẤT CHIẾN LƯỢC
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with tab_adv:
     st.markdown("""
@@ -1582,7 +1582,7 @@ with tab_adv:
 
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # TAB 4 â€” DỰ BÁO & MÔ HÌNH ML
+    # TAB 4 - DỰ BÁO & MÔ HÌNH ML
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with tab4:
     st.markdown("""
@@ -1605,16 +1605,16 @@ with tab4:
         mape4 = rf4.get('MAPE', None)
         m1.metric("Độ chính xác ước tính", f"{acc4:.1f}%", delta="Random Forest tốt nhất")
         m2.metric("Sai số trung bình (MAE)", f"${rf4.get('MAE',0):,.0f}")
-        m3.metric("RÂ² â€” Mức giải thích", f"{rf4.get('R2',0)*100:.1f}%")
+        m3.metric("R² - Mức giải thích", f"{rf4.get('R2',0)*100:.1f}%")
         if mape4:
             m4.metric("Lệch giá TB (%)", f"{mape4:.1f}%")
         else:
             m4.metric("RMSE", f"${rf4.get('RMSE',0):,.0f}")
 
         section_q("Mô hình nào dự báo chính xác hơn?",
-                  "RÂ² càng gần 1, MAE/RMSE càng thấp = tốt hơn. So sánh trên cùng tập kiểm tra.")
+                  "R² càng gần 1, MAE/RMSE càng thấp = tốt hơn. So sánh trên cùng tập kiểm tra.")
         rows4 = [{'Mô hình': n,
-                   'Điểm RÂ²':  f"{m['R2']:.4f}",
+                   'Điểm R²':  f"{m['R2']:.4f}",
                    'Sai số TB ($)': f"${m['MAE']:,.0f}",
                    'Căn SSBT ($)': f"${m['RMSE']:,.0f}",
                    'Đánh giá': ' Tốt hơn' if n == 'Random Forest' else ' Tham khảo'}
@@ -1648,7 +1648,7 @@ with tab4:
                 fig_av4 = px.scatter(pp4, x='Actual', y='Predicted', opacity=0.4,
                                      color_discrete_sequence=[C_BLUE2],
                                      labels={'Actual':'Giá thực ($)','Predicted':'Giá dự báo ($)'},
-                                     title='Dự báo vs Thực tế â€” Độ chính xác mô hình Random Forest',
+                                     title='Dự báo vs Thực tế - Độ chính xác mô hình Random Forest',
                                      trendline='ols')
                 # Đặt tên cho OLS trendline trace để tránh 'undefined' trong legend
                 for trace in fig_av4.data:
@@ -1740,7 +1740,7 @@ with tab7:
         """)
         st.warning("â ï¸ **LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
         
-        if st.button("đŸ¤– Chạy lại thuật toán AI cho bộ lọc hiện tại (Mất ~5 giây)", type="primary", use_container_width=True):
+        if st.button(" Chạy lại thuật toán AI cho bộ lọc hiện tại (Mất ~5 giây)", type="primary", use_container_width=True):
             with st.spinner("Đang truy xuất CSDL và chạy Random Forest Regressor trên tập dữ liệu đã lọc..."):
                 import sqlite3
                 from sklearn.ensemble import RandomForestRegressor
@@ -1814,7 +1814,7 @@ with tab7:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 8 â€” AI FINDER (COMPS)
+# TAB 8 - AI FINDER (COMPS)
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @st.cache_data
@@ -1861,7 +1861,7 @@ def load_comps_data():
         """, conn)
         conn.close()
 
-        # â”€â”€ Tính has_X_1km (boolean: có tiện ích trong 1km không) â”€â”€
+        # - Tính has_X_1km (boolean: có tiện ích trong 1km không) -
         df['has_subway_1km']      = (df['num_subway_within_1km']      > 0).astype(int)
         df['has_park_1km']        = (df['num_park_within_1km']        > 0).astype(int)
         df['has_hospital_1km']    = (df['num_hospital_within_1km']    > 0).astype(int)
@@ -1869,7 +1869,7 @@ def load_comps_data():
         df['has_supermarket_1km'] = (df['num_supermarket_within_1km'] > 0).astype(int)
         df['has_university_1km']  = (df['num_university_within_1km']  > 0).astype(int)
 
-        # â”€â”€ Tính amenity_score (trọng số theo tầm quan trọng BĐS) â”€â”€
+        # - Tính amenity_score (trọng số theo tầm quan trọng BĐS) -
         df['amenity_score'] = (
             df['has_subway_1km']      * 30 +
             df['has_school_1km']      * 25 +
@@ -2021,7 +2021,7 @@ with tab_search:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 7 â€” MINH CHỨNG DỮ LIỆU
+# TAB 7 - MINH CHỨNG DỮ LIỆU
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with tab_evid:
     st.info(" **HƯỚNG DẪN:** Dưới đây là các biểu đồ thực tế chứng minh cho những đề xuất vừa được AI đưa ra ở Tab Đề xuất Chiến lược.")
