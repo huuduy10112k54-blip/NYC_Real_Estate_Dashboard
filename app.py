@@ -8,6 +8,55 @@ import json
 import os
 import zlib
 
+
+# ==============================================================================
+# KHỞI TẠO DATABASE TỪ ZIP (NẾU CẦN)
+# ==============================================================================
+def init_database():
+    import sqlite3
+    import zipfile
+    import filelock
+    
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.db')
+    zip_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.zip')
+    
+    if not os.path.exists(zip_path):
+        return
+        
+    need_extract = False
+    if not os.path.exists(db_path):
+        need_extract = True
+    else:
+        if os.path.getmtime(zip_path) > os.path.getmtime(db_path):
+            need_extract = True
+        else:
+            try:
+                conn_test = sqlite3.connect(db_path)
+                conn_test.execute("SELECT 1 FROM fact_sales LIMIT 1")
+                conn_test.close()
+            except (sqlite3.DatabaseError, sqlite3.OperationalError):
+                need_extract = True
+                
+    if need_extract:
+        lock_path = db_path + ".lock"
+        with filelock.FileLock(lock_path, timeout=60):
+            do_extract = True
+            if os.path.exists(db_path):
+                try:
+                    conn_test = sqlite3.connect(db_path)
+                    conn_test.execute("SELECT 1 FROM fact_sales LIMIT 1")
+                    conn_test.close()
+                    if os.path.getmtime(zip_path) <= os.path.getmtime(db_path):
+                        do_extract = False
+                except:
+                    pass
+            if do_extract:
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(os.path.dirname(db_path))
+
+init_database()
+
+
 # â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
 # CẤU HÌNH TRANG
 # â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
