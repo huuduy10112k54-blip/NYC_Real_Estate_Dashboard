@@ -1473,7 +1473,7 @@ with tab_adv:
                 <div style='background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-top: 4px solid #10b981; transition: transform 0.2s;'>
                     <div style='color: #64748b; font-size: 12px; font-weight: bold; text-transform: uppercase;'>Háº¡ng {i+1}</div>
                     <div style='color: #0f172a; font-size: 20px; font-weight: 800; margin: 8px 0;'>{row._2}</div>
-                    <div style='font-size: 13px; color: #475569; margin-bottom: 4px;'>Quáºn: <b>{row.Quáºn}</b></div>
+                    <div style='font-size: 13px; color: #475569; margin-bottom: 4px;'>Quáºn: <b>{row._1}</b></div>
                     <div style='display: flex; justify-content: space-around; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1;'>
                         <div>
                             <div style='font-size: 11px; color: #64748b;'>Äá»™ Tin Cáºy</div>
