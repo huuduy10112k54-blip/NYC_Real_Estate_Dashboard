@@ -1818,7 +1818,8 @@ with tab7:
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @st.cache_data
-def load_comps_data():\n    # CACHE BUSTER: FORCE RE-RUN
+def load_comps_data():
+    # CACHE BUSTER: FORCE RE-RUN 2
     """
     Đọc trực tiếp từ fact_property_amenities + fact_sales + các dim tables.
     Tính toán has_X_1km và amenity_score động từ dữ liệu thực tế.
