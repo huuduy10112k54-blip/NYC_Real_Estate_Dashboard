@@ -63,7 +63,7 @@ init_database()
 st.set_page_config(
     page_title="Báo cáo Phân tích Thị trường Bất động sản NYC 2025 - 2026",
     layout="wide",
-    page_icon="ï¸ ",
+    page_icon=" ",
     initial_sidebar_state="expanded",
 )
 
@@ -642,7 +642,7 @@ def render_factor_summary_matrix(df_in):
                 elif abs_r >= 0.35:
                     level = " MẠNH"
                 elif abs_r >= 0.15:
-                    level = "ï¸ TRUNG BÌNH"
+                    level = " TRUNG BÌNH"
                 else:
                     level = " YẾU"
                 
@@ -703,7 +703,7 @@ if df_raw is not None:
         load_err = "Không có dữ liệu nào khớp với năm 2025 trở đi."
 
 if df_raw is None:
-    st.error(f"ï¸ **Lỗi:** {load_err}")
+    st.error(f" **Lỗi:** {load_err}")
     st.info("Hãy chạy `main.py` trước.")
     st.stop()
 
@@ -713,7 +713,7 @@ if df_raw is None:
 with st.sidebar:
     st.markdown("""
     <div style='text-align:center;padding:20px 0 10px'>
-        <div style='font-size:36px'>ï¸</div>
+        <div style='font-size:36px'></div>
         <div style='font-size:14px;font-weight:700;color:#f1f5f9;margin-top:6px'>Bộ lọc dữ liệu</div>
         <div style='font-size:11px;color:#64748b;margin-top:2px'>NYC Real Estate Analytics</div>
     </div>
@@ -743,11 +743,11 @@ with st.sidebar:
 # ÁP DỤNG BỘ LỌC
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 if not selected_boroughs:
-    st.warning("ï¸ Chưa chọn quận nào. Hãy chọn ít nhất một quận trong bộ lọc bên trái.")
+    st.warning(" Chưa chọn quận nào. Hãy chọn ít nhất một quận trong bộ lọc bên trái.")
     st.stop()
 df = apply_filters(df_raw, selected_boroughs, year_range, price_range)
 if len(df) == 0:
-    st.warning("ï¸ **Không có dữ liệu phù hợp.** Hãy mở rộng bộ lọc hoặc nhấn Đặt lại.")
+    st.warning(" **Không có dữ liệu phù hợp.** Hãy mở rộng bộ lọc hoặc nhấn Đặt lại.")
     st.stop()
 
 df_sample = df.sample(n=min(3000, len(df)), random_state=42)
@@ -760,7 +760,7 @@ h1, h2 = st.columns([4, 1])
 with h1:
     st.markdown("""
     <h1 style='font-size:24px;font-weight:800;color:#0f172a;margin:0'>
-    ï¸ BÁO CÁO PHÂN TÍCH THỊ TRƯỜNG BẤT ĐỘNG SẢN NEW YORK GIAI ĐOẠN 2025 - 2026
+     BÁO CÁO PHÂN TÍCH THỊ TRƯỜNG BẤT ĐỘNG SẢN NEW YORK GIAI ĐOẠN 2025 - 2026
     </h1>""", unsafe_allow_html=True)
 with h2:
     st.markdown(f"""
@@ -775,7 +775,7 @@ st.markdown("<div style='margin-bottom:18px'></div>", unsafe_allow_html=True)
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 tab0, tab1, tab2, tab4, tab_macro, tab_micro = st.tabs([
     "  Tổng quan",
-    "ï¸  Phân tích khu vực",
+    "  Phân tích khu vực",
     "  Yếu tố quyết định giá",
     "  Dự báo & Mô hình ML",
     "  Phân tích Đầu tư BĐS",
@@ -783,12 +783,12 @@ tab0, tab1, tab2, tab4, tab_macro, tab_micro = st.tabs([
 ])
 
 with tab_macro:
-    st.markdown("### ›ï¸ Đánh giá Tiềm năng Khu vực")
+    st.markdown("### › Đánh giá Tiềm năng Khu vực")
     st.info("Hệ thống dựa vào thuật toán và dữ liệu lịch sử để phân tích các khu vực (Neighborhoods) có đặc tính tăng trưởng hoặc thanh khoản cao nhất.")
     tab_adv, tab_evid = st.tabs(["¯ Gợi ý Đầu tư", " Dữ liệu Lịch sử"])
 
 with tab_micro:
-    st.markdown("### ¡ Tra cứu Bất động sản")
+    st.markdown("### ¡ Tra cứu Bất động sản")
     tab_search, tab7 = st.tabs(["” Tìm kiếm Bất động sản", " Phân tích Tiện ích"])
 
 
@@ -800,7 +800,7 @@ with tab0:
     <div style='background:linear-gradient(135deg,#4338ca,#6366f1,#818cf8);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(99,102,241,0.35)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>ï¸ Thị trường đang ở đâu và quy mô như thế nào?</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'> Thị trường đang ở đâu và quy mô như thế nào?</b><br>
     <span style='font-size:12px;opacity:0.88'>Tổng quan về quy mô, mặt bằng giá và cơ cấu thị trường bất động sản NYC trong bộ lọc hiện tại.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -982,7 +982,7 @@ with tab1:
     <div style='background:linear-gradient(135deg,#0f766e,#0d9488,#34d399);border-radius:14px;
     padding:18px 24px;color:#fff;margin-bottom:22px;
     box-shadow:0 6px 24px rgba(16,185,129,0.3)'>
-    <b style='font-size:15px;letter-spacing:-0.3px'>ï¸ Bản đồ Nhiệt Khu vực & Phân tích Điểm nóng (NYC Hotspot Map)</b><br>
+    <b style='font-size:15px;letter-spacing:-0.3px'> Bản đồ Nhiệt Khu vực & Phân tích Điểm nóng (NYC Hotspot Map)</b><br>
     <span style='font-size:12px;opacity:0.88'>Nhận diện điểm nóng giá bán, định giá đơn vị $/sqft và mật độ thanh khoản trên bản đồ tương quan không gian thực.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -1597,7 +1597,7 @@ with tab4:
     df_pred, df_imp, ml_metrics = load_ml_data(mtime=_get_cache_mtime())
 
     if not ml_metrics:
-        st.warning("ï¸ Chưa có kết quả ML. Hãy chạy `main.py` trước.")
+        st.warning(" Chưa có kết quả ML. Hãy chạy `main.py` trước.")
     else:
         rf4 = ml_metrics.get('Random Forest', {}); lr4 = ml_metrics.get('Linear Regression', {})
         m1,m2,m3,m4 = st.columns(4)
@@ -1738,7 +1738,7 @@ with tab7:
         *Phân tích này trích xuất từ **{len(df):,} giao dịch**, trong đó sử dụng tọa độ địa lý của **hơn 51.000 giao dịch** hợp lệ trên hệ thống OpenStreetMap để đo lường khoảng cách vật lý chính xác đến các tiện ích công cộng.*
         *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
         """)
-        st.warning("â ï¸ **LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
+        st.warning("â  **LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
         
         if st.button(" Chạy lại thuật toán AI cho bộ lọc hiện tại (Mất ~5 giây)", type="primary", use_container_width=True):
             with st.spinner("Đang truy xuất CSDL và chạy Random Forest Regressor trên tập dữ liệu đã lọc..."):
@@ -1911,7 +1911,7 @@ with tab_search:
         col_filter, col_res = st.columns([1, 2.2])
         
         with col_filter:
-            st.markdown("### ï¸ Bộ Lọc Thông Minh")
+            st.markdown("###  Bộ Lọc Thông Minh")
             
             # Budget
             min_price = 100000
