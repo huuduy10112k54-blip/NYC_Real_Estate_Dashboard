@@ -564,7 +564,11 @@ def get_flipping_stats(df_in):
         avg_days=('days_held', 'mean')
     ).reset_index()
     
-    neigh_stats = neigh_stats[neigh_stats['num_flips'] >= 2]
+    neigh_stats = neigh_stats[neigh_stats['num_flips'] >= 2].copy()
+    neigh_stats['flip_score'] = (
+        (neigh_stats['num_flips'] / 10.0 * 50.0).clip(upper=50) + 
+        (neigh_stats['avg_roi'] / 1.0 * 50.0).clip(upper=50)
+    ).round(0)
     
     # Khu vực định cư (Ít lướt sóng)
     all_sales = df_f.groupby('neighborhood')['property_id'].count().reset_index(name='total_sales')
@@ -1554,7 +1558,7 @@ with tab_adv:
     st.markdown("<br>", unsafe_allow_html=True)
     st.divider()
 
-    st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px; display: flex; align-items: center;'> ĐỀ XUẤT NGẮN HẠN (Lợi Nhuận Giao Dịch) <span title='Xếp hạng dựa trên Biên lợi nhuận trung bình. Lượt lướt là số lần một bất động sản được mua đi bán lại trong thời gian ngắn (từ 1 ngày đến dưới 3 năm). Lợi nhuận TB là mức chênh lệch giá trị (ROI) trung bình của các giao dịch lướt sóng này.' style='cursor:help; font-size:22px; color:#f97316; margin-left: 10px; margin-top: -3px;'>&#9432;</span></h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px; display: flex; align-items: center;'> ĐỀ XUẤT NGẮN HẠN (Lợi Nhuận Giao Dịch) <span title='Xếp hạng dựa trên Điểm Tiềm Năng Lướt Sóng (Max: 100). Điểm được tính từ 2 yếu tố: Khối lượng giao dịch lướt sóng (50%) và Biên lợi nhuận ROI trung bình (50%). Lượt lướt là số lần một bất động sản được mua đi bán lại trong thời gian ngắn (từ 1 ngày đến dưới 3 năm).' style='cursor:help; font-size:22px; color:#f97316; margin-left: 10px; margin-top: -3px;'>&#9432;</span></h3>", unsafe_allow_html=True)
     
     with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
         df_flip, flip_stats, long_term = get_flipping_stats(df)
@@ -1562,11 +1566,11 @@ with tab_adv:
     if flip_stats is None or len(flip_stats) == 0:
         st.warning("Không tìm thấy đủ dữ liệu giao dịch lướt sóng trong bộ lọc hiện tại.")
     else:
-        top_roi = flip_stats.sort_values('avg_roi', ascending=False).head(5)
+        top_roi = flip_stats.sort_values('flip_score', ascending=False).head(5)
         top_3_roi = top_roi.head(3)
         top_3_luot_song_names = top_3_roi['neighborhood'].tolist()
         
-        st.markdown("<h5 style='color:#334155; margin-top: 15px;'>Top 3 Điểm Nóng Mua Đi Bán Lại (Biên độ lợi nhuận cao nhất):</h5>", unsafe_allow_html=True)
+        st.markdown("<h5 style='color:#334155; margin-top: 15px;'>Top 3 Điểm Nóng Mua Đi Bán Lại (Dựa trên Điểm Lướt Sóng):</h5>", unsafe_allow_html=True)
         cols_flip = st.columns(3)
         
         for i, row in enumerate(top_3_roi.itertuples()):
@@ -1589,13 +1593,15 @@ with tab_adv:
                 """, unsafe_allow_html=True)
                 
         
-        with st.expander("Xem chi tiết số liệu Lướt sóng (Dưới 3 năm)"):
-            st.markdown("<div style='font-size:14px; color:#475569; margin-bottom:10px;'>Hệ thống nhận diện các bất động sản được mua và bán lại trong khoảng từ 1 ngày đến dưới 3 năm. Bảng xếp hạng dựa trên Biên lợi nhuận trung bình (ROI).</div>", unsafe_allow_html=True)
+        with st.expander("Xem chi tiết cách xếp hạng và chấm Điểm Tiềm Năng Lướt Sóng"):
+            st.markdown("<div style='font-size:14px; color:#475569; margin-bottom:10px;'>Hệ thống chấm điểm tối đa 100đ dựa trên 2 tiêu chí: (1) Thanh khoản lướt sóng (Khối lượng giao dịch lướt sóng) - tối đa 50đ, (2) Biên lợi nhuận trung bình (ROI) - tối đa 50đ. Điểm càng cao chứng tỏ khu vực càng dễ thanh khoản và có khả năng sinh lời tốt.</div>", unsafe_allow_html=True)
             for i, row in enumerate(top_3_roi.itertuples()):
-                st.markdown(f"**Mục tiêu {i+1}: {row.neighborhood} ({row.borough_name})**")
-                st.markdown(f"- Đã có **{row.num_flips}** lượt lướt sóng thành công.")
-                st.markdown(f"- Thời gian ôm hàng trung bình: **{row.avg_days:.0f} ngày** (~{row.avg_days/30:.1f} tháng).")
-                st.markdown(f"- Mức chênh lệch lợi nhuận trung bình mỗi giao dịch: **${row.avg_profit:,.0f}** (ROI: {row.avg_roi*100:.1f}%).")
+                c1 = min(50.0, row.num_flips / 10.0 * 50.0)
+                c2 = min(50.0, row.avg_roi / 1.0 * 50.0)
+                st.markdown(f"**Mục tiêu {i+1}: {row.neighborhood} ({row.borough_name}) — Tổng điểm: {row.flip_score}/100**")
+                st.markdown(f"- **Thanh khoản:** Có {row.num_flips} lượt lướt sóng thành công (Đóng góp: {c1:.1f}/50 điểm)")
+                st.markdown(f"- **Lợi nhuận:** Biên lợi nhuận ROI trung bình là {row.avg_roi*100:.1f}% (Đóng góp: {c2:.1f}/50 điểm)")
+                st.markdown(f"- **Chi tiết thêm:** Mức lời trung bình là **${row.avg_profit:,.0f}**/giao dịch sau **{row.avg_days:.0f}** ngày ôm hàng.")
         st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Vui lòng chọn mục **[Dữ liệu Lịch sử]** để đối chiếu lịch sử dao động giá của các khu vực này.</i></p>", unsafe_allow_html=True)
 
 
