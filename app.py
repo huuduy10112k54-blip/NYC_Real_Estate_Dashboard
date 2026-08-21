@@ -1818,7 +1818,7 @@ with tab7:
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @st.cache_data
-def load_comps_data():
+def load_comps_data():\n    # CACHE BUSTER: FORCE RE-RUN
     """
     Đọc trực tiếp từ fact_property_amenities + fact_sales + các dim tables.
     Tính toán has_X_1km và amenity_score động từ dữ liệu thực tế.
@@ -1903,29 +1903,7 @@ with tab_search:
     df_comps = load_comps_data()
     
     
-    # DEBUG INJECT
-    import os, sqlite3
-    db_path_debug = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.db')
-    zip_path_debug = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'warehouse', 'nyc_warehouse.zip')
     
-    st.error(f'Debug DB Path: {db_path_debug}')
-    if os.path.exists(db_path_debug):
-        st.error(f'Debug DB Size: {os.path.getsize(db_path_debug)} bytes')
-        try:
-            c = sqlite3.connect(db_path_debug).cursor()
-            c.execute("SELECT name FROM sqlite_master WHERE type='table'")
-            st.error(f'Debug Tables: {[r[0] for r in c.fetchall()]}')
-        except Exception as e:
-            st.error(f'Debug Error: {e}')
-    else:
-        st.error('Debug DB: Missing')
-        
-    st.error(f'Debug ZIP Path: {zip_path_debug}')
-    if os.path.exists(zip_path_debug):
-        st.error(f'Debug ZIP Size: {os.path.getsize(zip_path_debug)} bytes')
-    else:
-        st.error('Debug ZIP: Missing')
-    # END DEBUG
     if df_comps.empty:
         st.warning("Đang chờ dữ liệu...")
     else:
