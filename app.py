@@ -1503,7 +1503,7 @@ with tab_adv:
     top_3_tich_san_names = []
     top_3_luot_song_names = []
 
-    st.markdown("<h3 style='color:#064e3b; border-bottom: 2px solid #10b981; padding-bottom: 5px;'> ĐỀ XUẤT DÀI HẠN (An Toàn & Ổn Định)</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#064e3b; border-bottom: 2px solid #10b981; padding-bottom: 5px; display: flex; align-items: center;'> ĐỀ XUẤT DÀI HẠN (An Toàn & Ổn Định) <span title='Xếp hạng dựa trên Điểm Tin Cậy (Max: 100). Điểm được tính từ 3 yếu tố: Khối lượng giao dịch (40%), Độ liên tục của dữ liệu (30%), và Độ ổn định của đà tăng giá (30%). Điểm càng cao chứng tỏ khu vực có thanh khoản tốt và đà tăng trưởng bền vững, ít rủi ro.' style='cursor:help; font-size:22px; color:#10b981; margin-left: 10px; margin-top: -3px;'>&#9432;</span></h3>", unsafe_allow_html=True)
     
     if len(valid_neighs) > 0:
         # Sắp xếp để lấy Top 3
@@ -1543,7 +1543,7 @@ with tab_adv:
     st.markdown("<br>", unsafe_allow_html=True)
     st.divider()
 
-    st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px;'> ĐỀ XUẤT NGẮN HẠN (Lợi Nhuận Giao Dịch)</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#c2410c; border-bottom: 2px solid #f97316; padding-bottom: 5px; display: flex; align-items: center;'> ĐỀ XUẤT NGẮN HẠN (Lợi Nhuận Giao Dịch) <span title='Xếp hạng dựa trên Biên lợi nhuận trung bình. Lượt lướt là số lần một bất động sản được mua đi bán lại trong thời gian ngắn (từ 1 ngày đến dưới 3 năm). Lợi nhuận TB là mức chênh lệch giá trị (ROI) trung bình của các giao dịch lướt sóng này.' style='cursor:help; font-size:22px; color:#f97316; margin-left: 10px; margin-top: -3px;'>&#9432;</span></h3>", unsafe_allow_html=True)
     
     with st.spinner("Đang phân tích lịch sử giao dịch Bất động sản..."):
         df_flip, flip_stats, long_term = get_flipping_stats(df)
