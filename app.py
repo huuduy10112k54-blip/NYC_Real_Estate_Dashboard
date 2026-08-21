@@ -740,7 +740,7 @@ with st.sidebar:
         st.rerun()
     st.markdown(f"""
     <div style='text-align:center;margin-top:10px;color:#475569;font-size:11px'>
-        Tổng: {len(df_raw):,} giao dịch<br>Nguồn: NYC Property Sales
+        Nguồn: NYC Property Sales
     </div>""", unsafe_allow_html=True)
 
 # ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
@@ -1763,7 +1763,7 @@ with tab7:
         *Phân tích này trích xuất từ **{len(df):,} giao dịch**, trong đó sử dụng tọa độ địa lý của **100% các giao dịch này** (đã được xác thực hợp lệ trên hệ thống OpenStreetMap) để đo lường khoảng cách vật lý chính xác đến các tiện ích công cộng.*
         *Thuật toán **Random Forest Regressor** được sử dụng để lọc nhiễu và đo lường trọng số.*
         """)
-        st.warning("â **LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
+        st.warning("**LƯU Ý:** Các con số phần trăm (%) dưới đây thể hiện **Tỷ trọng đóng góp** của từng tiện ích vào mô hình AI (Tổng các tiện ích = 100%). Nó **KHÔNG PHẢI** là biên độ tăng giá nhà. Ví dụ: 28.3% nghĩa là Bệnh viện chiếm 28.3% sức nặng khi AI quyết định giá nhà tại khu vực đó.")
         
         if st.button(" Chạy lại thuật toán AI cho bộ lọc hiện tại (Mất ~5 giây)", type="primary", use_container_width=True):
             with st.spinner("Đang truy xuất CSDL và chạy Random Forest Regressor trên tập dữ liệu đã lọc..."):
