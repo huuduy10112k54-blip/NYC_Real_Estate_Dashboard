@@ -1544,8 +1544,9 @@ with tab_adv:
                 c2 = min(30.0, row._7 / 19.0 * 30.0)
                 c3 = min(30.0, row.R2 * 30.0)
                 st.markdown(f"**Hạng {i+1}: {row._2} ({row[1]}) — Tổng điểm: {row._5}/100**")
-                st.markdown(f"- **Thanh khoản:** Có {row._6} giao dịch trong {row._7} tháng (Đóng góp: {c1:.1f}/40 điểm & {c2:.1f}/30 điểm)")
-                st.markdown(f"- **Độ ổn định:** R² = {row.R2:.2f} (Đóng góp: {c3:.1f}/30 điểm)")
+                st.markdown(f"- **Khối lượng giao dịch:** Có {row._6} giao dịch (Đóng góp: {c1:.1f}/40 điểm)")
+                st.markdown(f"- **Độ liên tục:** Có dữ liệu trong {row._7} tháng (Đóng góp: {c2:.1f}/30 điểm)")
+                st.markdown(f"- **Độ ổn định:** Hệ số R² của đà tăng giá = {row.R2:.2f} (Đóng góp: {c3:.1f}/30 điểm)")
         st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Vui lòng chọn mục **[Dữ liệu Lịch sử]** để xem biểu đồ tăng trưởng thực tế của 3 khu vực này.</i></p>", unsafe_allow_html=True)
     else:
         st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản trong bộ lọc hiện tại.")
