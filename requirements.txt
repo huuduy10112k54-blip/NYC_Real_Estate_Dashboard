@@ -5,3 +5,4 @@ plotly
 pydeck
 statsmodels
 scikit-learn
+matplotlib
