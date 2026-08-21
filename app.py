@@ -1507,7 +1507,7 @@ with tab_adv:
     
     if len(valid_neighs) > 0:
         # Sắp xếp để lấy Top 3
-        df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "CAGR (%)", "Điểm Tin Cậy"]].copy()
+        df_leaderboard = valid_neighs[["Quận", "Khu Vực", col_end, "CAGR (%)", "Điểm Tin Cậy", "Số GD", "Số tháng", "R2"]].copy()
         df_leaderboard.rename(columns={"CAGR (%)": "Tăng trưởng (%)"}, inplace=True)
         df_leaderboard = df_leaderboard.sort_values("Điểm Tin Cậy", ascending=False)
         top_3_df = df_leaderboard.head(3)
@@ -1536,6 +1536,16 @@ with tab_adv:
                 </div>
                 """, unsafe_allow_html=True)
                 
+        
+        with st.expander("Xem chi tiết cách xếp hạng và chấm Điểm Tin Cậy"):
+            st.markdown("<div style='font-size:14px; color:#475569; margin-bottom:10px;'>Hệ thống chấm điểm tối đa 100đ dựa trên 3 tiêu chí: (1) Khối lượng giao dịch - tối đa 40đ, (2) Độ liên tục (số tháng có giao dịch) - tối đa 30đ, (3) Độ ổn định R² (đà tăng trưởng đều, không giật cục) - tối đa 30đ.</div>", unsafe_allow_html=True)
+            for i, row in enumerate(top_3_df.itertuples()):
+                c1 = min(40.0, row._6 / 120.0 * 40.0)
+                c2 = min(30.0, row._7 / 19.0 * 30.0)
+                c3 = min(30.0, row.R2 * 30.0)
+                st.markdown(f"**Hạng {i+1}: {row._2} ({row[1]}) — Tổng điểm: {row._5}/100**")
+                st.markdown(f"- **Thanh khoản:** Có {row._6} giao dịch trong {row._7} tháng (Đóng góp: {c1:.1f}/40 điểm & {c2:.1f}/30 điểm)")
+                st.markdown(f"- **Độ ổn định:** R² = {row.R2:.2f} (Đóng góp: {c3:.1f}/30 điểm)")
         st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Vui lòng chọn mục **[Dữ liệu Lịch sử]** để xem biểu đồ tăng trưởng thực tế của 3 khu vực này.</i></p>", unsafe_allow_html=True)
     else:
         st.warning("Không có khu vực nào đạt đủ điều kiện thanh khoản trong bộ lọc hiện tại.")
@@ -1577,6 +1587,14 @@ with tab_adv:
                 </div>
                 """, unsafe_allow_html=True)
                 
+        
+        with st.expander("Xem chi tiết số liệu Lướt sóng (Dưới 3 năm)"):
+            st.markdown("<div style='font-size:14px; color:#475569; margin-bottom:10px;'>Hệ thống nhận diện các bất động sản được mua và bán lại trong khoảng từ 1 ngày đến dưới 3 năm. Bảng xếp hạng dựa trên Biên lợi nhuận trung bình (ROI).</div>", unsafe_allow_html=True)
+            for i, row in enumerate(top_3_roi.itertuples()):
+                st.markdown(f"**Mục tiêu {i+1}: {row.neighborhood} ({row.borough_name})**")
+                st.markdown(f"- Đã có **{row.num_flips}** lượt lướt sóng thành công.")
+                st.markdown(f"- Thời gian ôm hàng trung bình: **{row.avg_days:.0f} ngày** (~{row.avg_days/30:.1f} tháng).")
+                st.markdown(f"- Mức chênh lệch lợi nhuận trung bình mỗi giao dịch: **${row.avg_profit:,.0f}** (ROI: {row.avg_roi*100:.1f}%).")
         st.markdown("<p style='text-align:center; font-size:14px; color:#64748b; margin-top:15px;'><i>Vui lòng chọn mục **[Dữ liệu Lịch sử]** để đối chiếu lịch sử dao động giá của các khu vực này.</i></p>", unsafe_allow_html=True)
 
 
