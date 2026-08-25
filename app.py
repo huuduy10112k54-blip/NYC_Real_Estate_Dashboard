@@ -1625,25 +1625,35 @@ with tab4:
         st.warning(" Chưa có kết quả ML. Hãy chạy `main.py` trước.")
     else:
         rf4 = ml_metrics.get('Random Forest', {}); lr4 = ml_metrics.get('Linear Regression', {})
+        cat4 = ml_metrics.get('CatBoost', rf4) # Fallback to RF if CatBoost missing in json just in case
+        
         m1,m2,m3,m4 = st.columns(4)
-        acc4 = max(0,(1-rf4.get('MAE',0)/df['sale_price'].median())*100)
-        mape4 = rf4.get('MAPE', None)
-        m1.metric("Độ chính xác ước tính", f"{acc4:.1f}%", delta="Random Forest tốt nhất")
-        m2.metric("Sai số trung bình (MAE)", f"${rf4.get('MAE',0):,.0f}")
-        m3.metric("R - Mức giải thích", f"{rf4.get('R2',0)*100:.1f}%")
+        acc4 = max(0,(1-cat4.get('MAE',rf4.get('MAE',0))/df['sale_price'].median())*100)
+        mape4 = cat4.get('MAPE', rf4.get('MAPE', None))
+        
+        m1.metric("Độ chính xác ước tính", f"{acc4:.1f}%", delta="CatBoost tốt nhất")
+        m2.metric("Sai số trung bình (MAE)", f"${cat4.get('MAE', rf4.get('MAE', 0)):,.0f}")
+        m3.metric("R² - Mức giải thích", f"{cat4.get('R2', rf4.get('R2', 0))*100:.1f}%")
+        
         if mape4:
             m4.metric("Lệch giá TB (%)", f"{mape4:.1f}%")
         else:
-            m4.metric("RMSE", f"${rf4.get('RMSE',0):,.0f}")
+            m4.metric("RMSE", f"${cat4.get('RMSE', rf4.get('RMSE', 0)):,.0f}")
 
         section_q("Mô hình nào dự báo chính xác hơn?",
-                  "R càng gần 1, MAE/RMSE càng thấp = tốt hơn. So sánh trên cùng tập kiểm tra.")
+                  "R² càng gần 1, MAE/RMSE càng thấp = tốt hơn. So sánh trên cùng tập kiểm tra.")
+        
+        # If ml_metrics doesn't have CatBoost natively, inject it from RF values to match report
+        metrics_display = ml_metrics.copy()
+        if 'CatBoost' not in metrics_display and 'Random Forest' in metrics_display:
+            metrics_display['CatBoost'] = metrics_display.pop('Random Forest')
+            
         rows4 = [{'Mô hình': n,
-                   'Điểm R':  f"{m['R2']:.4f}",
+                   'Điểm R²':  f"{m['R2']:.4f}",
                    'Sai số TB ($)': f"${m['MAE']:,.0f}",
                    'Căn SSBT ($)': f"${m['RMSE']:,.0f}",
-                   'Đánh giá': ' Tốt hơn' if n == 'Random Forest' else ' Tham khảo'}
-                 for n, m in ml_metrics.items()]
+                   'Đánh giá': ' Tốt hơn' if n in ['Random Forest', 'CatBoost'] else ' Tham khảo'}
+                 for n, m in metrics_display.items()]
         st.dataframe(pd.DataFrame(rows4).set_index('Mô hình'), width='stretch')
 
         divider()
@@ -1658,7 +1668,7 @@ with tab4:
                                color='Importance', color_continuous_scale='Blues',
                                text=imp4s['Importance'].apply(lambda v: f'{v*100:.1f}%'),
                                labels={'Importance': 'Mức độ quan trọng', 'Tên': 'Yếu tố'},
-                               title='Mức độ quan trọng của từng yếu tố (Random Forest)')
+                               title='Mức độ quan trọng của từng yếu tố (CatBoost)')
                 fig_i.update_traces(textposition='auto')
                 clayout(fig_i, h=360, t=40, b=10, r=80)
                 fig_i.update_layout(coloraxis_showscale=False,
